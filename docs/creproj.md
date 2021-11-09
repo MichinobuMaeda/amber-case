@@ -87,4 +87,16 @@ tion Emulator, Functions Emulator, Firestore Emulator, Hosting Emulator, Storage
 ? Which port do you want to use for the Emulator UI (leave empty to use any available port)? 4040
 ? Would you like to download the emulators now? No
 
+$ git add .
+$ git commit -m "firebase init"
+$ git push
+
+$ gh workflow list
+Deploy to Firebase Hosting on merge  active  15081748
+Deploy to Firebase Hosting on PR     active  15081749
+
+$ gh workflow view 15081748
+X  firebase init  Deploy to Firebase Hosting on merge  main  push  1439676149
+
+ --> bug fix and push
 ```
