@@ -94,12 +94,9 @@ $ git push
 $ gh secret list
 FIREBASE_SERVICE_ACCOUNT_AMBER_CASE  Updated 2021-11-09
 
-$ gh workflow list
-Deploy to Firebase Hosting on merge  active  15081748
-Deploy to Firebase Hosting on PR     active  15081749
-
-$ gh workflow view 15081748
-X  firebase init  Deploy to Firebase Hosting on merge  main  push  1439676149
+$ gh run list
+STATUS  NAME              WORKFLOW                             BRANCH  EVENT  ID          ELAPSED  AGE
+X       firebase init     Deploy to Firebase Hosting on merge  main    push   1439676149  22s      14h
 
  --> bug fix and push
 
