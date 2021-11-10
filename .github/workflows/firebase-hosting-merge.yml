@@ -39,8 +39,17 @@ jobs:
       - run: npm -g i yarn
       - run: yarn install --frozen-lockfile && yarn --cwd functions install --frozen-lockfile
       - run: yarn lint && yarn test
-      - run: yarn functions:config:set initial.email="secrets.INITIAL_EMAIL" initial.password="secrets.INITIAL_PASSWORD" initial.url="secrets.INITIAL_URL"
-      - run: yarn deploy --only storage,firestore --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
+      - name: set functions:config
+        run: |
+          yarn functions:config:set
+            initial.email="secrets.INITIAL_EMAIL"
+            initial.password="secrets.INITIAL_PASSWORD"
+            initial.url="secrets.INITIAL_URL"
+            --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}
+      - run: |
+          yarn deploy
+            --only storage,firestore
+            --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
       - run: yarn build
       - run: grep '"version"' package.json | sed -e 's/^\s*/{/' -e 's/,*\s*$/}/' > build/version.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
