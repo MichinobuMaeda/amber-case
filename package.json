@@ -2,8 +2,17 @@
   "name": "amber-case",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "build": "react-scripts build",
+    "deploy": "firebase deploy",
+    "lint": "eslint .",
+    "functions:config:set": "firebase functions:config:set",
+    "test:setup": "curl -X POST http://localhost:5001/amber-case/asia-northeast1/api/setup -H \"Content-Type: application/x-www-form-urlencoded\" -d \"name=Primary%20User&email=primary@example.com&password=password&url=http%3A%2F%2Flocalhost%3A3000%2F\"",
+    "test": "firebase emulators:exec --only auth,functions,firestore,storage 'jest -w 1 --coverage'",
+    "start": "firebase emulators:exec --only auth,functions,firestore,storage --ui 'yarn test:setup && react-scripts start'",
+    "emulate": "yarn build && firebase emulators:start"
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "react": "^17.0.2",
@@ -23,17 +32,18 @@
     "workbox-strategies": "^5.1.3",
     "workbox-streams": "^5.1.3"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.16.0",
+    "@testing-library/jest-dom": "^5.15.0",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^25.2.4",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4",
+    "express": "^4.17.1",
+    "jest-transform-stub": "^2.0.0"
   },
   "browserslist": {
     "production": [
@@ -45,6 +55,24 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "jest": {
+    "testMatch": [
+      "**/*.test.[jt]s?(x)"
+    ],
+    "transform": {
+      ".+\\.jsx?$": "babel-jest",
+      ".+\\.(svg|css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "jest-transform-stub"
+    }
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-runtime"
     ]
   }
 }

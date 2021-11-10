@@ -11,14 +11,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Cache functions/node_modules
+        uses: actions/cache@v2
+        id: cache-functions-node_modules
+        with:
+          path: functions/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('functions/yarn.lock') }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        id: cache-node_modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Cache firebase emulators
+        uses: actions/cache@v2
+        id: cache-firebase-emulators
+        with:
+          path: ~/.cache/firebase/emulators
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
       - run: npm -g i yarn
-      - run: yarn install --frozen-lockfile && yarn build
+      - run: yarn install --frozen-lockfile && yarn --cwd functions install --frozen-lockfile
+      - run: yarn lint && yarn test
+      - run: yarn functions:config:set initial.email="secrets.INITIAL_EMAIL" initial.password="secrets.INITIAL_PASSWORD" initial.url="secrets.INITIAL_URL"
+      - run: yarn deploy --only storage,firestore --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
+      - run: yarn build
+      - run: grep '"version"' package.json | sed -e 's/^\s*/{/' -e 's/,*\s*$/}/' > build/version.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_AMBER_CASE }}'
           channelId: live
           projectId: amber-case
+      - run: curl https://asia-northeast1-amber-case.cloudfunctions.net/api/setup

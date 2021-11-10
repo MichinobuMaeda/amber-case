@@ -21,6 +21,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
 # https://github.com/github/gitignore/blob/master/Global/VisualStudioCode.gitignore
 
 .vscode/*

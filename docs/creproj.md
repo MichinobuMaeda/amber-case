@@ -91,6 +91,9 @@ $ git add .
 $ git commit -m "firebase init"
 $ git push
 
+$ gh secret list
+FIREBASE_SERVICE_ACCOUNT_AMBER_CASE  Updated 2021-11-09
+
 $ gh workflow list
 Deploy to Firebase Hosting on merge  active  15081748
 Deploy to Firebase Hosting on PR     active  15081749
@@ -99,4 +102,27 @@ $ gh workflow view 15081748
 X  firebase init  Deploy to Firebase Hosting on merge  main  push  1439676149
 
  --> bug fix and push
+
+$ firebase login:ci
+
+***********
+
+$ gh secret set FIREBASE_TOKEN_AMBER_CASE
+? Paste your secret ***********
+
+$ gh secret set INITIAL_EMAIL
+? Paste your secret ***********
+
+$ gh secret set INITIAL_PASSWORD
+? Paste your secret ***********
+
+$ gh secret set INITIAL_URL
+? Paste your secret https://amber-case.web.app/
+
+$ gh secret list
+FIREBASE_SERVICE_ACCOUNT_AMBER_CASE  Updated 2021-11-09
+FIREBASE_TOKEN_AMBER_CASE            Updated 2021-11-09
+INITIAL_EMAIL                        Updated 2021-11-09
+INITIAL_PASSWORD                     Updated 2021-11-09
+INITIAL_URL                          Updated 2021-11-10
 ```
