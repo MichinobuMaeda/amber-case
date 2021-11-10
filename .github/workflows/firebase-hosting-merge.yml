@@ -45,7 +45,7 @@ jobs:
             initial.email="secrets.INITIAL_EMAIL"
             initial.password="secrets.INITIAL_PASSWORD"
             initial.url="secrets.INITIAL_URL"
-            --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}
+            --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
       - run: |
           yarn deploy
             --only storage,firestore
