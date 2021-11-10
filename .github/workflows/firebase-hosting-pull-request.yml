@@ -36,7 +36,11 @@ jobs:
           node-version: '14'
       - run: npm -g i yarn
       - run: yarn install --frozen-lockfile && yarn --cwd functions install --frozen-lockfile
+      - name: Set src/conf/version.js
+        run: grep '"version"' package.json | sed -e "s/.*:\s*\"/export default '/" -e "s/\"\s*,*\s*$/';/" > src/conf/version.js
       - run: yarn lint && yarn test
+      - name: Set src/conf/firebase.js
+        run: sed 's/FIREBASE_API_KEY/${{ secrets.FIREBASE_API_KEY_AMBER_CASE }}/' -i src/conf/firebase.js
       - run: yarn build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
