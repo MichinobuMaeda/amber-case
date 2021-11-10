@@ -39,16 +39,14 @@ jobs:
       - run: npm -g i yarn
       - run: yarn install --frozen-lockfile && yarn --cwd functions install --frozen-lockfile
       - run: yarn lint && yarn test
-      - name: Set functions:config
-        run: |
+      - run: |
           yarn functions:config:set \
-            initial.email="secrets.INITIAL_EMAIL" \
-            initial.password="secrets.INITIAL_PASSWORD" \
-            initial.url="secrets.INITIAL_URL" \
+            initial.email="${{ secrets.INITIAL_EMAIL }}" \
+            initial.password="${{ secrets.INITIAL_PASSWORD }}" \
+            initial.url="${{ secrets.INITIAL_URL }}" \
             --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
       - run: |
-          yarn deploy \
-            --only storage,firestore \
+          yarn deploy --only storage,firestore,functions \
             --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
       - run: yarn build
       - name: Set build/version.json
