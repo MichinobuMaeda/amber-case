@@ -6,6 +6,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
+import { ServiceContext } from './api';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -18,9 +19,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
@@ -32,9 +35,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
@@ -46,9 +51,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
@@ -60,9 +67,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('LoadingErrorPage')).toBeInTheDocument();
@@ -74,9 +83,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('LoadingErrorPage')).toBeInTheDocument();
@@ -88,9 +99,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('LoadingErrorPage')).toBeInTheDocument();
@@ -102,9 +115,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('SignInPage')).toBeInTheDocument();
@@ -116,9 +131,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('SettingsPage')).toBeInTheDocument();
@@ -130,9 +147,11 @@ describe('App', () => {
       me: {},
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('PolicyPage')).toBeInTheDocument();
@@ -144,9 +163,11 @@ describe('App', () => {
       me: { id: 'id01' },
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('HomePage')).toBeInTheDocument();
@@ -158,9 +179,11 @@ describe('App', () => {
       me: { id: 'id01' },
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('SettingsPage')).toBeInTheDocument();
@@ -172,9 +195,11 @@ describe('App', () => {
       me: { id: 'id01' },
     };
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-        <App service={service} />
-      </MemoryRouter>,
+      <ServiceContext.Provider value={service}>
+        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
     );
 
     expect(screen.queryByTestId('PolicyPage')).toBeInTheDocument();

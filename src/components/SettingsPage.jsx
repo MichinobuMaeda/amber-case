@@ -1,5 +1,4 @@
 import React from 'react';
-// import PropTypes from 'prop-types';
 import { Settings } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import PageTitle from './PageTitle';
@@ -10,14 +9,9 @@ const SettingsPage = () => {
 
   return (
     <>
-      <PageTitle data-testid="SettingsPage" icon={Settings} title={t('Settings')} />
+      <PageTitle data-testid="SettingsPage" icon={<Settings />} title={t('Settings')} />
     </>
   );
 };
-
-// HomePage.propTypes = {
-//   // eslint-disable-next-line react/forbid-prop-types
-//   service: PropTypes.object.isRequired,
-// };
 
 export default SettingsPage;

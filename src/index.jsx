@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { useMediaQuery } from '@material-ui/core';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -10,32 +10,33 @@ import 'firebase/compat/firestore';
 import 'firebase/compat/storage';
 import 'firebase/compat/functions';
 
-import { firebaseConfig, version } from './conf';
+import { firebaseConfig } from './conf';
 import {
-  selectThemeMode, listenFirebase,
+  ServiceContext, selectThemeMode, listenFirebase,
 } from './api';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 const firebaseApp = firebaseCompat.initializeApp(firebaseConfig);
-const service = {
-  version,
-  auth: firebaseApp.auth(),
-  db: firebaseApp.firestore(),
-  storage: firebaseApp.storage(),
-  functions: firebaseApp.functions(),
-  unsubConf: null,
-  unsub: {}, // key: path, value: function
-};
+const auth = firebaseApp.auth();
+const db = firebaseApp.firestore();
+const storage = firebaseApp.storage();
+const functions = firebaseApp.functions();
 
 if (firebaseConfig.apiKey === 'FIREBASE_API_KEY') {
-  service.auth.useEmulator('http://localhost:9099');
-  service.db.useEmulator('localhost', 8080);
-  service.storage.useEmulator('localhost', 9199);
-  service.functions.useEmulator('localhost', 5001);
+  auth.useEmulator('http://localhost:9099');
+  db.useEmulator('localhost', 8080);
+  storage.useEmulator('localhost', 9199);
+  functions.useEmulator('localhost', 5001);
 }
 
 const AppBase = () => {
+  const service = useContext(ServiceContext);
+  service.auth = auth;
+  service.db = db;
+  service.storage = storage;
+  service.functions = functions;
+
   const [themeMode, setThemeMode] = useState('light');
   service.themeMode = themeMode;
   service.setThemeMode = setThemeMode;
@@ -61,9 +62,9 @@ const AppBase = () => {
     <React.StrictMode>
       <ThemeProvider theme={createTheme(selectThemeMode(service))}>
         <CssBaseline />
-        <Container maxWidth="xl">
+        <Container>
           <BrowserRouter>
-            <App service={service} />
+            <App />
           </BrowserRouter>
         </Container>
       </ThemeProvider>

@@ -1,5 +1,4 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useContext } from 'react';
 import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import {
   AppBar, Toolbar, Typography, IconButton, Box,
@@ -7,12 +6,15 @@ import {
 import { ArrowBackIosNew, Settings } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import '../conf/i18n';
+import { ServiceContext } from '../api';
 
-const Header = ({ loaded }) => {
+const Header = () => {
   const navigate = useNavigate();
   const navigationType = useNavigationType();
   const location = useLocation();
   const { t } = useTranslation();
+  const service = useContext(ServiceContext);
+  const loaded = !!service.conf.id;
 
   return (
     <>
@@ -36,7 +38,7 @@ const Header = ({ loaded }) => {
               <ArrowBackIosNew />
             </IconButton>
           )}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h1" component="div" sx={{ flexGrow: 1 }}>
             {t('app name')}
           </Typography>
           {loaded && (
@@ -62,10 +64,6 @@ const Header = ({ loaded }) => {
       <Box sx={{ height: 64 }} />
     </>
   );
-};
-
-Header.propTypes = {
-  loaded: PropTypes.bool.isRequired,
 };
 
 export default Header;
