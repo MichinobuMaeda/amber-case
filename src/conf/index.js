@@ -1,9 +1,13 @@
-import version from './version';
+import firebaseConfig from './firebase';
+import i18n from './i18n';
 import themeOptions from './theme';
+import version from './version';
 
-export * from './firebase';
 export * from './validator';
+
 export {
-  version,
+  firebaseConfig,
+  i18n,
   themeOptions,
+  version,
 };

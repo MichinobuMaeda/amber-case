@@ -1,15 +1,4 @@
-export default (mode) => [
-  {
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#ffc107',
-      },
-      secondary: {
-        main: '#c6ff00',
-      },
-    },
-  },
+export default [
   {
     palette: {
       mode: 'light',
@@ -21,4 +10,15 @@ export default (mode) => [
       },
     },
   },
-].find((item) => item.palette.mode === (mode === 'dark' ? 'dark' : 'light'));
+  {
+    palette: {
+      mode: 'dark',
+      primary: {
+        main: '#ffc107',
+      },
+      secondary: {
+        main: '#c6ff00',
+      },
+    },
+  },
+];
