@@ -5,10 +5,8 @@ import {
   mockLocalStorage, mockWindow,
 } from '../testConfig';
 
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: mockDoc,
-  onSnapshot: mockOnSnapshot,
+jest.mock('firebase/app', () => ({
+  initializeApp: jest.fn(),
 }));
 
 const mockSignInWithEmailLink = jest
@@ -17,12 +15,15 @@ const mockSignInWithEmailLink = jest
 const mockIsSignInWithEmailLink = jest
   .fn(() => false)
   .mockImplementationOnce(() => true);
+const mockConnectAuthEmulator = jest.fn();
 const mockOnAuthStateChanged = jest.fn();
 const mockSendSignInLinkToEmail = jest.fn();
 const mockSignInWithEmailAndPassword = jest.fn();
 const mockSignOut = jest.fn();
 jest.mock('firebase/auth', () => ({
   ...jest.requireActual('firebase/auth'),
+  getAuth: jest.fn(),
+  connectAuthEmulator: mockConnectAuthEmulator,
   signInWithEmailLink: mockSignInWithEmailLink,
   sendSignInLinkToEmail: mockSendSignInLinkToEmail,
   signInWithEmailAndPassword: mockSignInWithEmailAndPassword,
@@ -31,8 +32,31 @@ jest.mock('firebase/auth', () => ({
   onAuthStateChanged: mockOnAuthStateChanged,
 }));
 
+const mockConnectFirestoreEmulator = jest.fn();
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  connectFirestoreEmulator: mockConnectFirestoreEmulator,
+  doc: mockDoc,
+  onSnapshot: mockOnSnapshot,
+}));
+
+const mockConnectStorageEmulator = jest.fn();
+jest.mock('firebase/storage', () => ({
+  ...jest.requireActual('firebase/storage'),
+  getStorage: jest.fn(),
+  connectStorageEmulator: mockConnectStorageEmulator,
+}));
+
+const mockConnectFunctionsEmulator = jest.fn();
+jest.mock('firebase/functions', () => ({
+  ...jest.requireActual('firebase/functions'),
+  getFunctions: jest.fn(),
+  connectFunctionsEmulator: mockConnectFunctionsEmulator,
+}));
+
 // work around for mocking problem.
 const {
+  initializeFirebase,
   unsubUserData,
   castDoc,
   handleSignInWithEmailLink,
@@ -55,6 +79,24 @@ beforeAll(() => {
 afterEach(() => {
   jest.clearAllMocks();
   resetMockService();
+});
+
+describe('initializeFirebase(firebaseConfig)', () => {
+  it('not use emulator if firebase api key is production.', () => {
+    initializeFirebase({ apiKey: 'production api key' });
+    expect(mockConnectAuthEmulator.mock.calls.length).toEqual(0);
+    expect(mockConnectFirestoreEmulator.mock.calls.length).toEqual(0);
+    expect(mockConnectStorageEmulator.mock.calls.length).toEqual(0);
+    expect(mockConnectFunctionsEmulator.mock.calls.length).toEqual(0);
+  });
+
+  it('use emulator if firebase api key is not production.', () => {
+    initializeFirebase({ apiKey: 'FIREBASE_API_KEY' });
+    expect(mockConnectAuthEmulator.mock.calls.length).toEqual(1);
+    expect(mockConnectFirestoreEmulator.mock.calls.length).toEqual(1);
+    expect(mockConnectStorageEmulator.mock.calls.length).toEqual(1);
+    expect(mockConnectFunctionsEmulator.mock.calls.length).toEqual(1);
+  });
 });
 
 describe('unsubUserData(service)', () => {
