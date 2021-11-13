@@ -4,6 +4,7 @@ export {
   ServiceContext,
 };
 export {
+  initializeFirebase,
   listenFirebase,
   handelSendSignInLinkToEmail,
   handleSignInWithPassword,

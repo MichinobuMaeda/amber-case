@@ -1,11 +1,38 @@
+import { initializeApp } from 'firebase/app';
 import {
+  getAuth, connectAuthEmulator,
   isSignInWithEmailLink, onAuthStateChanged,
   sendSignInLinkToEmail, signInWithEmailAndPassword,
   signInWithEmailLink, signOut,
 } from 'firebase/auth';
+import {
+  getFirestore, connectFirestoreEmulator,
+  onSnapshot, doc,
+} from 'firebase/firestore';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 export const localKeyEmail = 'AmberBowlEmail';
 export const localKeyError = 'AmberBowlError';
+
+export const initializeFirebase = (firebaseConfig) => {
+  const firebaseApp = initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const db = getFirestore(firebaseApp);
+  const storage = getStorage(firebaseApp);
+  const functions = getFunctions(firebaseApp);
+
+  if (firebaseConfig.apiKey === 'FIREBASE_API_KEY') {
+    connectAuthEmulator(auth, 'http://localhost:9099');
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    connectStorageEmulator(storage, 'localhost', 9199);
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+  }
+
+  return {
+    auth, db, storage, functions,
+  };
+};
 
 export const unsubUserData = ({ unsub }) => {
   Object.keys(unsub).forEach((key) => {
@@ -73,7 +100,10 @@ export const listenConf = (service) => {
   const { db, setConf } = service;
   if (!service.unsubConf) {
     // eslint-disable-next-line no-param-reassign
-    service.unsubConf = db.collection('service').doc('conf').onSnapshot(
+    // service.unsubConf = db.collection('service').doc('conf').onSnapshot(
+    // eslint-disable-next-line no-param-reassign
+    service.unsubConf = onSnapshot(
+      doc(db, 'service', 'conf'),
       (snapshot) => {
         setConf(snapshot.exists ? castDoc(snapshot) : { error: true });
       },
@@ -106,10 +136,14 @@ export const handleSignOut = async (service) => {
 
 export const listenMe = (service, uid) => {
   const { db, setMe } = service;
-  const meRef = db.collection('accounts').doc(uid);
+  // const meRef = db.collection('accounts').doc(uid);
+  const meRef = doc(db, 'accounts', uid);
   if (!service.unsub[meRef.path]) {
     // eslint-disable-next-line no-param-reassign
-    service.unsub[meRef.path] = meRef.onSnapshot(
+    // service.unsub[meRef.path] = meRef.onSnapshot(
+    // eslint-disable-next-line no-param-reassign
+    service.unsub[meRef.path] = onSnapshot(
+      meRef,
       async (snapshot) => {
         if (
           snapshot.exists

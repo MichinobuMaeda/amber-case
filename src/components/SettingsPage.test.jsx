@@ -9,6 +9,8 @@ import { MemoryRouter } from 'react-router-dom';
 
 // import { i18n } from '../conf';
 
+jest.mock('firebase/firestore', () => ({}));
+
 const mockHandleSignOut = jest.fn();
 jest.mock('../api', () => ({
   __esModule: true,

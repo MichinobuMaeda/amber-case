@@ -12,6 +12,7 @@ export const mockSetAuthUser = jest.fn();
 
 export const mockDocPath = 'mockDocPath';
 export const mockOnSnapshot = jest.fn(() => () => {});
+export const mockDoc = jest.fn();
 
 export const mockService = {};
 
@@ -42,14 +43,6 @@ export const resetMockService = () => {
   mockService.setAuthUser = mockSetAuthUser;
   mockService.me = {};
   mockService.setMe = mockSetMe;
-  mockService.db = {
-    collection: () => ({
-      doc: () => ({
-        path: mockDocPath,
-        onSnapshot: mockOnSnapshot,
-      }),
-    }),
-  };
 
   const mockLocalStorageKeys = Object.keys(mockLocalStorage);
   mockLocalStorageKeys.forEach((key) => { delete mockLocalStorage[key]; });

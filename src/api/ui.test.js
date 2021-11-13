@@ -1,5 +1,7 @@
 import { selectThemeMode } from '.';
 
+jest.mock('firebase/firestore', () => ({}));
+
 describe('selectThemeMode(service)', () => {
   it('return the dark theme options for themeMode: "dark", preferColorScheme: "dark".', async () => {
     expect(selectThemeMode({

@@ -1,9 +1,15 @@
 import {
   mockUrl, resetMockService, mockService, mockAuth,
   mockSetConf, mockSetMe, mockSetAuthUser,
-  mockDocPath, mockOnSnapshot,
+  mockDocPath, mockOnSnapshot, mockDoc,
   mockLocalStorage, mockWindow,
 } from '../testConfig';
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: mockDoc,
+  onSnapshot: mockOnSnapshot,
+}));
 
 const mockSignInWithEmailLink = jest
   .fn(() => 'default')
@@ -219,20 +225,12 @@ describe('restoreAuthError(service, window)', () => {
 
 describe('listenConf(service)', () => {
   it('start listening realtime data of service.conf.', async () => {
-    mockService.db = {
-      collection: () => ({
-        doc: () => ({
-          onSnapshot: mockOnSnapshot,
-        }),
-      }),
-    };
-
     listenConf(mockService);
 
     expect(mockService.unsubConf).toBeDefined();
     expect(mockOnSnapshot.mock.calls.length).toEqual(1);
     expect(mockSetConf.mock.calls.length).toEqual(0);
-    const cb = mockOnSnapshot.mock.calls[0][0];
+    const cb = mockOnSnapshot.mock.calls[0][1];
 
     cb({
       exists: true,
@@ -330,9 +328,9 @@ describe('handleSignOut(service)', () => {
 describe('listenMe(service, uid)', () => {
   it('start listening realtime data of account of me '
   + 'if unsub is empty.', () => {
-    mockService.unsub = {
-      'doc path': () => 'unsub function 1',
-    };
+    mockDoc.mockImplementationOnce(() => ({ path: 'doc path' }));
+    mockOnSnapshot.mockImplementationOnce(() => () => 'unsub function 1');
+    mockService.unsub = {};
     const uid = 'id01';
 
     listenMe(mockService, uid);
@@ -341,10 +339,12 @@ describe('listenMe(service, uid)', () => {
   });
 
   it('set the doc me if the snapshot is valid.', () => {
+    mockDoc.mockImplementationOnce(() => ({ path: 'doc path' }));
+    mockOnSnapshot.mockImplementationOnce(() => () => 'unsub function 1');
     const uid = 'id01';
 
     listenMe(mockService, uid);
-    const cb = mockOnSnapshot.mock.calls[0][0];
+    const cb = mockOnSnapshot.mock.calls[0][1];
 
     cb({
       exists: true,
@@ -395,13 +395,15 @@ describe('listenMe(service, uid)', () => {
 
   it('do not start listening realtime data of account of me '
   + 'if unsub is not empty.', () => {
+    mockDoc.mockImplementationOnce(() => ({ path: 'doc path' }));
+    mockOnSnapshot.mockImplementationOnce(() => () => 'unsub function 1');
     mockService.unsub = {
-      'doc path': () => 'unsub function 1',
+      'doc path': () => 'unsub function 0',
     };
     const uid = 'id01';
 
     listenMe(mockService, uid);
-    expect(mockService.unsub['doc path']()).toEqual('unsub function 1');
+    expect(mockService.unsub['doc path']()).toEqual('unsub function 0');
   });
 });
 
@@ -417,6 +419,7 @@ describe('listenFirebase(service, windows)', () => {
 
   it('calls onAuthStateChanged() '
   + 'if url is not sign-in with emai link.', async () => {
+    mockDoc.mockImplementation(() => ({ path: mockDocPath }));
     const mockGetItem = jest.fn(() => 'abc@example.com');
     const mockRemoveItem = jest.fn();
     mockService.unsubConf = () => {};

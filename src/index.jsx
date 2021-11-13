@@ -4,31 +4,18 @@ import { useMediaQuery } from '@material-ui/core';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
-import firebaseCompat from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
-import 'firebase/compat/storage';
-import 'firebase/compat/functions';
 
 import { firebaseConfig } from './conf';
 import {
-  ServiceContext, selectThemeMode, listenFirebase,
+  initializeFirebase, listenFirebase,
+  ServiceContext, selectThemeMode,
 } from './api';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
-const firebaseApp = firebaseCompat.initializeApp(firebaseConfig);
-const auth = firebaseApp.auth();
-const db = firebaseApp.firestore();
-const storage = firebaseApp.storage();
-const functions = firebaseApp.functions();
-
-if (firebaseConfig.apiKey === 'FIREBASE_API_KEY') {
-  auth.useEmulator('http://localhost:9099');
-  db.useEmulator('localhost', 8080);
-  storage.useEmulator('localhost', 9199);
-  functions.useEmulator('localhost', 5001);
-}
+const {
+  auth, db, storage, functions,
+} = initializeFirebase(firebaseConfig);
 
 const AppBase = () => {
   const service = useContext(ServiceContext);

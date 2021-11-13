@@ -9,6 +9,8 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { i18n, firebaseConfig } from '../conf';
 
+jest.mock('firebase/firestore', () => ({}));
+
 const mockHandelSendSignInLinkToEmail = jest
   .fn(() => {})
   .mockImplementationOnce(() => {})

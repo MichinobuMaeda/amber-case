@@ -11,6 +11,8 @@ import {
   resetMockService, mockService,
 } from './testConfig';
 
+jest.mock('firebase/firestore', () => ({}));
+
 beforeAll(() => {
   resetMockService();
 });

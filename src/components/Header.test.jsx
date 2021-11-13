@@ -11,6 +11,8 @@ import { ServiceContext } from '../api';
 import { i18n } from '../conf';
 import { Header } from '.';
 
+jest.mock('firebase/firestore', () => ({}));
+
 let mockNavigationType;
 const mockUseNavigate = jest.fn();
 
