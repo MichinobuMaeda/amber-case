@@ -48,13 +48,7 @@ const Header = () => {
               aria-label="settings"
               disabled={location.pathname.startsWith('/settings')}
               sx={{ ml: 2 }}
-              onClick={() => {
-                if (location.pathname.startsWith('/policy') && navigate.action !== 'POP') {
-                  navigate(-1);
-                } else {
-                  navigate('/settings/themeMode');
-                }
-              }}
+              onClick={() => { navigate('/settings/themeMode'); }}
             >
               <Settings />
             </IconButton>

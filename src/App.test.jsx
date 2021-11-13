@@ -7,19 +7,23 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 import { ServiceContext } from './api';
+import {
+  resetMockService, mockService,
+} from './testConfig';
+
+beforeAll(() => {
+  resetMockService();
+});
 
 afterEach(() => {
   jest.clearAllMocks();
+  resetMockService();
 });
 
 describe('App', () => {
   it('show LoadingPage without service.conf on "/".', () => {
-    const service = {
-      conf: {},
-      me: {},
-    };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <App />
         </MemoryRouter>
@@ -30,12 +34,8 @@ describe('App', () => {
   });
 
   it('show LoadingPage without service.conf on "settings/:panel".', () => {
-    const service = {
-      conf: {},
-      me: {},
-    };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
           <App />
         </MemoryRouter>
@@ -46,12 +46,8 @@ describe('App', () => {
   });
 
   it('show LoadingPage without service.conf on "policy".', () => {
-    const service = {
-      conf: {},
-      me: {},
-    };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <App />
         </MemoryRouter>
@@ -62,12 +58,9 @@ describe('App', () => {
   });
 
   it('show LoadingErrorPage if failed to load service.conf on "/".', () => {
-    const service = {
-      conf: { error: true },
-      me: {},
-    };
+    mockService.conf = { error: true };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <App />
         </MemoryRouter>
@@ -78,12 +71,9 @@ describe('App', () => {
   });
 
   it('show LoadingErrorPage if failed to load service.conf on "settings/:panel".', () => {
-    const service = {
-      conf: { error: true },
-      me: {},
-    };
+    mockService.conf = { error: true };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
           <App />
         </MemoryRouter>
@@ -94,12 +84,9 @@ describe('App', () => {
   });
 
   it('show LoadingErrorPage if failed to load service.conf on "policy".', () => {
-    const service = {
-      conf: { error: true },
-      me: {},
-    };
+    mockService.conf = { error: true };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <App />
         </MemoryRouter>
@@ -110,12 +97,9 @@ describe('App', () => {
   });
 
   it('show SignInPage if not signed in on "/".', () => {
-    const service = {
-      conf: { id: 'conf' },
-      me: {},
-    };
+    mockService.conf = { id: 'conf' };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <App />
         </MemoryRouter>
@@ -126,12 +110,9 @@ describe('App', () => {
   });
 
   it('show Settings if not signed in on "settings/:panel".', () => {
-    const service = {
-      conf: { id: 'conf' },
-      me: {},
-    };
+    mockService.conf = { id: 'conf' };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
           <App />
         </MemoryRouter>
@@ -142,12 +123,9 @@ describe('App', () => {
   });
 
   it('show PolicyPage if not signed in on "policy".', () => {
-    const service = {
-      conf: { id: 'conf' },
-      me: {},
-    };
+    mockService.conf = { id: 'conf' };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <App />
         </MemoryRouter>
@@ -158,12 +136,10 @@ describe('App', () => {
   });
 
   it('show HomePage if signed in on "/".', () => {
-    const service = {
-      conf: { id: 'conf' },
-      me: { id: 'id01' },
-    };
+    mockService.conf = { id: 'conf' };
+    mockService.me = { id: 'id01' };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <App />
         </MemoryRouter>
@@ -174,12 +150,10 @@ describe('App', () => {
   });
 
   it('show Settings if signed in on "settings/:panel".', () => {
-    const service = {
-      conf: { id: 'conf' },
-      me: { id: 'id01' },
-    };
+    mockService.conf = { id: 'conf' };
+    mockService.me = { id: 'id01' };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
           <App />
         </MemoryRouter>
@@ -190,12 +164,10 @@ describe('App', () => {
   });
 
   it('show PolicyPage if signed in on "policy".', () => {
-    const service = {
-      conf: { id: 'conf' },
-      me: { id: 'id01' },
-    };
+    mockService.conf = { id: 'conf' };
+    mockService.me = { id: 'id01' };
     render(
-      <ServiceContext.Provider value={service}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <App />
         </MemoryRouter>

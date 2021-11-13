@@ -17,7 +17,7 @@ const LoadingErrorPage = () => {
       <Stack spacing={4} alignItems="center">
         <Typography variant="body1">{t('failed to load config')}</Typography>
         <Typography variant="body1">{t('check connection')}</Typography>
-        <Typography variant="body1">{t('retry or call admin')}</Typography>
+        <Typography variant="body1">{t('retry failed or call admin')}</Typography>
       </Stack>
     </Box>
   );

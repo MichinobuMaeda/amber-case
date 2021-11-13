@@ -1,3 +1,10 @@
+import {
+  mockUrl, resetMockService, mockService, mockAuth,
+  mockSetConf, mockSetMe, mockSetAuthUser,
+  mockDocPath, mockOnSnapshot,
+  mockLocalStorage, mockWindow,
+} from '../testConfig';
+
 const mockSignInWithEmailLink = jest
   .fn(() => 'default')
   .mockImplementationOnce(() => { throw new Error(); });
@@ -5,21 +12,28 @@ const mockIsSignInWithEmailLink = jest
   .fn(() => false)
   .mockImplementationOnce(() => true);
 const mockOnAuthStateChanged = jest.fn();
+const mockSendSignInLinkToEmail = jest.fn();
+const mockSignInWithEmailAndPassword = jest.fn();
 const mockSignOut = jest.fn();
 jest.mock('firebase/auth', () => ({
   ...jest.requireActual('firebase/auth'),
   signInWithEmailLink: mockSignInWithEmailLink,
+  sendSignInLinkToEmail: mockSendSignInLinkToEmail,
+  signInWithEmailAndPassword: mockSignInWithEmailAndPassword,
   signOut: mockSignOut,
   isSignInWithEmailLink: mockIsSignInWithEmailLink,
   onAuthStateChanged: mockOnAuthStateChanged,
 }));
 
+// work around for mocking problem.
 const {
   unsubUserData,
   castDoc,
   handleSignInWithEmailLink,
   restoreAuthError,
   listenConf,
+  handelSendSignInLinkToEmail,
+  handleSignInWithPassword,
   onSignOut,
   handleSignOut,
   listenMe,
@@ -28,26 +42,29 @@ const {
   localKeyError,
 } = require('./firebase');
 
+beforeAll(() => {
+  resetMockService();
+});
+
 afterEach(() => {
   jest.clearAllMocks();
+  resetMockService();
 });
 
 describe('unsubUserData(service)', () => {
   it('exec each unsub functions and delete them all.', async () => {
     const unsub1 = jest.fn();
     const unsub2 = jest.fn();
-    const service = {
-      unsub: {
-        unsub0: null,
-        unsub1,
-        unsub2,
-        unsub4: 'dummy',
-      },
+    mockService.unsub = {
+      unsub0: null,
+      unsub1,
+      unsub2,
+      unsub4: 'dummy',
     };
-    unsubUserData(service);
+    unsubUserData(mockService);
     expect(unsub1.mock.calls.length).toEqual(1);
     expect(unsub2.mock.calls.length).toEqual(1);
-    expect(Object.keys(service.unsub).length).toEqual(0);
+    expect(Object.keys(mockService.unsub).length).toEqual(0);
   });
 });
 
@@ -135,143 +152,89 @@ describe('castDoc(doc)', () => {
 });
 
 describe('handleSignInWithEmailLink(service, window)', () => {
-  const service = { auth: { name: 'Test auth object' } };
-
   it('set localKeyError: "check your email address" '
   + 'if failed to sign in.', async () => {
     const email01 = 'abc@example.com';
     const url01 = 'https://example.com/?name=value';
-    const localStorageData = {
-      [localKeyEmail]: email01,
-      [localKeyError]: 'dummy',
-    };
-    const window = {
-      localStorage: {
-        getItem: (key) => localStorageData[key],
-        setItem: (key, value) => { localStorageData[key] = value; },
-        removeItem: (key) => { delete localStorageData[key]; },
-      },
-      location: {
-        href: url01,
-      },
-    };
+    mockLocalStorage[localKeyEmail] = email01;
+    mockLocalStorage[localKeyError] = 'dummy';
+    mockWindow.location.href = url01;
 
-    await handleSignInWithEmailLink(service, window);
+    await handleSignInWithEmailLink(mockService, mockWindow);
 
-    expect(localStorageData[localKeyEmail]).not.toBeDefined();
-    expect(localStorageData[localKeyError]).toEqual('check your email address');
-    expect(window.location.href).toEqual('https://example.com/');
+    expect(mockLocalStorage[localKeyEmail]).not.toBeDefined();
+    expect(mockLocalStorage[localKeyError]).toEqual('check your email address');
+    expect(mockWindow.location.href).toEqual('https://example.com/');
   });
 
   it('call signInWithEmailLink() '
   + 'if an email address in localStorage.', async () => {
     const email01 = 'abc@example.com';
     const url01 = 'https://example.com/?name=value';
-    const localStorageData = {
-      [localKeyEmail]: email01,
-      [localKeyError]: 'dummy',
-    };
-    const window = {
-      localStorage: {
-        getItem: (key) => localStorageData[key],
-        setItem: (key, value) => { localStorageData[key] = value; },
-        removeItem: (key) => { delete localStorageData[key]; },
-      },
-      location: {
-        href: url01,
-      },
-    };
+    mockLocalStorage[localKeyEmail] = email01;
+    mockLocalStorage[localKeyError] = 'dummy';
+    mockWindow.location.href = url01;
 
-    await handleSignInWithEmailLink(service, window);
+    await handleSignInWithEmailLink(mockService, mockWindow);
 
-    expect(localStorageData[localKeyEmail]).not.toBeDefined();
-    expect(localStorageData[localKeyError]).not.toBeDefined();
+    expect(mockLocalStorage[localKeyEmail]).not.toBeDefined();
+    expect(mockLocalStorage[localKeyError]).not.toBeDefined();
     expect(mockSignInWithEmailLink.mock.calls.length).toEqual(1);
-    expect(mockSignInWithEmailLink.mock.calls[0][0]).toEqual(service.auth);
+    expect(mockSignInWithEmailLink.mock.calls[0][0]).toEqual(mockAuth);
     expect(mockSignInWithEmailLink.mock.calls[0][1]).toEqual(email01);
     expect(mockSignInWithEmailLink.mock.calls[0][2]).toEqual(url01);
-    expect(window.location.href).toEqual('https://example.com/');
+    expect(mockWindow.location.href).toEqual('https://example.com/');
   });
 
   it('set localKeyError: "failed to sign in" '
   + 'if no email address in localStorage.', async () => {
     const url01 = 'https://example.com/?name=value';
-    const localStorageData = {
-      [localKeyError]: 'dummy',
-    };
-    const window = {
-      localStorage: {
-        getItem: (key) => localStorageData[key],
-        setItem: (key, value) => { localStorageData[key] = value; },
-        removeItem: (key) => { delete localStorageData[key]; },
-      },
-      location: {
-        href: url01,
-      },
-    };
+    mockLocalStorage[localKeyError] = 'dummy';
+    mockWindow.location.href = url01;
 
-    await handleSignInWithEmailLink(service, window);
+    await handleSignInWithEmailLink(mockService, mockWindow);
 
-    expect(localStorageData[localKeyEmail]).not.toBeDefined();
-    expect(localStorageData[localKeyError]).toEqual('failed to sign in');
+    expect(mockLocalStorage[localKeyEmail]).not.toBeDefined();
+    expect(mockLocalStorage[localKeyError]).toEqual('failed to sign in');
     expect(mockSignInWithEmailLink.mock.calls.length).toEqual(0);
-    expect(window.location.href).toEqual('https://example.com/');
+    expect(mockWindow.location.href).toEqual('https://example.com/');
   });
 });
 
 describe('restoreAuthError(service, window)', () => {
-  const service = {};
-
   it('restore localKeyError to the service object.', async () => {
-    const localStorageData = {
-      [localKeyError]: 'test01',
-    };
-    const window = {
-      localStorage: {
-        getItem: (key) => localStorageData[key],
-        setItem: (key, value) => { localStorageData[key] = value; },
-        removeItem: (key) => { delete localStorageData[key]; },
-      },
-    };
+    mockLocalStorage[localKeyError] = 'test01';
 
-    restoreAuthError(service, window);
+    restoreAuthError(mockService, mockWindow);
 
-    expect(service.authError).toEqual('test01');
-    expect(localStorageData[localKeyError]).not.toBeDefined();
+    expect(mockService.authError).toEqual('test01');
+    expect(mockLocalStorage[localKeyError]).not.toBeDefined();
 
-    restoreAuthError(service, window);
+    restoreAuthError(mockService, mockWindow);
 
-    expect(service.authError).toBeFalsy();
-    expect(localStorageData[localKeyError]).not.toBeDefined();
+    expect(mockService.authError).toBeFalsy();
+    expect(mockLocalStorage[localKeyError]).not.toBeDefined();
   });
 });
 
 describe('listenConf(service)', () => {
-  let handelSnapshotCallBack = null;
-  const mockSetConf = jest.fn();
-  const mockOnSnapshot = jest.fn((cb) => {
-    handelSnapshotCallBack = cb;
-    return () => {};
-  });
-  const service = {
-    setConf: mockSetConf,
-    db: {
+  it('start listening realtime data of service.conf.', async () => {
+    mockService.db = {
       collection: () => ({
         doc: () => ({
           onSnapshot: mockOnSnapshot,
         }),
       }),
-    },
-  };
+    };
 
-  it('start listening realtime data of service.conf.', async () => {
-    listenConf(service);
+    listenConf(mockService);
 
-    expect(service.unsubConf).toBeDefined();
+    expect(mockService.unsubConf).toBeDefined();
     expect(mockOnSnapshot.mock.calls.length).toEqual(1);
     expect(mockSetConf.mock.calls.length).toEqual(0);
+    const cb = mockOnSnapshot.mock.calls[0][0];
 
-    handelSnapshotCallBack({
+    cb({
       exists: true,
       id: 'id01',
       data: () => ({}),
@@ -280,114 +243,110 @@ describe('listenConf(service)', () => {
     expect(mockSetConf.mock.calls.length).toEqual(1);
     expect(mockSetConf.mock.calls[0][0]).toEqual({ id: 'id01' });
 
-    handelSnapshotCallBack({
+    cb({
       exists: false,
     });
 
     expect(mockSetConf.mock.calls.length).toEqual(2);
     expect(mockSetConf.mock.calls[1][0]).toEqual({ error: true });
 
-    service.unsubConf = () => 'unsub conf';
-    listenConf(service);
+    mockService.unsubConf = () => 'unsub conf';
+    listenConf(mockService);
     expect(mockSetConf.mock.calls.length).toEqual(2);
   });
 });
 
+describe('handelSendSignInLinkToEmail(service, window, email)', () => {
+  it('calls signInWithEmailAndPassword(auth, email, { url, handleCodeInApp })', async () => {
+    const mockSetItem = jest.fn();
+    mockWindow.localStorage.setItem = mockSetItem;
+    const handleCodeInApp = true;
+    mockService.conf = { url: mockUrl };
+    const email = 'test01@example.com';
+    const param2 = { url: mockUrl, handleCodeInApp };
+
+    await handelSendSignInLinkToEmail(mockService, mockWindow, email);
+
+    expect(mockSetItem.mock.calls.length).toEqual(1);
+    expect(mockSetItem.mock.calls[0][0]).toEqual(localKeyEmail);
+    expect(mockSetItem.mock.calls[0][1]).toEqual(email);
+    expect(mockSendSignInLinkToEmail.mock.calls.length).toEqual(1);
+    expect(mockSendSignInLinkToEmail.mock.calls[0][0]).toEqual(mockAuth);
+    expect(mockSendSignInLinkToEmail.mock.calls[0][1]).toEqual(email);
+    expect(mockSendSignInLinkToEmail.mock.calls[0][2]).toEqual(param2);
+  });
+});
+
+describe('handleSignInWithPassword(service, email, password)', () => {
+  it('calls signInWithEmailAndPassword(auth, email, password)', async () => {
+    const email = 'test01@example.com';
+    const password = 'password01';
+
+    await handleSignInWithPassword(mockService, email, password);
+
+    expect(mockSignInWithEmailAndPassword.mock.calls.length).toEqual(1);
+    expect(mockSignInWithEmailAndPassword.mock.calls[0][0]).toEqual(mockAuth);
+    expect(mockSignInWithEmailAndPassword.mock.calls[0][1]).toEqual(email);
+    expect(mockSignInWithEmailAndPassword.mock.calls[0][2]).toEqual(password);
+  });
+});
+
 describe('onSignOut(service)', () => {
-  const mockSetMe = jest.fn();
-  const mockSetAuthUser = jest.fn();
-  const mockUnsub01 = jest.fn();
-  const service = {
-    setMe: mockSetMe,
-    setAuthUser: mockSetAuthUser,
-    unsub: {
-      unsub01: mockUnsub01,
-    },
-  };
-
   it('call unsubUserData(), call setMe with {}, call setAuthUser with {}.', async () => {
-    onSignOut(service);
+    const mockUnsub = jest.fn();
+    mockService.unsub = {
+      unsub01: mockUnsub,
+    };
+    onSignOut(mockService);
 
-    expect(service.unsub).toEqual({});
+    expect(mockService.unsub).toEqual({});
     expect(mockSetMe.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls[0][0]).toEqual({});
     expect(mockSetAuthUser.mock.calls.length).toEqual(1);
     expect(mockSetAuthUser.mock.calls[0][0]).toEqual({});
-    expect(mockUnsub01.mock.calls.length).toEqual(1);
+    expect(mockUnsub.mock.calls.length).toEqual(1);
   });
 });
 
 describe('handleSignOut(service)', () => {
-  const auth = { name: 'auth object' };
-  const mockSetMe = jest.fn();
-  const mockSetAuthUser = jest.fn();
-  const mockUnsub01 = jest.fn();
-  const service = {
-    auth,
-    setMe: mockSetMe,
-    setAuthUser: mockSetAuthUser,
-    unsub: {
-      unsub01: mockUnsub01,
-    },
-  };
-
   it('call onSignOut(), call onSignOut(auth).', async () => {
-    handleSignOut(service);
+    const mockUnsub = jest.fn();
+    mockService.unsub = {
+      unsub01: mockUnsub,
+    };
+    handleSignOut(mockService);
 
-    expect(service.unsub).toEqual({});
+    expect(mockService.unsub).toEqual({});
     expect(mockSetMe.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls[0][0]).toEqual({});
     expect(mockSetAuthUser.mock.calls.length).toEqual(1);
     expect(mockSetAuthUser.mock.calls[0][0]).toEqual({});
-    expect(mockUnsub01.mock.calls.length).toEqual(1);
+    expect(mockUnsub.mock.calls.length).toEqual(1);
     expect(mockSignOut.mock.calls.length).toEqual(1);
-    expect(mockSignOut.mock.calls[0][0]).toEqual(auth);
+    expect(mockSignOut.mock.calls[0][0]).toEqual(mockAuth);
   });
 });
 
 describe('listenMe(service, uid)', () => {
   it('start listening realtime data of account of me '
   + 'if unsub is empty.', () => {
-    const service = {
-      unsub: {},
-      db: {
-        collection: () => ({
-          doc: () => ({
-            path: 'doc path',
-            onSnapshot: () => () => 'unsub function',
-          }),
-        }),
-      },
+    mockService.unsub = {
+      'doc path': () => 'unsub function 1',
     };
     const uid = 'id01';
 
-    listenMe(service, uid);
+    listenMe(mockService, uid);
 
-    expect(service.unsub['doc path']()).toEqual('unsub function');
+    expect(mockService.unsub['doc path']()).toEqual('unsub function 1');
   });
 
   it('set the doc me if the snapshot is valid.', () => {
-    let callBackOfSnapshot = null;
-    const mockSetMe = jest.fn();
-    const service = {
-      unsub: {},
-      db: {
-        collection: () => ({
-          doc: () => ({
-            path: 'doc path',
-            onSnapshot: (cb) => {
-              callBackOfSnapshot = cb;
-              return () => 'unsub function';
-            },
-          }),
-        }),
-      },
-      setMe: mockSetMe,
-    };
     const uid = 'id01';
 
-    listenMe(service, uid);
-    callBackOfSnapshot({
+    listenMe(mockService, uid);
+    const cb = mockOnSnapshot.mock.calls[0][0];
+
+    cb({
       exists: true,
       id: 'id01',
       data: () => ({
@@ -398,7 +357,7 @@ describe('listenMe(service, uid)', () => {
     expect(mockSetMe.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls[0][0]).toEqual({ id: 'id01', valid: true });
 
-    callBackOfSnapshot({
+    cb({
       exists: true,
       id: 'id01',
       data: () => ({
@@ -409,10 +368,10 @@ describe('listenMe(service, uid)', () => {
 
     expect(mockSetMe.mock.calls.length).toEqual(2);
     expect(mockSetMe.mock.calls[1][0]).toEqual({});
-    expect(service.authError).toEqual('unregistered account');
+    expect(mockService.authError).toEqual('unregistered account');
 
-    service.authError = '';
-    callBackOfSnapshot({
+    mockService.authError = '';
+    cb({
       exists: true,
       id: 'id01',
       data: () => ({
@@ -422,92 +381,55 @@ describe('listenMe(service, uid)', () => {
 
     expect(mockSetMe.mock.calls.length).toEqual(3);
     expect(mockSetMe.mock.calls[2][0]).toEqual({});
-    expect(service.authError).toEqual('unregistered account');
+    expect(mockService.authError).toEqual('unregistered account');
 
-    service.authError = '';
-    callBackOfSnapshot({
+    mockService.authError = '';
+    cb({
       exists: false,
     });
 
     expect(mockSetMe.mock.calls.length).toEqual(4);
     expect(mockSetMe.mock.calls[3][0]).toEqual({});
-    expect(service.authError).toEqual('unregistered account');
+    expect(mockService.authError).toEqual('unregistered account');
   });
 
   it('do not start listening realtime data of account of me '
   + 'if unsub is not empty.', () => {
-    const service = {
-      unsub: { 'doc path': () => 'unsub function 1' },
-      db: {
-        collection: () => ({
-          doc: () => ({
-            path: 'doc path',
-            onSnapshot: () => () => 'unsub function 2',
-          }),
-        }),
-      },
+    mockService.unsub = {
+      'doc path': () => 'unsub function 1',
     };
     const uid = 'id01';
 
-    listenMe(service, uid);
-    expect(service.unsub['doc path']()).toEqual('unsub function 1');
+    listenMe(mockService, uid);
+    expect(mockService.unsub['doc path']()).toEqual('unsub function 1');
   });
 });
 
 describe('listenFirebase(service, windows)', () => {
   it('calls handleSignInWithEmailLink() '
   + 'if url is sign-in with emai link.', async () => {
-    const service = { name: 'service object' };
-    const window = {
-      location: { href: 'https://example.com/' },
-      localStorage: {
-        getItem: () => 'abc@example.com',
-        removeItem: () => {},
-      },
-    };
+    mockLocalStorage[localKeyEmail] = 'abc@example.com';
 
-    await listenFirebase(service, window);
+    await listenFirebase(mockService, mockWindow);
 
     expect(mockSignInWithEmailLink.mock.calls.length).toEqual(1);
   });
 
   it('calls onAuthStateChanged() '
   + 'if url is not sign-in with emai link.', async () => {
-    const mockSetAuthUser = jest.fn();
     const mockGetItem = jest.fn(() => 'abc@example.com');
     const mockRemoveItem = jest.fn();
-    const mockMeOnSnapshot = jest.fn();
-    const mockSetMe = jest.fn();
-    const service = {
-      db: {
-        collection: () => ({
-          doc: () => ({
-            path: 'path of id01',
-            onSnapshot: mockMeOnSnapshot,
-          }),
-        }),
-      },
-      auth: { name: 'auth object' },
-      authUser: {},
-      setAuthUser: mockSetAuthUser,
-      unsubConf: () => {},
-      unsub: {
-        'path of id01': () => {},
-      },
-      setMe: mockSetMe,
+    mockService.unsubConf = () => {};
+    mockService.unsub = {
+      [mockDocPath]: () => {},
     };
-    const window = {
-      location: { href: 'https://example.com/' },
-      localStorage: {
-        getItem: mockGetItem,
-        removeItem: mockRemoveItem,
-      },
-    };
+    mockWindow.localStorage.getItem = mockGetItem;
+    mockWindow.localStorage.removeItem = mockRemoveItem;
 
-    await listenFirebase(service, window);
+    await listenFirebase(mockService, mockWindow);
 
     expect(mockOnAuthStateChanged.mock.calls.length).toEqual(1);
-    expect(mockOnAuthStateChanged.mock.calls[0][0]).toEqual(service.auth);
+    expect(mockOnAuthStateChanged.mock.calls[0][0]).toEqual(mockAuth);
 
     const cb = mockOnAuthStateChanged.mock.calls[0][1];
     const authUser01 = { uid: 'id01' };
@@ -518,34 +440,34 @@ describe('listenFirebase(service, windows)', () => {
     expect(mockSetAuthUser.mock.calls[0][0]).toEqual(authUser01);
     expect(mockSignOut.mock.calls.length).toEqual(0);
 
-    service.authUser = authUser01;
+    mockService.authUser = authUser01;
     const authUser02 = { uid: 'id02' };
 
     cb(authUser02);
 
     expect(mockSetAuthUser.mock.calls.length).toEqual(2);
     expect(mockSetAuthUser.mock.calls[1][0]).toEqual(authUser02);
-    expect(mockMeOnSnapshot.mock.calls.length).toEqual(1);
+    expect(mockOnSnapshot.mock.calls.length).toEqual(1);
     expect(mockSignOut.mock.calls.length).toEqual(0);
 
-    service.authUser = authUser02;
-    service.me = { id: authUser02.uid };
+    mockService.authUser = authUser02;
+    mockService.me = { id: authUser02.uid };
 
     cb(null);
 
     expect(mockSetAuthUser.mock.calls.length).toEqual(3);
     expect(mockSetAuthUser.mock.calls[2][0]).toEqual({});
-    expect(mockMeOnSnapshot.mock.calls.length).toEqual(1);
+    expect(mockOnSnapshot.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls[0][0]).toEqual({});
 
-    service.authUser = {};
-    service.me = {};
+    mockService.authUser = {};
+    mockService.me = {};
 
     cb(null);
 
     expect(mockSetAuthUser.mock.calls.length).toEqual(3);
-    expect(mockMeOnSnapshot.mock.calls.length).toEqual(1);
+    expect(mockOnSnapshot.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls.length).toEqual(1);
   });
 });

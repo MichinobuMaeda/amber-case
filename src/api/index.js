@@ -5,6 +5,8 @@ export {
 };
 export {
   listenFirebase,
+  handelSendSignInLinkToEmail,
+  handleSignInWithPassword,
   handleSignOut,
 } from './firebase';
 export * from './ui';

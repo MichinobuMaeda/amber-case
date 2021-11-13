@@ -1,8 +1,8 @@
 import {
   isSignInWithEmailLink, onAuthStateChanged,
+  sendSignInLinkToEmail, signInWithEmailAndPassword,
   signInWithEmailLink, signOut,
 } from 'firebase/auth';
-// import { doc, onSnapshot } from 'firebase/firestore';
 
 export const localKeyEmail = 'AmberBowlEmail';
 export const localKeyError = 'AmberBowlError';
@@ -81,7 +81,19 @@ export const listenConf = (service) => {
   }
 };
 
-export const onSignOut = async (service) => {
+export const handelSendSignInLinkToEmail = async (service, window, email) => {
+  window.localStorage.setItem(localKeyEmail, email);
+  await sendSignInLinkToEmail(service.auth, email, {
+    url: service.conf.url,
+    handleCodeInApp: true,
+  });
+};
+
+export const handleSignInWithPassword = async (service, email, password) => {
+  await signInWithEmailAndPassword(service.auth, email, password);
+};
+
+export const onSignOut = (service) => {
   unsubUserData(service);
   service.setMe({});
   service.setAuthUser({});

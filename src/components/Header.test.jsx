@@ -6,8 +6,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { ServiceContext } from '../api';
 
+import { ServiceContext } from '../api';
 import { i18n } from '../conf';
 import { Header } from '.';
 
@@ -110,7 +110,7 @@ describe('Header', () => {
     expect(screen.queryByRole('button', { name: 'settings' })).not.toHaveAttribute('disabled');
   });
 
-  it('calls history.replace("/") on the back button, '
+  it('calls navigation("/", { replace: true }) on the back button, '
   + 'if history has no entry.', () => {
     mockNavigationType = 'POP';
     render(
@@ -127,7 +127,7 @@ describe('Header', () => {
     expect(mockUseNavigate.mock.calls[0][1]).toEqual({ replace: true });
   });
 
-  it('calls history.goBack() on the back button, '
+  it('calls navigation(-1) on the back button, '
   + 'if history has entries.', () => {
     mockNavigationType = 'PUSH';
     render(
@@ -143,24 +143,7 @@ describe('Header', () => {
     expect(mockUseNavigate.mock.calls[0][0]).toEqual(-1);
   });
 
-  it('calls history.goBack() on the settings button, '
-  + 'on "/policy".', () => {
-    mockNavigationType = 'PUSH';
-    render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-          <Header />
-        </MemoryRouter>
-      </ServiceContext.Provider>,
-    );
-    userEvent.click(screen.queryByRole('button', { name: 'settings' }));
-    expect(mockUseNavigate.mock.calls.length).toEqual(1);
-    expect(mockUseNavigate.mock.calls[0].length).toEqual(1);
-    expect(mockUseNavigate.mock.calls[0][0]).toEqual(-1);
-  });
-
-  it('calls history.push("/settings/themeMode") on the settings button, '
-  + 'on not "/policy" and with history entries.', () => {
+  it('calls navigation("/settings/themeMode") on the settings button.', () => {
     mockNavigationType = 'PUSH';
     render(
       <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
@@ -173,18 +156,5 @@ describe('Header', () => {
     expect(mockUseNavigate.mock.calls.length).toEqual(1);
     expect(mockUseNavigate.mock.calls[0].length).toEqual(1);
     expect(mockUseNavigate.mock.calls[0][0]).toEqual('/settings/themeMode');
-  });
-
-  it('calls history.goBack() on the settings button, '
-  + 'on not "/policy" and without history entries.', () => {
-    mockNavigationType = 'POP';
-    render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
-        </MemoryRouter>
-      </ServiceContext.Provider>,
-    );
-    userEvent.click(screen.queryByRole('button', { name: 'settings' }));
   });
 });

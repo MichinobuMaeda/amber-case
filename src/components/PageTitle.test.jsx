@@ -7,7 +7,7 @@ import React from 'react';
 import { ArrowForward } from '@mui/icons-material';
 
 import { i18n } from '../conf';
-import { PageTitle } from '.';
+import PageTitle from './PageTitle';
 
 describe('PageTitle', () => {
   it('show icon if given and title.', () => {

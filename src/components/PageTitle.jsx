@@ -4,7 +4,7 @@ import { Typography } from '@mui/material';
 
 const PageTitle = ({ 'data-testid': dataTestid, icon, title }) => (
   <Typography data-testid={dataTestid} variant="h2" component="div" sx={{ mb: 2.0 }}>
-    {icon}
+    <span style={{ marginRight: '0.25em' }}>{icon}</span>
     {title}
   </Typography>
 );
