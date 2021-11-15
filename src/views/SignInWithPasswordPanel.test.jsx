@@ -16,26 +16,25 @@ const mockHandleSignInWithPassword = jest
   .mockImplementationOnce(() => {})
   .mockImplementationOnce(() => { throw new Error(); });
 jest.mock('../api', () => ({
-  __esModule: true,
   ...jest.requireActual('../api'),
   handleSignInWithPassword: mockHandleSignInWithPassword,
 }));
 
 // work around for mocking problem.
-const { SignInWithPassword } = require('.');
+const { SignInWithPasswordPanel } = require('.');
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('SignInWithPassword', () => {
+describe('SignInWithPasswordPanel', () => {
   it('shows button sign-in for valid email and password.', async () => {
     const email = 'test01@example.com';
     const onEmailChange = () => {};
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithPassword email={email} onEmailChange={onEmailChange} />
+        <SignInWithPasswordPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     userEvent.type(screen.queryByTestId('password'), 't');
@@ -51,7 +50,7 @@ describe('SignInWithPassword', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithPassword email={email} onEmailChange={onEmailChange} />
+        <SignInWithPasswordPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     userEvent.type(screen.queryByTestId('password'), 't');
@@ -69,7 +68,7 @@ describe('SignInWithPassword', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithPassword email={email} onEmailChange={onEmailChange} />
+        <SignInWithPasswordPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     userEvent.type(screen.queryByTestId('password'), 't');
@@ -82,7 +81,7 @@ describe('SignInWithPassword', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithPassword email={email} onEmailChange={onEmailChange} />
+        <SignInWithPasswordPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     userEvent.type(screen.queryByTestId('password'), 't');
@@ -95,7 +94,7 @@ describe('SignInWithPassword', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithPassword email={email} onEmailChange={onEmailChange} />
+        <SignInWithPasswordPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     await waitFor(() => expect(screen.queryByRole('button', { name: 'sign-in' })).toBeNull());

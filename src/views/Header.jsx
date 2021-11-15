@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import {
-  AppBar, Toolbar, Typography, IconButton, Box,
+  AppBar, Toolbar, Typography, IconButton, Box, Button,
 } from '@mui/material';
-import { ArrowBackIosNew, Settings } from '@mui/icons-material';
+import { ArrowBackIosNew, Settings, SystemUpdateAlt } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import '../conf/i18n';
-import { ServiceContext } from '../api';
+import { ServiceContext, updateApp } from '../api';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -56,6 +56,18 @@ const Header = () => {
         </Toolbar>
       </AppBar>
       <Box sx={{ height: 64 }} />
+      {service.conf.version && service.conf.version !== service.version && (
+        <Button
+          aria-label="updateApp"
+          startIcon={<SystemUpdateAlt />}
+          onClick={() => updateApp(navigator, window)}
+          variant="outlined"
+          color="warning"
+          sx={{ mb: '1em', width: '100%' }}
+        >
+          {t('Update app')}
+        </Button>
+      )}
     </>
   );
 };

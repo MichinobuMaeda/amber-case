@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import PasswordField from './PasswordField';
+import { PasswordField } from '.';
 
 describe('PasswordField', () => {
   it('hides password chars on default and toggled visibility '

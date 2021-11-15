@@ -13,7 +13,6 @@ jest.mock('firebase/firestore', () => ({}));
 
 const mockHandleSignOut = jest.fn();
 jest.mock('../api', () => ({
-  __esModule: true,
   ...jest.requireActual('../api'),
   handleSignOut: mockHandleSignOut,
 }));
@@ -27,9 +26,9 @@ afterEach(() => {
 });
 
 describe('SettingsPage', () => {
-  it('show button Sign-out if user has signed in.', async () => {
+  it('show button Sign-out if user has signed in and email has verified.', async () => {
     render(
-      <ServiceContext.Provider value={{ me: { id: 'id01' } }}>
+      <ServiceContext.Provider value={{ me: { id: 'id01' }, authUser: { emailVerified: true } }}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
@@ -41,9 +40,20 @@ describe('SettingsPage', () => {
     await waitFor(() => expect(mockHandleSignOut.mock.calls.length).toEqual(1));
   });
 
+  it('hide button Sign-out if email has not verified.', async () => {
+    render(
+      <ServiceContext.Provider value={{ me: { id: 'id01' }, authUser: { emailVerified: false } }}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
+          <SettingsPage />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
+    );
+    expect(screen.queryByRole('button', { name: 'sign-out' })).toBeNull();
+  });
+
   it('hide button Sign-out if user has not signed in.', async () => {
     render(
-      <ServiceContext.Provider value={{ me: {} }}>
+      <ServiceContext.Provider value={{ me: {}, authUser: {} }}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>

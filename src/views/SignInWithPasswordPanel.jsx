@@ -1,26 +1,26 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Login } from '@mui/icons-material';
-import { Button, Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateReuired, validateEmail } from '../conf';
 import { ServiceContext, handleSignInWithPassword } from '../api';
-import EmailField from './EmailField';
-import PasswordField from './PasswordField';
+import {
+  EmailField, PasswordField, PrimaryButton, ErrorMessage,
+} from '../components';
 
-const SignInWithPassword = ({ email, onEmailChange }) => {
+const SignInWithPasswordPanel = ({ email, onEmailChange }) => {
   const { t } = useTranslation();
   const service = useContext(ServiceContext);
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorStatus, setErrorStatus] = useState(false);
 
   const onSubmit = async () => {
     try {
       await handleSignInWithPassword(service, email, password);
     } catch (e) {
-      setErrorMessage(t('failed to sign in') + t('check your email and password'));
+      setErrorStatus(true);
     }
   };
 
@@ -46,28 +46,25 @@ const SignInWithPassword = ({ email, onEmailChange }) => {
         />
       </div>
       {validateEmail(email) && validateReuired(password) && (
-      <Button
+      <PrimaryButton
         onClick={onSubmit}
         aria-label="sign-in"
-        variant="contained"
         startIcon={<Login />}
-        sx={{ mb: '1em' }}
-      >
-        {t('Sign-in')}
-      </Button>
+        label={t('Sign-in')}
+      />
       )}
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      {errorStatus && <ErrorMessage text={t('failed to sign in') + t('check your email and password')} />}
     </>
   );
 };
 
-SignInWithPassword.propTypes = {
+SignInWithPasswordPanel.propTypes = {
   email: PropTypes.string,
   onEmailChange: PropTypes.func.isRequired,
 };
 
-SignInWithPassword.defaultProps = {
+SignInWithPasswordPanel.defaultProps = {
   email: null,
 };
 
-export default SignInWithPassword;
+export default SignInWithPasswordPanel;

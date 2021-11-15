@@ -2,7 +2,7 @@ import {
   mockUrl, resetMockService, mockService, mockAuth,
   mockSetConf, mockSetMe, mockSetAuthUser,
   mockDocPath, mockOnSnapshot, mockDoc,
-  mockLocalStorage, mockWindow,
+  mockLocalStorage, mockWindow, mockLocationReload, mockLocationReplace,
 } from '../testConfig';
 
 jest.mock('firebase/app', () => ({
@@ -12,29 +12,31 @@ jest.mock('firebase/app', () => ({
 const mockSignInWithEmailLink = jest
   .fn(() => 'default')
   .mockImplementationOnce(() => { throw new Error(); });
-const mockIsSignInWithEmailLink = jest
-  .fn(() => false)
-  .mockImplementationOnce(() => true);
+const mockIsSignInWithEmailLink = jest.fn(() => false);
 const mockConnectAuthEmulator = jest.fn();
 const mockOnAuthStateChanged = jest.fn();
 const mockSendSignInLinkToEmail = jest.fn();
 const mockSignInWithEmailAndPassword = jest.fn();
+const mockSendEmailVerification = jest.fn();
 const mockSignOut = jest.fn();
+const mockReload = jest.fn();
 jest.mock('firebase/auth', () => ({
   ...jest.requireActual('firebase/auth'),
-  getAuth: jest.fn(),
+  getAuth: jest.fn(() => ({})),
   connectAuthEmulator: mockConnectAuthEmulator,
   signInWithEmailLink: mockSignInWithEmailLink,
   sendSignInLinkToEmail: mockSendSignInLinkToEmail,
   signInWithEmailAndPassword: mockSignInWithEmailAndPassword,
+  sendEmailVerification: mockSendEmailVerification,
   signOut: mockSignOut,
   isSignInWithEmailLink: mockIsSignInWithEmailLink,
   onAuthStateChanged: mockOnAuthStateChanged,
+  reload: mockReload,
 }));
 
 const mockConnectFirestoreEmulator = jest.fn();
 jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
+  getFirestore: jest.fn(() => ({})),
   connectFirestoreEmulator: mockConnectFirestoreEmulator,
   doc: mockDoc,
   onSnapshot: mockOnSnapshot,
@@ -43,19 +45,20 @@ jest.mock('firebase/firestore', () => ({
 const mockConnectStorageEmulator = jest.fn();
 jest.mock('firebase/storage', () => ({
   ...jest.requireActual('firebase/storage'),
-  getStorage: jest.fn(),
+  getStorage: jest.fn(() => ({})),
   connectStorageEmulator: mockConnectStorageEmulator,
 }));
 
 const mockConnectFunctionsEmulator = jest.fn();
 jest.mock('firebase/functions', () => ({
   ...jest.requireActual('firebase/functions'),
-  getFunctions: jest.fn(),
+  getFunctions: jest.fn(() => ({})),
   connectFunctionsEmulator: mockConnectFunctionsEmulator,
 }));
 
 // work around for mocking problem.
 const {
+  updateApp,
   initializeFirebase,
   unsubUserData,
   castDoc,
@@ -64,12 +67,16 @@ const {
   listenConf,
   handelSendSignInLinkToEmail,
   handleSignInWithPassword,
+  handleSendEmailVerification,
+  handleReloadAuthUser,
   onSignOut,
   handleSignOut,
   listenMe,
   listenFirebase,
+  isSignedIn,
   localKeyEmail,
   localKeyError,
+  actionEmailVerification,
 } = require('./firebase');
 
 beforeAll(() => {
@@ -79,6 +86,22 @@ beforeAll(() => {
 afterEach(() => {
   jest.clearAllMocks();
   resetMockService();
+});
+
+describe('updateApp(navigator, window)', () => {
+  it('unregister the service worker and reload web app.', async () => {
+    const mockUnregister = jest.fn();
+    const navigator = {
+      serviceWorker: {
+        ready: {
+          unregister: mockUnregister,
+        },
+      },
+    };
+    await updateApp(navigator, mockWindow);
+    expect(mockUnregister.mock.calls.length).toEqual(1);
+    expect(mockLocationReload.mock.calls.length).toEqual(1);
+  });
 });
 
 describe('initializeFirebase(firebaseConfig)', () => {
@@ -331,6 +354,33 @@ describe('handleSignInWithPassword(service, email, password)', () => {
   });
 });
 
+describe('handleSendEmailVerification(service)', () => {
+  it('calls sendEmailVerification(auth.currentUser)', async () => {
+    const mockUser = { uid: 'id01' };
+    mockService.auth = { currentUser: mockUser };
+
+    await handleSendEmailVerification(mockService);
+
+    expect(mockSendEmailVerification.mock.calls.length).toEqual(1);
+    expect(mockSendEmailVerification.mock.calls[0][0]).toEqual(mockUser);
+  });
+});
+
+describe('handleReloadAuthUser(service)', () => {
+  it('call reload(user), call setAuthUser({}) and call setAuthUser(user)', async () => {
+    const mockAuthUser = { uid: 'id01' };
+    mockService.authUser = mockAuthUser;
+
+    await handleReloadAuthUser(mockService);
+
+    expect(mockReload.mock.calls.length).toEqual(1);
+    expect(mockReload.mock.calls[0][0]).toEqual(mockAuthUser);
+    expect(mockSetAuthUser.mock.calls.length).toEqual(2);
+    expect(mockSetAuthUser.mock.calls[0][0]).toEqual({});
+    expect(mockSetAuthUser.mock.calls[1][0]).toEqual(mockAuthUser);
+  });
+});
+
 describe('onSignOut(service)', () => {
   it('call unsubUserData(), call setMe with {}, call setAuthUser with {}.', async () => {
     const mockUnsub = jest.fn();
@@ -450,9 +500,20 @@ describe('listenMe(service, uid)', () => {
 });
 
 describe('listenFirebase(service, windows)', () => {
+  it('calls window.location.replace() '
+  + 'if has param of actionEmailVerification.', async () => {
+    mockWindow.location.href += actionEmailVerification;
+
+    await listenFirebase(mockService, mockWindow);
+
+    expect(mockLocationReplace.mock.calls.length).toEqual(1);
+    expect(mockLocationReplace.mock.calls[0][0]).toEqual(mockUrl);
+  });
+
   it('calls handleSignInWithEmailLink() '
   + 'if url is sign-in with emai link.', async () => {
     mockLocalStorage[localKeyEmail] = 'abc@example.com';
+    mockIsSignInWithEmailLink.mockImplementationOnce(() => true);
 
     await listenFirebase(mockService, mockWindow);
 
@@ -514,5 +575,24 @@ describe('listenFirebase(service, windows)', () => {
     expect(mockSetAuthUser.mock.calls.length).toEqual(3);
     expect(mockOnSnapshot.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls.length).toEqual(1);
+  });
+});
+
+describe('isSignedIn(service)', () => {
+  it('returns true with me.id and authUser.emailVerified', () => {
+    mockService.me.id = 'id01';
+    mockService.authUser.emailVerified = true;
+    expect(isSignedIn(mockService)).toBeTruthy();
+  });
+
+  it('returns true with me.id and without authUser.emailVerified', () => {
+    mockService.me.id = 'id01';
+    mockService.authUser.emailVerified = false;
+    expect(isSignedIn(mockService)).toBeFalsy();
+  });
+
+  it('returns true without me.id', () => {
+    mockService.me = {};
+    expect(isSignedIn(mockService)).toBeFalsy();
   });
 });

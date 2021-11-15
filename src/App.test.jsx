@@ -10,6 +10,7 @@ import { ServiceContext } from './api';
 import {
   resetMockService, mockService,
 } from './testConfig';
+import { i18n } from './conf';
 
 jest.mock('firebase/firestore', () => ({}));
 
@@ -33,6 +34,7 @@ describe('App', () => {
     );
 
     expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('loading config'))).toBeInTheDocument();
   });
 
   it('show LoadingPage without service.conf on "settings/:panel".', () => {
@@ -45,6 +47,7 @@ describe('App', () => {
     );
 
     expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('loading config'))).toBeInTheDocument();
   });
 
   it('show LoadingPage without service.conf on "policy".', () => {
@@ -57,9 +60,11 @@ describe('App', () => {
     );
 
     expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('loading config'))).toBeInTheDocument();
   });
 
-  it('show LoadingErrorPage if failed to load service.conf on "/".', () => {
+  it('show LoadingPage with error message '
+  + 'if failed to load service.conf on "/".', () => {
     mockService.conf = { error: true };
     render(
       <ServiceContext.Provider value={mockService}>
@@ -69,10 +74,12 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingErrorPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('failed to load config'))).toBeInTheDocument();
   });
 
-  it('show LoadingErrorPage if failed to load service.conf on "settings/:panel".', () => {
+  it('show LoadingPage with error message '
+  + 'if failed to load service.conf on "settings/:panel".', () => {
     mockService.conf = { error: true };
     render(
       <ServiceContext.Provider value={mockService}>
@@ -82,10 +89,12 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingErrorPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('failed to load config'))).toBeInTheDocument();
   });
 
-  it('show LoadingErrorPage if failed to load service.conf on "policy".', () => {
+  it('show LoadingPage with error message '
+  + 'if failed to load service.conf on "policy".', () => {
     mockService.conf = { error: true };
     render(
       <ServiceContext.Provider value={mockService}>
@@ -95,7 +104,8 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingErrorPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('failed to load config'))).toBeInTheDocument();
   });
 
   it('show SignInPage if not signed in on "/".', () => {
@@ -137,8 +147,24 @@ describe('App', () => {
     expect(screen.queryByTestId('PolicyPage')).toBeInTheDocument();
   });
 
-  it('show HomePage if signed in on "/".', () => {
+  it('show EmailVerificationPage if signed in but not email verified on "/".', () => {
     mockService.conf = { id: 'conf' };
+    mockService.authUser = { uid: 'id01', emailVerified: false };
+    mockService.me = { id: 'id01' };
+    render(
+      <ServiceContext.Provider value={mockService}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <App />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
+    );
+
+    expect(screen.queryByTestId('EmailVerificationPage')).toBeInTheDocument();
+  });
+
+  it('show HomePage if signed in and email verified on "/".', () => {
+    mockService.conf = { id: 'conf' };
+    mockService.authUser = { uid: 'id01', emailVerified: true };
     mockService.me = { id: 'id01' };
     render(
       <ServiceContext.Provider value={mockService}>

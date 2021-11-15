@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Send } from '@mui/icons-material';
-import { Button, Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
@@ -9,20 +8,22 @@ import { validateEmail, firebaseConfig } from '../conf';
 import {
   ServiceContext, handelSendSignInLinkToEmail, handleSignInWithPassword,
 } from '../api';
-import EmailField from './EmailField';
+import {
+  EmailField, PrimaryButton, SecondaryButton, SuccessMessage, ErrorMessage,
+} from '../components';
 
-const SignInWithEmailLinkPage = ({ email, onEmailChange }) => {
+const SignInWithEmailLinkPanel = ({ email, onEmailChange }) => {
   const { t } = useTranslation();
   const service = useContext(ServiceContext);
-  const [noticeMessage, setNoticeMessage] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [completion, setCompletion] = useState(false);
+  const [errorStatus, setErrorStatus] = useState(false);
 
   const onSubmit = async () => {
     try {
       await handelSendSignInLinkToEmail(service, window, email);
-      setNoticeMessage(t('send email link'));
+      setCompletion(true);
     } catch (e) {
-      setErrorMessage(t('failed to send email') + t('retry failed or call admin'));
+      setErrorStatus(true);
     }
   };
 
@@ -39,38 +40,33 @@ const SignInWithEmailLinkPage = ({ email, onEmailChange }) => {
         />
       </div>
       {validateEmail(email) && (
-      <Button
+      <PrimaryButton
         onClick={onSubmit}
-        variant="contained"
         aria-label="send"
         startIcon={<Send />}
-        sx={{ mb: '1em' }}
-      >
-        {t('Send')}
-      </Button>
+        label={t('Send')}
+      />
       )}
-      {noticeMessage && <Alert severity="success">{noticeMessage}</Alert>}
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      {completion && <SuccessMessage text={t('send email link')} />}
+      {errorStatus && <ErrorMessage text={t('failed to send email') + t('retry failed or call admin')} />}
       {firebaseConfig.apiKey === 'FIREBASE_API_KEY' && !email && (
-      <Button
+      <SecondaryButton
         onClick={() => handleSignInWithPassword(service, 'primary@example.com', 'password')}
         aria-label="test"
-        sx={{ mb: '1em' }}
-      >
-        Test
-      </Button>
+        label="Test"
+      />
       )}
     </>
   );
 };
 
-SignInWithEmailLinkPage.propTypes = {
+SignInWithEmailLinkPanel.propTypes = {
   email: PropTypes.string,
   onEmailChange: PropTypes.func.isRequired,
 };
 
-SignInWithEmailLinkPage.defaultProps = {
+SignInWithEmailLinkPanel.defaultProps = {
   email: '',
 };
 
-export default SignInWithEmailLinkPage;
+export default SignInWithEmailLinkPanel;

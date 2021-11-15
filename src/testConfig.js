@@ -11,14 +11,20 @@ export const mockSetMe = jest.fn();
 export const mockSetAuthUser = jest.fn();
 
 export const mockDocPath = 'mockDocPath';
-export const mockOnSnapshot = jest.fn(() => () => {});
+export const mockOnSnapshot = jest.fn(() => jest.fn());
 export const mockDoc = jest.fn();
 
 export const mockService = {};
 
 export const mockLocalStorage = {};
+export const mockLocationReload = jest.fn();
+export const mockLocationReplace = jest.fn();
 export const mockWindow = {
-  location: { href: mockUrl },
+  location: {
+    href: mockUrl,
+    reload: mockLocationReload,
+    replace: mockLocationReplace,
+  },
   localStorage: {
     getItem: (key) => mockLocalStorage[key],
     setItem: (key, value) => { mockLocalStorage[key] = value; },

@@ -26,10 +26,10 @@ export default [
     palette: {
       mode: 'light',
       primary: {
-        main: '#b27000',
+        main: '#b27d00',
       },
       secondary: {
-        main: '#8ab200',
+        main: '#0277bd',
       },
     },
     typography,
@@ -41,7 +41,7 @@ export default [
         main: '#ffc107',
       },
       secondary: {
-        main: '#c6ff00',
+        main: '#4fc3f7',
       },
     },
     typography,

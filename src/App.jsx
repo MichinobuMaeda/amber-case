@@ -1,33 +1,31 @@
 import React, { useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import {
-  Header, LoadingErrorPage, LoadingPage,
-  SignInPage, HomePage, SettingsPage, PolicyPage,
-} from './components';
-import { ServiceContext } from './api';
-
-const TopPage = () => {
-  const service = useContext(ServiceContext);
-  return (
-    <>
-      {!service.me.id && <SignInPage service={service} />}
-      {service.me.id && <HomePage service={service} />}
-    </>
-  );
-};
+  Header, LoadingPage, SignInPage, EmailVerificationPage,
+  HomePage, SettingsPage, PolicyPage,
+} from './views';
+import { ServiceContext, isSignedIn } from './api';
 
 const App = () => {
   const service = useContext(ServiceContext);
   return (
     <>
       <Header />
-      {!service.conf.id && !service.conf.error && (<LoadingPage />)}
-      {!service.conf.id && service.conf.error && (<LoadingErrorPage />)}
+      {!service.conf.id && (<LoadingPage error={service.conf.error} />)}
       {service.conf.id && (
       <Routes>
-        <Route path="/" element={<TopPage />} />
-        <Route path="settings/:panel" element={<SettingsPage service={service} />} />
-        <Route path="policy" element={<PolicyPage service={service} />} />
+        <Route
+          path="/"
+          element={(
+            <>
+              {!service.me.id && <SignInPage />}
+              {service.me.id && !isSignedIn(service) && <EmailVerificationPage />}
+              {isSignedIn(service) && <HomePage />}
+            </>
+          )}
+        />
+        <Route path="settings/:panel" element={<SettingsPage />} />
+        <Route path="policy" element={<PolicyPage />} />
       </Routes>
       )}
     </>

@@ -7,9 +7,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { ServiceContext } from '../api';
 import { i18n } from '../conf';
-import { Header } from '.';
+import { mockService } from '../testConfig';
 
 jest.mock('firebase/firestore', () => ({}));
 
@@ -21,6 +20,16 @@ jest.mock('react-router-dom', () => ({
   useNavigationType: jest.fn(() => mockNavigationType),
   useNavigate: () => mockUseNavigate,
 }));
+
+const mockUpdateApp = jest.fn();
+jest.mock('../api', () => ({
+  ...jest.requireActual('../api'),
+  updateApp: mockUpdateApp,
+}));
+
+// work around for mocking problem.
+const { ServiceContext } = require('../api');
+const { Header } = require('.');
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -158,5 +167,38 @@ describe('Header', () => {
     expect(mockUseNavigate.mock.calls.length).toEqual(1);
     expect(mockUseNavigate.mock.calls[0].length).toEqual(1);
     expect(mockUseNavigate.mock.calls[0][0]).toEqual('/settings/themeMode');
+  });
+
+  it('do not shows button appUpdate if this app is latest version.', () => {
+    mockService.conf = {
+      id: 'conf',
+      version: mockService.version,
+    };
+    render(
+      <ServiceContext.Provider value={mockService}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Header />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
+    );
+    expect(screen.queryByRole('button', { name: 'updateApp' })).toBeNull();
+  });
+
+  it('shows button appUpdate if this app is out of date.', () => {
+    mockService.conf = {
+      id: 'conf',
+      version: 'x.x.x',
+    };
+    render(
+      <ServiceContext.Provider value={mockService}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Header />
+        </MemoryRouter>
+      </ServiceContext.Provider>,
+    );
+    expect(screen.queryByRole('button', { name: 'updateApp' })).toBeDefined();
+
+    userEvent.click(screen.queryByRole('button', { name: 'updateApp' }));
+    expect(mockUpdateApp.mock.calls.length).toEqual(1);
   });
 });

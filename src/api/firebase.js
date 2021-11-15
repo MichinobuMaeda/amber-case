@@ -1,9 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getAuth, connectAuthEmulator,
+  getAuth, connectAuthEmulator, reload,
   isSignInWithEmailLink, onAuthStateChanged,
   sendSignInLinkToEmail, signInWithEmailAndPassword,
-  signInWithEmailLink, signOut,
+  signInWithEmailLink, sendEmailVerification, signOut,
 } from 'firebase/auth';
 import {
   getFirestore, connectFirestoreEmulator,
@@ -21,6 +21,8 @@ export const initializeFirebase = (firebaseConfig) => {
   const db = getFirestore(firebaseApp);
   const storage = getStorage(firebaseApp);
   const functions = getFunctions(firebaseApp);
+
+  auth.languageCode = 'ja';
 
   if (firebaseConfig.apiKey === 'FIREBASE_API_KEY') {
     connectAuthEmulator(auth, 'http://localhost:9099');
@@ -72,6 +74,12 @@ export const castDoc = (snapshot) => {
   return {};
 };
 
+export const updateApp = async (navigator, window) => {
+  const registration = await navigator.serviceWorker.ready;
+  await registration.unregister();
+  window.location.reload();
+};
+
 export const handleSignInWithEmailLink = async ({ auth }, window) => {
   const email = window.localStorage.getItem(localKeyEmail);
   window.localStorage.removeItem(localKeyEmail);
@@ -100,8 +108,6 @@ export const listenConf = (service) => {
   const { db, setConf } = service;
   if (!service.unsubConf) {
     // eslint-disable-next-line no-param-reassign
-    // service.unsubConf = db.collection('service').doc('conf').onSnapshot(
-    // eslint-disable-next-line no-param-reassign
     service.unsubConf = onSnapshot(
       doc(db, 'service', 'conf'),
       (snapshot) => {
@@ -123,6 +129,21 @@ export const handleSignInWithPassword = async (service, email, password) => {
   await signInWithEmailAndPassword(service.auth, email, password);
 };
 
+export const actionEmailVerification = '?action=emailverification';
+
+export const handleSendEmailVerification = async (service) => {
+  await sendEmailVerification(service.auth.currentUser, {
+    url: `${window.location.href}${actionEmailVerification}`,
+    handleCodeInApp: true,
+  });
+};
+
+export const handleReloadAuthUser = async (service) => {
+  await reload(service.authUser);
+  service.setAuthUser({});
+  service.setAuthUser(service.authUser);
+};
+
 export const onSignOut = (service) => {
   unsubUserData(service);
   service.setMe({});
@@ -139,8 +160,6 @@ export const listenMe = (service, uid) => {
   // const meRef = db.collection('accounts').doc(uid);
   const meRef = doc(db, 'accounts', uid);
   if (!service.unsub[meRef.path]) {
-    // eslint-disable-next-line no-param-reassign
-    // service.unsub[meRef.path] = meRef.onSnapshot(
     // eslint-disable-next-line no-param-reassign
     service.unsub[meRef.path] = onSnapshot(
       meRef,
@@ -162,7 +181,11 @@ export const listenMe = (service, uid) => {
 };
 
 export const listenFirebase = async (service, window) => {
-  if (isSignInWithEmailLink(service.auth, window.location.href)) {
+  if (window.location.href.includes(actionEmailVerification)) {
+    window.location.replace(
+      window.location.href.replace(actionEmailVerification, ''),
+    );
+  } else if (isSignInWithEmailLink(service.auth, window.location.href)) {
     await handleSignInWithEmailLink(service, window);
   } else {
     restoreAuthError(service, window);
@@ -181,3 +204,5 @@ export const listenFirebase = async (service, window) => {
     });
   }
 };
+
+export const isSignedIn = (service) => service.me.id && service.authUser.emailVerified;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Policy } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import PageTitle from './PageTitle';
 import '../conf/i18n';
+import { PageTitle } from '../components';
 
 const PolicyPage = () => {
   const { t } = useTranslation();

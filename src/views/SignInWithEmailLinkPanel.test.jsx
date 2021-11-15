@@ -17,27 +17,26 @@ const mockHandelSendSignInLinkToEmail = jest
   .mockImplementationOnce(() => { throw new Error(); });
 const mockHandleSignInWithPassword = jest.fn();
 jest.mock('../api', () => ({
-  __esModule: true,
   ...jest.requireActual('../api'),
   handelSendSignInLinkToEmail: mockHandelSendSignInLinkToEmail,
   handleSignInWithPassword: mockHandleSignInWithPassword,
 }));
 
 // work around for mocking problem.
-const { SignInWithEmailLinkPage } = require('.');
+const { SignInWithEmailLinkPanel } = require('.');
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('SignInWithEmailLinkPage', () => {
+describe('SignInWithEmailLinkPanel', () => {
   it('shows button send for valid email.', async () => {
     const email = 'test01@example.com';
     const onEmailChange = () => {};
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithEmailLinkPage email={email} onEmailChange={onEmailChange} />
+        <SignInWithEmailLinkPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: 'send' })).toBeDefined();
@@ -54,7 +53,7 @@ describe('SignInWithEmailLinkPage', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithEmailLinkPage email={email} onEmailChange={onEmailChange} />
+        <SignInWithEmailLinkPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: 'send' })).toBeDefined();
@@ -71,7 +70,7 @@ describe('SignInWithEmailLinkPage', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithEmailLinkPage email={email} onEmailChange={onEmailChange} />
+        <SignInWithEmailLinkPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: 'send' })).toBeNull();
@@ -83,7 +82,7 @@ describe('SignInWithEmailLinkPage', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithEmailLinkPage email={email} onEmailChange={onEmailChange} />
+        <SignInWithEmailLinkPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: 'send' })).toBeNull();
@@ -97,7 +96,7 @@ describe('SignInWithEmailLinkPage', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithEmailLinkPage email={email} onEmailChange={onEmailChange} />
+        <SignInWithEmailLinkPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: 'test' })).toBeDefined();
@@ -116,7 +115,7 @@ describe('SignInWithEmailLinkPage', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithEmailLinkPage email={email} onEmailChange={onEmailChange} />
+        <SignInWithEmailLinkPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: 'test' })).toBeNull();
@@ -132,7 +131,7 @@ describe('SignInWithEmailLinkPage', () => {
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-        <SignInWithEmailLinkPage email={email} onEmailChange={onEmailChange} />
+        <SignInWithEmailLinkPanel email={email} onEmailChange={onEmailChange} />
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: 'test' })).toBeNull();

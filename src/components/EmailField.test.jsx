@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import EmailField from './EmailField';
+import { EmailField } from '.';
 
 describe('EmailField', () => {
   it('shows helper text if the value is required but the value is empty.', () => {
