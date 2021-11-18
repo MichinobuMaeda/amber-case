@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 const supertest = require('supertest');
 const express = require('express');
 const axios = require('axios');

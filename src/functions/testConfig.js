@@ -1,10 +1,6 @@
-// const admin = require('firebase-admin');
 const { createHash } = require('crypto');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const { nanoid } = require('nanoid');
-
-// const firebase = admin.initializeApp();
-// const db = admin.firestore();
-// const auth = admin.auth();
 
 const testInvitation = (
   code,

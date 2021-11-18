@@ -5,10 +5,10 @@
   "scripts": {
     "build": "react-scripts build",
     "deploy": "firebase deploy",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "functions:config:set": "firebase functions:config:set",
     "test:setup": "curl http://localhost:5001/amber-case/asia-northeast1/api/setup",
-    "test": "jest -w 1 --coverage",
+    "test": "react-scripts test -w 1 --coverage --watchAll=false",
     "start": "firebase emulators:exec --only auth,functions,firestore,storage --ui 'yarn test:setup && react-scripts start'",
     "emulate": "yarn build && firebase emulators:start"
   },
@@ -42,10 +42,10 @@
     "workbox-streams": "^5.1.3"
   },
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.16.0",
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^0.24.0",
     "eslint": "^7.2.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.22.1",
@@ -55,7 +55,8 @@
     "eslint-plugin-react-hooks": "^4",
     "express": "^4.17.1",
     "firebase-tools": "^9.22.0",
-    "jest-transform-stub": "^2.0.0"
+    "nanoid": "^3.1.30",
+    "supertest": "^6.1.6"
   },
   "browserslist": {
     "production": [
@@ -70,25 +71,14 @@
     ]
   },
   "jest": {
-    "testMatch": [
-      "**/*.test.[jt]s?(x)"
-    ],
-    "transform": {
-      ".+\\.jsx?$": "babel-jest",
-      ".+\\.(svg|css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "jest-transform-stub"
-    },
     "coveragePathIgnorePatterns": [
       "index.js",
-      "testConfig.js"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react"
+      "index.jsx",
+      "testConfig.js",
+      "reportWebVitals.js",
+      "service-worker.js",
+      "serviceWorkerRegistration.js"
     ],
-    "plugins": [
-      "@babel/plugin-transform-runtime"
-    ]
+    "resetMocks": false
   }
 }

@@ -58,10 +58,12 @@ $ firebase init storage
 
 $ firebase init functions
 ? What language would you like to use to write Cloud Functions? JavaScript
-? Do you want to use ESLint to catch probable bugs and enforce style? Yes
+? Do you want to use ESLint to catch probable bugs and enforce style? No
 ? Do you want to install dependencies with npm now? No
 
-$ yarn --cwd functions install
+$ mv functions src/
+
+$ yarn --cwd src/functions install
 
 $ firebase init hosting
 ? What do you want to use as your public directory? build
