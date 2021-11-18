@@ -33,14 +33,22 @@ const updateData = async (firebase, conf) => {
   const db = firebase.firestore();
   const dataVersion = conf.get('dataVersion') || 0;
 
-  if (dataVersion < 1) {
-    const accounts = await db.collection('accounts').get();
-    await Promise.all(accounts.docs.map(async (doc) => {
-      await doc.ref.update({
-        themeMode: doc.get('themeMode') || null,
-      });
-    }));
+  if (dataVersion === 1) {
+    return false;
   }
+
+  // for data version 0
+  const accounts = await db.collection('accounts').get();
+  await Promise.all(accounts.docs.map(async (doc) => {
+    await doc.ref.update({
+      themeMode: doc.get('themeMode') || null,
+    });
+  }));
+
+  // for data version 1
+  // for data version 2
+  //  ... ...
+  // for data version n
 
   await conf.ref.update({
     dataVersion: 1,

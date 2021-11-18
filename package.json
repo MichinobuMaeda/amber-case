@@ -5,18 +5,27 @@
   "scripts": {
     "build": "react-scripts build",
     "deploy": "firebase deploy",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "functions:config:set": "firebase functions:config:set",
-    "test:setup": "curl -X POST http://localhost:5001/amber-case/asia-northeast1/api/setup -H \"Content-Type: application/x-www-form-urlencoded\" -d \"name=Primary%20User&email=primary@example.com&password=password&url=http%3A%2F%2Flocalhost%3A3000%2F\"",
-    "test": "firebase emulators:exec --only auth,functions,firestore,storage 'jest -w 1 --coverage'",
+    "test:setup": "curl http://localhost:5001/amber-case/asia-northeast1/api/setup",
+    "test": "react-scripts test -w 1 --coverage --watchAll=false",
     "start": "firebase emulators:exec --only auth,functions,firestore,storage --ui 'yarn test:setup && react-scripts start'",
     "emulate": "yarn build && firebase emulators:start"
   },
   "dependencies": {
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
+    "@emotion/react": "^11.5.0",
+    "@emotion/styled": "^11.3.0",
+    "@material-ui/core": "^4.12.3",
+    "@mui/icons-material": "^5.1.0",
+    "@mui/material": "^5.1.0",
+    "firebase": "^9.4.1",
+    "history": "5",
+    "i18next": "^21.4.2",
+    "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-i18next": "^11.14.0",
+    "react-router-dom": "6",
     "react-scripts": "4.0.3",
     "web-vitals": "^0.2.4",
     "workbox-background-sync": "^5.1.3",
@@ -33,8 +42,10 @@
     "workbox-streams": "^5.1.3"
   },
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.16.0",
     "@testing-library/jest-dom": "^5.15.0",
+    "@testing-library/react": "^12.1.2",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^0.24.0",
     "eslint": "^7.2.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.22.1",
@@ -44,7 +55,8 @@
     "eslint-plugin-react-hooks": "^4",
     "express": "^4.17.1",
     "firebase-tools": "^9.22.0",
-    "jest-transform-stub": "^2.0.0"
+    "nanoid": "^3.1.30",
+    "supertest": "^6.1.6"
   },
   "browserslist": {
     "production": [
@@ -59,21 +71,14 @@
     ]
   },
   "jest": {
-    "testMatch": [
-      "**/*.test.[jt]s?(x)"
+    "coveragePathIgnorePatterns": [
+      "index.js",
+      "index.jsx",
+      "testConfig.js",
+      "reportWebVitals.js",
+      "service-worker.js",
+      "serviceWorkerRegistration.js"
     ],
-    "transform": {
-      ".+\\.jsx?$": "babel-jest",
-      ".+\\.(svg|css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "jest-transform-stub"
-    }
-  },
-  "babel": {
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react"
-    ],
-    "plugins": [
-      "@babel/plugin-transform-runtime"
-    ]
+    "resetMocks": false
   }
 }

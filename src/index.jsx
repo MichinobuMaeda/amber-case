@@ -1,23 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import { useMediaQuery } from '@material-ui/core';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline, Container } from '@mui/material';
+import { BrowserRouter } from 'react-router-dom';
+
+import { firebaseConfig } from './conf';
+import {
+  initializeFirebase, listenFirebase,
+  ServiceContext, selectThemeMode,
+} from './api';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-import reportWebVitals from './reportWebVitals';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root'),
-);
+const {
+  auth, db, storage, functions,
+} = initializeFirebase(firebaseConfig);
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://cra.link/PWA
-serviceWorkerRegistration.unregister();
+const AppBase = () => {
+  const service = useContext(ServiceContext);
+  service.auth = auth;
+  service.db = db;
+  service.storage = storage;
+  service.functions = functions;
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  const [themeMode, setThemeMode] = useState('light');
+  service.themeMode = themeMode;
+  service.setThemeMode = setThemeMode;
+  service.preferColorScheme = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+
+  const [conf, setConf] = useState({});
+  service.conf = conf;
+  service.setConf = setConf;
+
+  const [authUser, setAuthUser] = useState({});
+  service.authUser = authUser;
+  service.setAuthUser = setAuthUser;
+
+  const [me, setMe] = useState({});
+  service.me = me;
+  service.setMe = setMe;
+
+  useEffect(() => {
+    listenFirebase(service, window);
+  }, []);
+
+  return (
+    <React.StrictMode>
+      <ThemeProvider theme={createTheme(selectThemeMode(service))}>
+        <CssBaseline />
+        <Container>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Container>
+      </ThemeProvider>
+    </React.StrictMode>
+  );
+};
+
+ReactDOM.render(<AppBase />, document.getElementById('root'));
+
+serviceWorkerRegistration.register();

@@ -1,0 +1,7 @@
+{
+  "initial": {
+    "email": "primary@example.com",
+    "password": "password",
+    "url": "http://localhost:3000/"
+  }
+}

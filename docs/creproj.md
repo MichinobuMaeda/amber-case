@@ -58,10 +58,12 @@ $ firebase init storage
 
 $ firebase init functions
 ? What language would you like to use to write Cloud Functions? JavaScript
-? Do you want to use ESLint to catch probable bugs and enforce style? Yes
+? Do you want to use ESLint to catch probable bugs and enforce style? No
 ? Do you want to install dependencies with npm now? No
 
-$ yarn --cwd functions install
+$ mv functions src/
+
+$ yarn --cwd src/functions install
 
 $ firebase init hosting
 ? What do you want to use as your public directory? build
@@ -107,6 +109,9 @@ $ firebase login:ci
 $ gh secret set FIREBASE_TOKEN_AMBER_CASE
 ? Paste your secret ***********
 
+$ gh secret set FIREBASE_API_KEY_AMBER_CASE
+? Paste your secret ***********
+
 $ gh secret set INITIAL_EMAIL
 ? Paste your secret ***********
 
@@ -117,9 +122,20 @@ $ gh secret set INITIAL_URL
 ? Paste your secret https://amber-case.web.app/
 
 $ gh secret list
+FIREBASE_API_KEY_AMBER_CASE          Updated 2021-11-10
 FIREBASE_SERVICE_ACCOUNT_AMBER_CASE  Updated 2021-11-09
 FIREBASE_TOKEN_AMBER_CASE            Updated 2021-11-09
-INITIAL_EMAIL                        Updated 2021-11-09
-INITIAL_PASSWORD                     Updated 2021-11-09
+INITIAL_EMAIL                        Updated 2021-11-10
+INITIAL_PASSWORD                     Updated 2021-11-10
 INITIAL_URL                          Updated 2021-11-10
+```
+
+Reset initial email and password after first deployment.
+
+```
+$ gh secret set INITIAL_EMAIL
+? Paste your secret primary@example.com
+
+$ gh secret set INITIAL_PASSWORD
+? Paste your secret password
 ```

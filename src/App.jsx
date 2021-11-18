@@ -1,28 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import {
+  Header, LoadingPage, SignInPage, EmailVerificationPage,
+  HomePage, SettingsPage, PolicyPage,
+} from './views';
+import { ServiceContext, isSignedIn } from './api';
 
-function App() {
+const App = () => {
+  const service = useContext(ServiceContext);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit
-          <code>src/App.js</code>
-          and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header />
+      {!service.conf.id && (<LoadingPage error={service.conf.error} />)}
+      {service.conf.id && (
+      <Routes>
+        <Route
+          path="/"
+          element={(
+            <>
+              {!service.me.id && <SignInPage />}
+              {service.me.id && !isSignedIn(service) && <EmailVerificationPage />}
+              {isSignedIn(service) && <HomePage />}
+            </>
+          )}
+        />
+        <Route path="settings/:panel" element={<SettingsPage />} />
+        <Route path="policy" element={<PolicyPage />} />
+      </Routes>
+      )}
+    </>
   );
-}
+};
 
 export default App;
