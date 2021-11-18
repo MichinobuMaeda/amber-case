@@ -1,108 +1,75 @@
-const { firebase, db } = require('./testConfig');
+const {
+  mockFirebase,
+} = require('./testConfig');
 const {
   valid,
   admin,
 } = require('./guard');
 
-beforeEach(async () => {
-  const ts = new Date();
-  await db.collection('accounts').doc('admin').set({
-    name: 'Admin',
-    valid: true,
-    admin: true,
-    tester: true,
-    createdAt: ts,
-    updatedAt: ts,
-    deletedAt: null,
-  });
-  await db.collection('accounts').doc('account01').set({
-    name: 'Admin',
-    valid: true,
-    admin: false,
-    tester: false,
-    createdAt: ts,
-    updatedAt: ts,
-    deletedAt: null,
-  });
-  await db.collection('accounts').doc('invalid').set({
-    name: 'Admin',
-    valid: false,
-    admin: true,
-    tester: true,
-    createdAt: ts,
-    updatedAt: ts,
-    deletedAt: null,
-  });
-  await db.collection('accounts').doc('deleted').set({
-    name: 'Admin',
-    valid: true,
-    admin: true,
-    tester: true,
-    createdAt: ts,
-    updatedAt: ts,
-    deletedAt: ts,
-  });
-});
-
 afterEach(async () => {
-  await db.collection('accounts').doc('admin').delete();
-  await db.collection('accounts').doc('account01').delete();
-  await db.collection('accounts').doc('invalid').delete();
-  await db.collection('accounts').doc('deleted').delete();
-});
-
-afterAll(async () => {
-  await firebase.delete();
+  jest.clearAllMocks();
 });
 
 describe('valid()', () => {
   it('rejects undefined uid.', async () => {
-    await expect(valid(firebase))
+    await expect(valid(mockFirebase))
       .rejects.toThrow('Param uid is missing.');
   });
+
   it('rejects uid without doc.', async () => {
-    await expect(valid(firebase, 'dummy'))
+    await expect(valid(mockFirebase, 'dummy'))
       .rejects.toThrow('User: dummy is not exists.');
   });
+
   it('rejects invalid account.', async () => {
-    await expect(valid(firebase, 'invalid'))
+    await expect(valid(mockFirebase, 'invalid'))
       .rejects.toThrow('User: invalid is not valid.');
   });
+
   it('rejects deleted account.', async () => {
-    await expect(valid(firebase, 'deleted'))
+    await expect(valid(mockFirebase, 'deleted'))
       .rejects.toThrow('User: deleted has deleted.');
   });
+
   it('returns valid account.', async () => {
-    const account01 = await valid(firebase, 'account01');
-    expect(account01.id).toEqual('account01');
-    const adminAccount = await valid(firebase, 'admin');
-    expect(adminAccount.id).toEqual('admin');
+    const ret = await valid(mockFirebase, 'account01');
+    expect(ret.id).toEqual('account01');
+  });
+
+  it('returns valid admin account.', async () => {
+    const ret = await valid(mockFirebase, 'admin');
+    expect(ret.id).toEqual('admin');
   });
 });
 
 describe('admin()', () => {
   it('rejects undefined uid.', async () => {
-    await expect(admin(firebase))
+    await expect(admin(mockFirebase))
       .rejects.toThrow('Param uid is missing.');
   });
+
   it('rejects uid without doc.', async () => {
-    await expect(admin(firebase, 'dummy'))
+    await expect(admin(mockFirebase, 'dummy'))
       .rejects.toThrow('User: dummy is not exists.');
   });
+
   it('rejects invalid account.', async () => {
-    await expect(admin(firebase, 'invalid'))
+    await expect(admin(mockFirebase, 'invalid'))
       .rejects.toThrow('User: invalid is not valid.');
   });
+
   it('rejects deleted account.', async () => {
-    await expect(admin(firebase, 'deleted'))
+    await expect(admin(mockFirebase, 'deleted'))
       .rejects.toThrow('User: deleted has deleted.');
   });
+
   it('rejects account without admin priv.', async () => {
-    await expect(admin(firebase, 'account01'))
+    await expect(admin(mockFirebase, 'account01'))
       .rejects.toThrow('User: account01 is not admin.');
   });
+
   it('returns valid account with admin priv.', async () => {
-    const account = await admin(firebase, 'admin');
-    expect(account.id).toEqual('admin');
+    const ret = await admin(mockFirebase, 'admin');
+    expect(ret.id).toEqual('admin');
   });
 });

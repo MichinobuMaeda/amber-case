@@ -1,5 +1,17 @@
-const { createHash } = require('crypto');
-const { firebase, db, auth } = require('./testConfig');
+const {
+  testInvitation,
+  mockFirebase,
+  mockInvitationCode,
+  mockInvitationCodeNoHost,
+  mockInvitationCodeNoTime,
+  mockInvitationCodeExpired,
+  mockDocAdd,
+  mockDocSet,
+  mockDocUpdate,
+  mockConfData,
+  mockCreateUser,
+  mockUpdateUser,
+} = require('./testConfig');
 const {
   createUser,
   setUserName,
@@ -9,351 +21,266 @@ const {
   getToken,
 } = require('./users');
 
-const confRef = db.collection('service').doc('conf');
-const ts = new Date('2020-01-01T00:00:00.000Z');
-const seed = '0123456789';
-const invitationExpirationTime = 3 * 24 * 3600 * 1000;
-
-beforeEach(async () => {
-  await confRef.set({
-    url: 'http://example.com/version.json',
-    seed,
-    invitationExpirationTime,
-    version: '1.0.0',
-    createdAt: ts,
-    updatedAt: ts,
-  });
-});
-
 afterEach(async () => {
-  await confRef.delete();
-});
-
-afterAll(async () => {
-  await firebase.delete();
+  jest.clearAllMocks();
 });
 
 describe('createUser()', () => {
+  const uid = 'id01';
+  const name = 'User 01';
+  const group = 'group01';
+  const email = 'account01@example.com';
+  const password = "account01's password";
+
   it('rejects name with length 0.', async () => {
-    await expect(createUser(firebase, '', false, false))
+    await expect(createUser(mockFirebase, '', false, false))
       .rejects.toThrow('Param name is missing.');
   });
 
   it('rejects email with length 0.', async () => {
     await expect(createUser(
-      firebase, 'name', false, false, 'group', '',
+      mockFirebase, 'name', false, false, 'group', '',
     )).rejects.toThrow('Param email is empty.');
   });
 
   it('rejects password with length 0.', async () => {
     await expect(createUser(
-      firebase, 'name', false, false, 'group', 'email', '',
+      mockFirebase, 'name', false, false, 'group', 'email', '',
     )).rejects.toThrow('Param password is empty.');
   });
 
   it('creates account with given properties,'
-      + ' and returns uid.', async () => {
-    const name = 'User 01';
+  + ' and returns uid.', async () => {
+    mockDocAdd.mockImplementationOnce(() => ({ id: uid }));
 
-    const uid = await createUser(firebase, name, false, false);
+    const ret = await createUser(
+      mockFirebase, name, false, false,
+    );
 
-    expect(uid).toBeDefined();
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('name')).toEqual(name);
-    expect(doc.get('admin')).toBeFalsy();
-    expect(doc.get('tester')).toBeFalsy();
-    expect(doc.get('valid')).toBeTruthy();
-    const account = await auth.getUser(uid);
-    expect(account.displayName).toEqual(name);
-    expect(account.email).not.toBeDefined();
-    expect(account.passwordHash).not.toBeDefined();
+    expect(ret).toEqual(uid);
+    expect(mockDocAdd.mock.calls.length).toEqual(1);
+    expect(mockDocAdd.mock.calls[0][0]).toEqual('accounts');
+    const addData = mockDocAdd.mock.calls[0][1];
+    expect(addData.name).toEqual(name);
+    expect(addData.admin).toBeFalsy();
+    expect(addData.tester).toBeFalsy();
+    expect(addData.valid).toBeTruthy();
+    expect(addData.themeMode).toBeNull();
+    expect(addData.invitation).toBeNull();
+    expect(addData.invitedBy).toBeNull();
+    expect(addData.invitedAt).toBeNull();
+    expect(addData.createdAt).toBeDefined();
+    expect(addData.updatedAt).toBeDefined();
+    expect(addData.deletedAt).toBeDefined();
 
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    expect(mockDocSet.mock.calls.length).toEqual(1);
+    expect(mockDocSet.mock.calls[0][0]).toEqual('people');
+    expect(mockDocSet.mock.calls[0][1]).toEqual(uid);
+    const setData = mockDocSet.mock.calls[0][2];
+    expect(setData.groups).toEqual([]);
+    expect(setData.createdAt).toBeDefined();
+    expect(setData.updatedAt).toBeDefined();
+    expect(setData.deletedAt).toBeFalsy();
+
+    expect(mockCreateUser.mock.calls.length).toEqual(1);
+    expect(mockCreateUser.mock.calls[0][0]).toEqual({
+      uid,
+      displayName: name,
+    });
   });
+
   it('creates account with given properties inclueds group,'
-      + ' and returns uid.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
+  + ' and returns uid.', async () => {
+    mockDocAdd.mockImplementationOnce(() => ({ id: uid }));
 
-    const uid = await createUser(firebase, name, true, false, group);
+    await createUser(
+      mockFirebase, name, false, false, group,
+    );
 
-    expect(uid).toBeDefined();
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('name')).toEqual(name);
-    expect(doc.get('admin')).toBeTruthy();
-    expect(doc.get('tester')).toBeFalsy();
-    expect(doc.get('valid')).toBeTruthy();
-    const account = await auth.getUser(uid);
-    expect(account.displayName).toEqual(name);
-    expect(account.email).not.toBeDefined();
-    expect(account.passwordHash).not.toBeDefined();
+    expect(mockDocAdd.mock.calls.length).toEqual(1);
 
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    expect(mockDocSet.mock.calls.length).toEqual(1);
+    const setData = mockDocSet.mock.calls[0][2];
+    expect(setData.groups).toEqual([group]);
+    expect(setData.createdAt).toBeDefined();
+    expect(setData.updatedAt).toBeDefined();
+    expect(setData.deletedAt).toBeFalsy();
+
+    expect(mockCreateUser.mock.calls.length).toEqual(1);
+    expect(mockCreateUser.mock.calls[0][0]).toEqual({
+      uid,
+      displayName: name,
+    });
   });
+
   it('creates account with given properties inclueds email,'
-      + ' and returns uid.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const email = 'account01@example.com';
+  + ' and returns uid.', async () => {
+    mockDocAdd.mockImplementationOnce(() => ({ id: uid }));
 
-    const uid = await createUser(
-      firebase, name, false, true, group, email,
+    await createUser(
+      mockFirebase, name, false, false, group, email,
     );
 
-    expect(uid).toBeDefined();
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('name')).toEqual(name);
-    expect(doc.get('admin')).toBeFalsy();
-    expect(doc.get('tester')).toBeTruthy();
-    expect(doc.get('valid')).toBeTruthy();
-    const account = await auth.getUser(uid);
-    expect(account.displayName).toEqual(name);
-    expect(account.email).toEqual(email);
-    expect(account.passwordHash).not.toBeDefined();
+    expect(mockDocAdd.mock.calls.length).toEqual(1);
+    expect(mockDocSet.mock.calls.length).toEqual(1);
 
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    expect(mockCreateUser.mock.calls.length).toEqual(1);
+    expect(mockCreateUser.mock.calls[0][0]).toEqual({
+      uid,
+      displayName: name,
+      email,
+    });
   });
-  it('creates account with given properties inclueds password,'
-      + ' and returns uid.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const email = 'account01@example.com';
-    const password = "account01's password";
 
-    const uid = await createUser(
-      firebase, name, false, true, group, email, password,
+  it('creates account with given properties inclueds password,'
+  + ' and returns uid.', async () => {
+    mockDocAdd.mockImplementationOnce(() => ({ id: uid }));
+
+    await createUser(
+      mockFirebase, name, false, false, group, email, password,
     );
 
-    expect(uid).toBeDefined();
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('name')).toEqual(name);
-    expect(doc.get('admin')).toBeFalsy();
-    expect(doc.get('tester')).toBeTruthy();
-    expect(doc.get('valid')).toBeTruthy();
-    const account = await auth.getUser(uid);
-    expect(account.displayName).toEqual(name);
-    expect(account.email).toEqual(email);
-    expect(account.passwordHash).toBeDefined();
+    expect(mockDocAdd.mock.calls.length).toEqual(1);
+    expect(mockDocSet.mock.calls.length).toEqual(1);
 
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    expect(mockCreateUser.mock.calls.length).toEqual(1);
+    expect(mockCreateUser.mock.calls[0][0]).toEqual({
+      uid,
+      displayName: name,
+      email,
+      password,
+    });
   });
 });
 
 describe('setUserName()', () => {
+  const uid = 'id01';
+  const name = 'User 01';
+
   it('rejects name with length 0.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const uid = await createUser(firebase, name, true, false, group);
-
-    await expect(setUserName(firebase, uid, ''))
+    await expect(setUserName(mockFirebase, uid, ''))
       .rejects.toThrow('Param name is missing.');
-
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
   });
+
   it('updates name of doc and auth entry.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const uid = await createUser(firebase, name, true, false, group);
-    const newName = 'New name';
+    await setUserName(mockFirebase, uid, name);
 
-    await setUserName(firebase, uid, newName);
+    expect(mockUpdateUser.mock.calls.length).toEqual(1);
+    expect(mockUpdateUser.mock.calls[0][0]).toEqual(uid);
+    expect(mockUpdateUser.mock.calls[0][1]).toEqual({ displayName: name });
 
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('name')).toEqual(newName);
-    expect(doc.get('updatedAt')).not.toEqual(doc.get('createdAt'));
-    const account = await auth.getUser(uid);
-    expect(account.displayName).toEqual(newName);
-
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    expect(mockDocUpdate.mock.calls.length).toEqual(1);
+    expect(mockDocUpdate.mock.calls[0][0]).toEqual('accounts');
+    expect(mockDocUpdate.mock.calls[0][1]).toEqual(uid);
+    const updateData = mockDocUpdate.mock.calls[0][2];
+    expect(updateData.name).toEqual(name);
+    expect(updateData.updatedAt).toBeDefined();
   });
 });
 
 describe('setUserEmail()', () => {
+  const uid = 'id01';
+  const email = 'account01@example.com';
+
   it('rejects email with length 0.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const email = 'account01@example.com';
-    const uid = await createUser(firebase, name, true, false, group, email);
-
-    await expect(setUserEmail(firebase, uid, ''))
+    await expect(setUserEmail(mockFirebase, uid, ''))
       .rejects.toThrow('Param email is empty.');
-
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
   });
+
   it('updates email of auth entry.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const email = 'account01@example.com';
-    const uid = await createUser(firebase, name, true, false, group, email);
-    const newEmail = 'new@example.com';
+    await setUserEmail(mockFirebase, uid, email);
 
-    await setUserEmail(firebase, uid, newEmail);
-
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('updatedAt')).toEqual(doc.get('createdAt'));
-    const account = await auth.getUser(uid);
-    await db.collection('accounts').doc(uid).delete();
-    expect(account.email).toEqual(newEmail);
-
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    expect(mockUpdateUser.mock.calls.length).toEqual(1);
+    expect(mockUpdateUser.mock.calls[0][0]).toEqual(uid);
+    expect(mockUpdateUser.mock.calls[0][1]).toEqual({ email });
   });
 });
 
 describe('setUserPassword()', () => {
+  const uid = 'id01';
+  const password = 'account01@example.com';
+
   it('rejects password with length 0.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const email = 'account01@example.com';
-    const uid = await createUser(firebase, name, true, false, group, email);
-
-    await expect(setUserPassword(firebase, uid, ''))
+    await expect(setUserPassword(mockFirebase, uid, ''))
       .rejects.toThrow('Param password is empty.');
-
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
   });
+
   it('updates password of auth entry.', async () => {
-    const name = 'User 01';
-    const group = 'group01';
-    const email = 'account01@example.com';
-    const uid = await createUser(firebase, name, true, false, group, email);
-    const password = 'new password';
+    await setUserPassword(mockFirebase, uid, password);
 
-    await setUserPassword(firebase, uid, password);
-
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('updatedAt')).toEqual(doc.get('createdAt'));
-    const account = await auth.getUser(uid);
-    await db.collection('accounts').doc(uid).delete();
-    expect(account.passwordHash).toBeDefined();
-
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    expect(mockUpdateUser.mock.calls.length).toEqual(1);
+    expect(mockUpdateUser.mock.calls[0][0]).toEqual(uid);
+    expect(mockUpdateUser.mock.calls[0][1]).toEqual({ password });
   });
 });
 
 describe('invite()', () => {
+  const caller = { id: 'admin' };
+  const uid = 'id01';
+
   it('creates invitation code and'
-      + ' save hashed code, host account id and timestamp,'
-      + ' and return invitation code.', async () => {
-    const adminId = await createUser(firebase, 'Admin account', true, false);
-    const admin = await db.collection('accounts').doc(adminId).get();
-    const uid = await createUser(firebase, 'account 01', false, false);
+  + ' save hashed code, host account id and timestamp,'
+  + ' and return invitation code.', async () => {
+    const code = await invite(mockFirebase, caller, uid);
 
-    const code = await invite(firebase, admin, uid);
-
-    const doc = await db.collection('accounts').doc(uid).get();
-    expect(doc.get('updatedAt')).not.toEqual(doc.get('createdAt'));
-    const hash = createHash('sha256');
-    hash.update(code);
-    hash.update(seed);
-    expect(doc.get('invitation')).toEqual(hash.digest('hex'));
-    expect(doc.get('invitedBy')).toEqual(adminId);
-    expect(doc.get('invitedAt')).toEqual(doc.get('updatedAt'));
-    await db.collection('accounts').doc(adminId).delete();
-    await auth.deleteUser(adminId);
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
+    const invitation = testInvitation(code, mockConfData().seed);
+    expect(mockDocUpdate.mock.calls.length).toEqual(1);
+    expect(mockDocUpdate.mock.calls[0][0]).toEqual('accounts');
+    expect(mockDocUpdate.mock.calls[0][1]).toEqual(uid);
+    const updateData = mockDocUpdate.mock.calls[0][2];
+    expect(updateData.invitation).toEqual(invitation);
+    expect(updateData.invitedBy).toEqual(caller.id);
+    expect(updateData.invitedAt).toBeDefined();
+    expect(updateData.updatedAt).toBeDefined();
   });
 });
 
 describe('getToken()', () => {
   it('rejects invitation without record.', async () => {
-    const adminId = await createUser(firebase, 'Admin account', true, false);
-    const admin = await db.collection('accounts').doc(adminId).get();
-    const uid = await createUser(firebase, 'account 01', false, false);
-    const code = await invite(firebase, admin, uid);
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
-
-    await expect(getToken(firebase, code))
+    await expect(getToken(mockFirebase, 'dummy code'))
       .rejects.toThrow('No record');
-
-    await db.collection('accounts').doc(adminId).delete();
-    await auth.deleteUser(adminId);
   });
 
   it('rejects invitation without host account id.', async () => {
-    const adminId = await createUser(firebase, 'Admin account', true, false);
-    const admin = await db.collection('accounts').doc(adminId).get();
-    const uid = await createUser(firebase, 'account 01', false, false);
-    const code = await invite(firebase, admin, uid);
-    await db.collection('accounts').doc(uid).update({
+    await expect(getToken(mockFirebase, mockInvitationCodeNoHost))
+      .rejects.toThrow('Invitation for account: invitationNoHost has invalid status.');
+
+    expect(mockDocUpdate.mock.calls.length).toEqual(1);
+    expect(mockDocUpdate.mock.calls[0][0]).toEqual('accounts');
+    expect(mockDocUpdate.mock.calls[0][1]).toEqual('invitationNoHost');
+    expect(mockDocUpdate.mock.calls[0][2]).toEqual({
+      invitation: null,
       invitedBy: null,
+      invitedAt: null,
     });
-
-    await expect(getToken(firebase, code))
-      .rejects.toThrow(`Invitation for account: ${uid} has invalid status.`);
-
-    await db.collection('accounts').doc(adminId).delete();
-    await auth.deleteUser(adminId);
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
   });
 
   it('rejects invitation without timestamp.', async () => {
-    const adminId = await createUser(firebase, 'Admin account', true, false);
-    const admin = await db.collection('accounts').doc(adminId).get();
-    const uid = await createUser(firebase, 'account 01', false, false);
-    const code = await invite(firebase, admin, uid);
-    await db.collection('accounts').doc(uid).update({
+    await expect(getToken(mockFirebase, mockInvitationCodeNoTime))
+      .rejects.toThrow('Invitation for account: invitationNoTime has invalid status.');
+    expect(mockDocUpdate.mock.calls[0][0]).toEqual('accounts');
+    expect(mockDocUpdate.mock.calls[0][1]).toEqual('invitationNoTime');
+    expect(mockDocUpdate.mock.calls[0][2]).toEqual({
+      invitation: null,
+      invitedBy: null,
       invitedAt: null,
     });
-
-    await expect(getToken(firebase, code))
-      .rejects.toThrow(`Invitation for account: ${uid} has invalid status.`);
-
-    await db.collection('accounts').doc(adminId).delete();
-    await auth.deleteUser(adminId);
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
   });
 
   it('rejects invitation with expired timestamp.', async () => {
-    const adminId = await createUser(firebase, 'Admin account', true, false);
-    const admin = await db.collection('accounts').doc(adminId).get();
-    const uid = await createUser(firebase, 'account 01', false, false);
-    const code = await invite(firebase, admin, uid);
-    await db.collection('accounts').doc(uid).update({
-      invitedAt: new Date(
-        new Date().getTime() - invitationExpirationTime - 1000,
-      ),
+    await expect(getToken(mockFirebase, mockInvitationCodeExpired))
+      .rejects.toThrow('Invitation for account: invitationExpired is expired.');
+    expect(mockDocUpdate.mock.calls[0][0]).toEqual('accounts');
+    expect(mockDocUpdate.mock.calls[0][1]).toEqual('invitationExpired');
+    expect(mockDocUpdate.mock.calls[0][2]).toEqual({
+      invitation: null,
+      invitedBy: null,
+      invitedAt: null,
     });
-
-    await expect(getToken(firebase, code))
-      .rejects.toThrow(`Invitation for account: ${uid} is expired.`);
-
-    await db.collection('accounts').doc(adminId).delete();
-    await auth.deleteUser(adminId);
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
   });
 
   it('returns token.', async () => {
-    const adminId = await createUser(firebase, 'Admin account', true, false);
-    const admin = await db.collection('accounts').doc(adminId).get();
-    const uid = await createUser(firebase, 'account 01', false, false);
-    const code = await invite(firebase, admin, uid);
-    await db.collection('accounts').doc(uid).update({
-      invitedAt: new Date(
-        new Date().getTime() - invitationExpirationTime + 1000,
-      ),
-    });
-
-    const token = await getToken(firebase, code);
-
+    const token = await expect(getToken(mockFirebase, mockInvitationCode));
     expect(token).toBeDefined();
-    await db.collection('accounts').doc(adminId).delete();
-    await auth.deleteUser(adminId);
-    await db.collection('accounts').doc(uid).delete();
-    await auth.deleteUser(uid);
   });
 });
