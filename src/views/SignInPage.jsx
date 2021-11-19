@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { Login } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 
+import '../conf/i18n';
 import { PageTitle, RadioButtons } from '../components';
 import SignInWithEmailLinkPanel from './SignInWithEmailLinkPanel';
 import SignInWithPasswordPanel from './SignInWithPasswordPanel';
-import '../conf/i18n';
 
 const SignInPage = () => {
   const { t } = useTranslation();

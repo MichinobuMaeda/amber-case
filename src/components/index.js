@@ -1,3 +1,4 @@
+import ControlledAccordion from './ControlledAccordion';
 import DangerButton from './DangerButton';
 import EmailField from './EmailField';
 import ErrorMessage from './ErrorMessage';
@@ -10,6 +11,7 @@ import SecondaryButton from './SecondaryButton';
 import SuccessMessage from './SuccessMessage';
 
 export {
+  ControlledAccordion,
   DangerButton,
   EmailField,
   ErrorMessage,

@@ -26,21 +26,14 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
 
-      - name: Cache firebase emulators
-        uses: actions/cache@v2
-        id: cache-firebase-emulators
-        with:
-          path: ~/.cache/firebase/emulators
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
       - run: npm -g i yarn
       - run: yarn install --frozen-lockfile && yarn --cwd src/functions install --frozen-lockfile
+      - run: yarn lint && yarn test
       - name: Set src/conf/version.js
         run: grep '"version"' package.json | sed -e "s/.*:\s*\"/export default '/" -e "s/\"\s*,*\s*$/';/" > src/conf/version.js
-      - run: yarn lint && yarn test
       - run: |
           yarn functions:config:set \
             initial.email="${{ secrets.INITIAL_EMAIL }}" \

@@ -12,6 +12,7 @@ export {
   handleSendEmailVerification,
   handleReloadAuthUser,
   handleSignOut,
+  setAccountProperties,
   isSignedIn,
 } from './firebase';
 export * from './ui';

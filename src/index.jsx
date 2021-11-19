@@ -43,7 +43,7 @@ const AppBase = () => {
 
   useEffect(() => {
     listenFirebase(service, window);
-  }, []);
+  }, [service]);
 
   return (
     <React.StrictMode>

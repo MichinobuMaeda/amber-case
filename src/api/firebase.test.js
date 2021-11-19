@@ -1,5 +1,5 @@
 import {
-  mockUrl, resetMockService, mockService, mockAuth,
+  mockUrl, resetMockService, mockService, mockCurrentUser, mockAuth,
   mockSetConf, mockSetMe, mockSetAuthUser,
   mockDocPath, mockOnSnapshot, mockDoc,
   mockLocalStorage, mockWindow, mockLocationReload, mockLocationReplace,
@@ -35,10 +35,12 @@ jest.mock('firebase/auth', () => ({
 }));
 
 const mockConnectFirestoreEmulator = jest.fn();
+const mockUpdateDoc = jest.fn();
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(() => ({})),
   connectFirestoreEmulator: mockConnectFirestoreEmulator,
   doc: mockDoc,
+  updateDoc: mockUpdateDoc,
   onSnapshot: mockOnSnapshot,
 }));
 
@@ -72,6 +74,7 @@ const {
   onSignOut,
   handleSignOut,
   listenMe,
+  setAccountProperties,
   listenFirebase,
   isSignedIn,
   localKeyEmail,
@@ -377,7 +380,7 @@ describe('handleReloadAuthUser(service)', () => {
     expect(mockReload.mock.calls[0][0]).toEqual(mockAuthUser);
     expect(mockSetAuthUser.mock.calls.length).toEqual(2);
     expect(mockSetAuthUser.mock.calls[0][0]).toEqual({});
-    expect(mockSetAuthUser.mock.calls[1][0]).toEqual(mockAuthUser);
+    expect(mockSetAuthUser.mock.calls[1][0]).toEqual(mockCurrentUser);
   });
 });
 
@@ -496,6 +499,19 @@ describe('listenMe(service, uid)', () => {
 
     listenMe(mockService, uid);
     expect(mockService.unsub['doc path']()).toEqual('unsub function 0');
+  });
+});
+
+describe('setAccountProperties(service, id, props)', () => {
+  it('call updateDoc() with updatedAt.', async () => {
+    const meRef = { id: 'id01', name: 'doc ref of me' };
+    mockDoc.mockImplementationOnce(() => meRef);
+    await setAccountProperties(mockService, meRef.id, { key1: 'value1' });
+
+    expect(mockUpdateDoc.mock.calls.length).toEqual(1);
+    expect(mockUpdateDoc.mock.calls[0][0]).toEqual(meRef);
+    expect(mockUpdateDoc.mock.calls[0][1].key1).toEqual('value1');
+    expect(mockUpdateDoc.mock.calls[0][1].updatedAt).toBeDefined();
   });
 });
 

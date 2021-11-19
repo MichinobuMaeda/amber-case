@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,6 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
+import { resetMockService, mockService } from '../testConfig';
 
 jest.mock('firebase/firestore', () => ({}));
 
@@ -26,15 +24,22 @@ jest.mock('../api', () => ({
 const { ServiceContext } = require('../api');
 const { EmailVerificationPage } = require('.');
 
+beforeAll(() => {
+  resetMockService();
+});
+
 afterEach(() => {
   jest.clearAllMocks();
+  resetMockService();
 });
 
 describe('EmailVerificationPage', () => {
   it('shows button send and button sign-out on initial state, '
   + 'and shows button reload after click button send.', async () => {
+    mockService.me = { id: 'id01' };
+    mockService.authUser = { emailVerified: false };
     render(
-      <ServiceContext.Provider value={{ me: { id: 'id01' }, authUser: { emailVerified: false } }}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <EmailVerificationPage />
         </MemoryRouter>
@@ -66,10 +71,12 @@ describe('EmailVerificationPage', () => {
 
   it('shows button send and button sign-out on initial state, '
   + 'and shows error messeege after click button send is failed.', async () => {
+    mockService.me = { id: 'id01' };
+    mockService.authUser = { emailVerified: false };
     mockHandleSendEmailVerification
       .mockImplementationOnce(() => { throw Error(); });
     render(
-      <ServiceContext.Provider value={{ me: { id: 'id01' }, authUser: { emailVerified: false } }}>
+      <ServiceContext.Provider value={mockService}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <EmailVerificationPage />
         </MemoryRouter>

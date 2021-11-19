@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,7 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-import { mockService } from '../testConfig';
+import { resetMockService, mockService } from '../testConfig';
 
 jest.mock('firebase/firestore', () => ({}));
 
@@ -31,8 +28,13 @@ jest.mock('../api', () => ({
 const { ServiceContext } = require('../api');
 const { Header } = require('.');
 
+beforeAll(() => {
+  resetMockService();
+});
+
 afterEach(() => {
   jest.clearAllMocks();
+  resetMockService();
 });
 
 describe('Header', () => {

@@ -1,6 +1,10 @@
 export const mockUrl = 'https://example.com/';
 
-export const mockAuth = { name: 'mockAuth' };
+export const mockCurrentUser = { uid: 'id01' };
+export const mockAuth = {
+  name: 'mockAuth',
+  currentUser: mockCurrentUser,
+};
 export const mockDb = { name: 'mockDb' };
 export const mockStorage = { name: 'mockStorage' };
 export const mockFunctions = { name: 'mockFunctions' };
@@ -40,7 +44,7 @@ export const resetMockService = () => {
   mockService.db = mockDb;
   mockService.storage = mockStorage;
   mockService.functions = mockFunctions;
-  mockService.themeMode = {};
+  mockService.themeMode = 'light';
   mockService.setThemeMode = mockSetThemeMode;
   mockService.preferColorScheme = 'light';
   mockService.conf = {};

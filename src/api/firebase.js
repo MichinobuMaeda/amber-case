@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import {
   getFirestore, connectFirestoreEmulator,
-  onSnapshot, doc,
+  onSnapshot, doc, updateDoc,
 } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
@@ -141,7 +141,7 @@ export const handleSendEmailVerification = async (service) => {
 export const handleReloadAuthUser = async (service) => {
   await reload(service.authUser);
   service.setAuthUser({});
-  service.setAuthUser(service.authUser);
+  service.setAuthUser(service.auth.currentUser);
 };
 
 export const onSignOut = (service) => {
@@ -156,8 +156,7 @@ export const handleSignOut = async (service) => {
 };
 
 export const listenMe = (service, uid) => {
-  const { db, setMe } = service;
-  // const meRef = db.collection('accounts').doc(uid);
+  const { db, setMe, setThemeMode } = service;
   const meRef = doc(db, 'accounts', uid);
   if (!service.unsub[meRef.path]) {
     // eslint-disable-next-line no-param-reassign
@@ -169,7 +168,9 @@ export const listenMe = (service, uid) => {
           && snapshot.data().valid
           && !snapshot.data().deletedAt
         ) {
-          setMe(castDoc(snapshot));
+          const me = castDoc(snapshot);
+          setMe(me);
+          setThemeMode(me.themeMode || 'light');
         } else {
           // eslint-disable-next-line no-param-reassign
           service.authError = 'unregistered account';
@@ -178,6 +179,14 @@ export const listenMe = (service, uid) => {
       },
     );
   }
+};
+
+export const setAccountProperties = async (service, id, props) => {
+  const { db } = service;
+  await updateDoc(doc(db, 'accounts', id), {
+    ...props,
+    updatedAt: new Date(),
+  });
 };
 
 export const listenFirebase = async (service, window) => {
