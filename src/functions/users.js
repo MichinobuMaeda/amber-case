@@ -28,7 +28,7 @@ const createUser = async (firebase, name, admin, tester, group, email, password)
     valid: true,
     admin,
     tester,
-    themeMode: null, // dataVersion: 1
+    themeMode: null, // added: dataVersion: 1
     invitation: null,
     invitedBy: null,
     invitedAt: null,
@@ -161,6 +161,26 @@ const getToken = async (firebase, code) => {
   return token;
 };
 
+const onCreateAuthUser = async (firebase, user) => {
+  const db = firebase.firestore();
+  const account = await db.collection('accounts').doc(user.uid).get();
+  if (account && account.exists) {
+    return true;
+  }
+
+  const auth = firebase.auth();
+  await auth.deleteUser(user.uid);
+  logger.warn(`deleted: ${user.uid}`);
+  return false;
+};
+
+const onAccountUpdate = async (firebase, change) => {
+  const auth = firebase.auth();
+  if (change.before.data().name !== change.after.data().name) {
+    await auth.updateUser(change.after.id, { displayName: change.after.data().name });
+  }
+};
+
 module.exports = {
   createUser,
   setUserName,
@@ -168,4 +188,6 @@ module.exports = {
   setUserPassword,
   invite,
   getToken,
+  onCreateAuthUser,
+  onAccountUpdate,
 };

@@ -1,4 +1,7 @@
 const {
+  mockCreateUser,
+  mockUpdateUser,
+  mockDeleteUser,
   testInvitation,
   mockFirebase,
   mockInvitationCode,
@@ -9,8 +12,6 @@ const {
   mockDocSet,
   mockDocUpdate,
   mockConfData,
-  mockCreateUser,
-  mockUpdateUser,
 } = require('./testConfig');
 const {
   createUser,
@@ -19,6 +20,8 @@ const {
   setUserPassword,
   invite,
   getToken,
+  onCreateAuthUser,
+  onAccountUpdate,
 } = require('./users');
 
 afterEach(async () => {
@@ -282,5 +285,55 @@ describe('getToken()', () => {
   it('returns token.', async () => {
     const token = await expect(getToken(mockFirebase, mockInvitationCode));
     expect(token).toBeDefined();
+  });
+});
+
+describe('onCreateAuthUser()', () => {
+  it('delete user without its account doc.', async () => {
+    await onCreateAuthUser(mockFirebase, { uid: 'dummy' });
+    expect(mockDeleteUser.mock.calls.length).toEqual(1);
+    expect(mockDeleteUser.mock.calls[0][0]).toEqual('dummy');
+  });
+
+  it('do nothing in all other cases.', async () => {
+    await onCreateAuthUser(mockFirebase, { uid: 'account01' });
+    expect(mockDeleteUser.mock.calls.length).toEqual(0);
+  });
+});
+
+describe('onAccountUpdate()', () => {
+  it('update displayName of its auth user '
+  + 'on change the name of the account', async () => {
+    const id = 'id01';
+    const change = {
+      before: {
+        id,
+        data: () => ({ name: 'Name before' }),
+      },
+      after: {
+        id,
+        data: () => ({ name: 'Name after' }),
+      },
+    };
+    await onAccountUpdate(mockFirebase, change);
+    expect(mockUpdateUser.mock.calls.length).toEqual(1);
+    expect(mockUpdateUser.mock.calls[0][0]).toEqual(id);
+    expect(mockUpdateUser.mock.calls[0][1]).toEqual({ displayName: 'Name after' });
+  });
+
+  it('do nothing in all other cases.', async () => {
+    const id = 'id01';
+    const change = {
+      before: {
+        id,
+        data: () => ({ name: 'Name before' }),
+      },
+      after: {
+        id,
+        data: () => ({ name: 'Name before' }),
+      },
+    };
+    await onAccountUpdate(mockFirebase, change);
+    expect(mockUpdateUser.mock.calls.length).toEqual(0);
   });
 });

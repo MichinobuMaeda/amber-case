@@ -1,6 +1,13 @@
 const { createHash } = require('crypto');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { nanoid } = require('nanoid');
+
+global.console = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+};
+// jest.mock('firebase-functions');
 
 const testInvitation = (
   code,
@@ -12,14 +19,18 @@ const testInvitation = (
   return hash.digest('hex');
 };
 
+// auth
+const mockCreateUser = jest.fn();
+const mockUpdateUser = jest.fn();
+const mockDeleteUser = jest.fn();
+const mockCreateCustomToken = jest.fn();
+
+// firestore
 const mockDocGet = jest.fn();
 const mockDocAdd = jest.fn();
 const mockDocUpdate = jest.fn();
 const mockDocSet = jest.fn();
 const mockDocDelete = jest.fn();
-const mockCreateUser = jest.fn();
-const mockUpdateUser = jest.fn();
-const mockCreateCustomToken = jest.fn();
 const mockConfExists = jest.fn(() => true);
 const mockConfData = jest.fn(() => ({
   invitationExpirationTime: 3 * 24 * 3600 * 1000,
@@ -157,11 +168,16 @@ const mockFirebase = {
   auth: () => ({
     createUser: mockCreateUser,
     updateUser: mockUpdateUser,
+    deleteUser: mockDeleteUser,
     createCustomToken: mockCreateCustomToken,
   }),
 };
 
 module.exports = {
+  mockCreateUser,
+  mockUpdateUser,
+  mockDeleteUser,
+  mockCreateCustomToken,
   testInvitation,
   mockFirebase,
   mockConfData,
@@ -176,10 +192,4 @@ module.exports = {
   mockDocUpdate,
   mockDocSet,
   mockDocDelete,
-  mockCreateUser,
-  mockUpdateUser,
-  mockCreateCustomToken,
-  // firebase,
-  // db,
-  // auth,
 };

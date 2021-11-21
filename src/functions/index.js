@@ -59,3 +59,11 @@ exports.setUserPassword = functions.region(REGION)
       data.password || '',
     );
   });
+
+// Warning: Firebase Authentication triggers are beta at 2021-11-21.
+exports.onCreateAuthUser = functions.auth.user()
+  .onCreate((user) => users.onCreateAuthUser(firebase, user));
+
+exports.onUpdateAccount = functions.firestore
+  .document('accounts/{accountId}')
+  .onUpdate((change) => users.onAccountUpdate(firebase, change));
