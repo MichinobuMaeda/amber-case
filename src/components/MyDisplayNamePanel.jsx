@@ -6,24 +6,27 @@ import { SaveAlt } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
+import { validateReuired } from '../conf';
 import { ServiceContext, setAccountProperties } from '../api';
 
 const MyDisplayNamePanel = () => {
   const { t } = useTranslation();
   const service = useContext(ServiceContext);
 
-  const validateName = (text) => (text && typeof text === 'string' && text.trim()
-    ? null
-    : t('input is required'));
+  const getValidationError = (text) => (
+    validateReuired(text) ? null : t('input is required')
+  );
 
-  const [name, setName] = useState(validateName(service.me.name) ? '' : service.me.name.trim());
-  const [inputError, setInputError] = useState(false);
+  const [name, setName] = useState(
+    validateReuired(service.me.name) ? service.me.name.trim() : '',
+  );
+  const [validationError, setValidationError] = useState(getValidationError(service.me.name));
   const [successStatus, setSuccessStatus] = useState(false);
   const [errorStatus, setErrorStatus] = useState(false);
 
   const onNameChange = (text) => {
     setName(text.trim());
-    setInputError(validateName(text));
+    setValidationError(getValidationError(text));
     setSuccessStatus(false);
     setErrorStatus(false);
   };
@@ -45,8 +48,8 @@ const MyDisplayNamePanel = () => {
           value={name}
           label={t('Display name')}
           onChange={(e) => onNameChange(e.target.value)}
-          error={!!inputError}
-          helperText={inputError}
+          error={!!validationError}
+          helperText={validationError}
         />
       </Grid>
       <Grid item xs={12} sm="auto">

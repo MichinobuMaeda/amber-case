@@ -23,10 +23,10 @@ beforeEach(() => {
 });
 
 describe('MyDisplayNamePanel', () => {
-  const competeMessage = i18n.t('completed saving data');
+  const successMessage = i18n.t('completed saving data');
   const errorMessage = i18n.t('failed to save data') + i18n.t('retry failed or call admin');
 
-  it('enables button if data is valid.', async () => {
+  it('enables button if data is valid and is modified.', async () => {
     mockService.me = { id: 'id01', valid: true, name: 'User 01 ' };
     render(
       <ServiceContext.Provider value={mockService}>
@@ -34,20 +34,22 @@ describe('MyDisplayNamePanel', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByRole('button', { name: 'save' })).toBeInTheDocument();
-    expect(screen.queryByText(competeMessage)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();
+    expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Display name')), 'x');
+    expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();
+
     userEvent.click(screen.queryByRole('button', { name: 'save' }));
     await waitFor(() => expect(mockSetAccountProperties.mock.calls.length).toEqual(1));
     expect(mockSetAccountProperties.mock.calls[0][1]).toEqual('id01');
     expect(mockSetAccountProperties.mock.calls[0][2]).toEqual({ name: 'User 01x' });
-    expect(screen.queryByText(competeMessage)).toBeInTheDocument();
+    expect(screen.queryByText(successMessage)).toBeInTheDocument();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Display name')), 'y');
-    expect(screen.queryByText(competeMessage)).toBeNull();
+    expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
   });
 
@@ -60,8 +62,14 @@ describe('MyDisplayNamePanel', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
-    expect(screen.queryByText(competeMessage)).toBeNull();
+    expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
+
+    userEvent.type(screen.queryByLabelText(i18n.t('Display name')), 'x');
+    expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();
+
+    userEvent.type(screen.queryByLabelText(i18n.t('Display name')), '{backspace}');
+    expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
   });
 
   it('disables button if data is not modified.', async () => {
@@ -73,7 +81,7 @@ describe('MyDisplayNamePanel', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
-    expect(screen.queryByText(competeMessage)).toBeNull();
+    expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
   });
 
@@ -86,18 +94,18 @@ describe('MyDisplayNamePanel', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByRole('button', { name: 'save' })).toBeInTheDocument();
-    expect(screen.queryByText(competeMessage)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();
+    expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Display name')), 'x');
     userEvent.click(screen.queryByRole('button', { name: 'save' }));
     await waitFor(() => expect(mockSetAccountProperties.mock.calls.length).toEqual(1));
-    expect(screen.queryByText(competeMessage)).toBeNull();
+    expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeInTheDocument();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Display name')), 'y');
-    expect(screen.queryByText(competeMessage)).toBeNull();
+    expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
   });
 });

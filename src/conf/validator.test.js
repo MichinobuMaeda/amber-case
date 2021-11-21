@@ -5,17 +5,19 @@ import {
 } from './validator';
 
 describe('validateReuired(v)', () => {
-  it('return true if the value is 0 or truthy.', async () => {
-    expect(validateReuired(0)).toBeTruthy();
+  it('return true if the value has length > 0 as trimed string.', async () => {
     expect(validateReuired('1')).toBeTruthy();
-    expect(validateReuired([])).toBeTruthy();
-    expect(validateReuired({})).toBeTruthy();
-  });
-  it('return false if the value is undef, null, false or empty string.', async () => {
+    expect(validateReuired(' a ')).toBeTruthy();
+
     expect(validateReuired()).toBeFalsy();
     expect(validateReuired(null)).toBeFalsy();
     expect(validateReuired(false)).toBeFalsy();
+    expect(validateReuired(0)).toBeFalsy();
+    expect(validateReuired(1)).toBeFalsy();
+    expect(validateReuired([])).toBeFalsy();
+    expect(validateReuired({})).toBeFalsy();
     expect(validateReuired('')).toBeFalsy();
+    expect(validateReuired(' ')).toBeFalsy();
   });
 });
 
@@ -24,17 +26,17 @@ describe('validateEmail(v)', () => {
     expect(validateEmail()).toBeTruthy();
     expect(validateEmail(null)).toBeTruthy();
     expect(validateEmail(false)).toBeTruthy();
-    expect(validateEmail(0)).toBeTruthy();
     expect(validateEmail('')).toBeTruthy();
     expect(validateEmail('abc@def.gh')).toBeTruthy();
     expect(validateEmail('a.bc@def.gh')).toBeTruthy();
     expect(validateEmail('a-bc@def.gh')).toBeTruthy();
     expect(validateEmail('a_bc@def.gh')).toBeTruthy();
-  });
-  it('return false if the value is invalid email address.', async () => {
+
+    expect(validateEmail(0)).toBeFalsy();
     expect(validateEmail(1)).toBeFalsy();
     expect(validateEmail([])).toBeFalsy();
     expect(validateEmail({})).toBeFalsy();
+    expect(validateEmail(' ')).toBeFalsy();
     expect(validateEmail('1')).toBeFalsy();
     expect(validateEmail('abc@')).toBeFalsy();
     expect(validateEmail('abc@def')).toBeFalsy();
@@ -50,17 +52,17 @@ describe('validatePassword(v)', () => {
     expect(validatePassword()).toBeTruthy();
     expect(validatePassword(null)).toBeTruthy();
     expect(validatePassword(false)).toBeTruthy();
-    expect(validatePassword(0)).toBeTruthy();
     expect(validatePassword('')).toBeTruthy();
     expect(validatePassword('12abCD@$')).toBeTruthy();
     expect(validatePassword('12abCDEF')).toBeTruthy();
     expect(validatePassword('12abcd@$')).toBeTruthy();
     expect(validatePassword('xyabCD@$')).toBeTruthy();
-  });
-  it('return false if the value is invalid password.', async () => {
+
+    expect(validatePassword(0)).toBeFalsy();
     expect(validatePassword(1)).toBeFalsy();
     expect(validatePassword([])).toBeFalsy();
     expect(validatePassword({})).toBeFalsy();
+    expect(validatePassword(' ')).toBeFalsy();
     expect(validatePassword('1')).toBeFalsy();
     expect(validatePassword('12abCD@')).toBeFalsy();
     expect(validatePassword('12345678')).toBeFalsy();
