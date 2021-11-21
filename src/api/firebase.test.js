@@ -1,7 +1,7 @@
 import {
   mockUrl, resetMockService, mockService, mockCurrentUser, mockAuth,
   mockSetConf, mockSetMe, mockSetAuthUser,
-  mockDocPath, mockOnSnapshot, mockDoc,
+  mockDocPath, mockOnSnapshot, mockDoc, mockConnectFirestoreEmulator, mockUpdateDoc,
   mockLocalStorage, mockLocalStorageSetItem, mockLocalStorageRemoveItem,
   mockWindow, mockLocationReload, mockLocationReplace,
 } from '../testConfig';
@@ -41,16 +41,6 @@ jest.mock('firebase/auth', () => ({
   EmailAuthProvider: { credential: mockEmailAuthProviderCredential },
 }));
 
-const mockConnectFirestoreEmulator = jest.fn();
-const mockUpdateDoc = jest.fn();
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => ({})),
-  connectFirestoreEmulator: mockConnectFirestoreEmulator,
-  doc: mockDoc,
-  updateDoc: mockUpdateDoc,
-  onSnapshot: mockOnSnapshot,
-}));
-
 const mockConnectStorageEmulator = jest.fn();
 jest.mock('firebase/storage', () => ({
   ...jest.requireActual('firebase/storage'),
@@ -73,7 +63,6 @@ const {
   castDoc,
   handleSignInWithEmailLink,
   restoreAuthError,
-  listenConf,
   handelSendSignInLinkToEmail,
   handleSignInWithPassword,
   handleSendEmailVerification,
@@ -83,10 +72,12 @@ const {
   handleReloadAuthUser,
   onSignOut,
   handleSignOut,
-  listenMe,
-  setAccountProperties,
   setMyEmail,
   setMyPassword,
+  listenConf,
+  setConfProperties,
+  listenMe,
+  setAccountProperties,
   listenFirebase,
   isSignedIn,
   localKeyEmail,
@@ -311,37 +302,6 @@ describe('restoreAuthError(service, window)', () => {
   });
 });
 
-describe('listenConf(service)', () => {
-  it('start listening realtime data of service.conf.', async () => {
-    listenConf(mockService);
-
-    expect(mockService.unsubConf).toBeDefined();
-    expect(mockOnSnapshot.mock.calls.length).toEqual(1);
-    expect(mockSetConf.mock.calls.length).toEqual(0);
-    const cb = mockOnSnapshot.mock.calls[0][1];
-
-    cb({
-      exists: true,
-      id: 'id01',
-      data: () => ({}),
-    });
-
-    expect(mockSetConf.mock.calls.length).toEqual(1);
-    expect(mockSetConf.mock.calls[0][0]).toEqual({ id: 'id01' });
-
-    cb({
-      exists: false,
-    });
-
-    expect(mockSetConf.mock.calls.length).toEqual(2);
-    expect(mockSetConf.mock.calls[1][0]).toEqual({ error: true });
-
-    mockService.unsubConf = () => 'unsub conf';
-    listenConf(mockService);
-    expect(mockSetConf.mock.calls.length).toEqual(2);
-  });
-});
-
 describe('handelSendSignInLinkToEmail(service, window, email)', () => {
   it('calls signInWithEmailAndPassword(auth, email, { url, handleCodeInApp })', async () => {
     const handleCodeInApp = true;
@@ -543,6 +503,76 @@ describe('handleSignOut(service)', () => {
   });
 });
 
+describe('setMyEmail(service, email)', () => {
+  it('call updateEmail(user, email).', async () => {
+    const email = 'test01@example.com';
+    const user = { uid: 'id01' };
+    mockService.auth = { currentUser: user };
+    await setMyEmail(mockService, email);
+
+    expect(mockUpdateEmail.mock.calls.length).toEqual(1);
+    expect(mockUpdateEmail.mock.calls[0][0]).toEqual(user);
+    expect(mockUpdateEmail.mock.calls[0][1]).toEqual(email);
+  });
+});
+
+describe('setMyPassword(service, password)', () => {
+  it('call updatePassword(user, password).', async () => {
+    const password = 'password01';
+    const user = { uid: 'id01' };
+    mockService.auth = { currentUser: user };
+    await setMyPassword(mockService, password);
+
+    expect(mockUpdatePassword.mock.calls.length).toEqual(1);
+    expect(mockUpdatePassword.mock.calls[0][0]).toEqual(user);
+    expect(mockUpdatePassword.mock.calls[0][1]).toEqual(password);
+  });
+});
+
+describe('listenConf(service)', () => {
+  it('start listening realtime data of service.conf.', async () => {
+    listenConf(mockService);
+
+    expect(mockService.unsubConf).toBeDefined();
+    expect(mockOnSnapshot.mock.calls.length).toEqual(1);
+    expect(mockSetConf.mock.calls.length).toEqual(0);
+    const cb = mockOnSnapshot.mock.calls[0][1];
+
+    cb({
+      exists: true,
+      id: 'id01',
+      data: () => ({}),
+    });
+
+    expect(mockSetConf.mock.calls.length).toEqual(1);
+    expect(mockSetConf.mock.calls[0][0]).toEqual({ id: 'id01' });
+
+    cb({
+      exists: false,
+    });
+
+    expect(mockSetConf.mock.calls.length).toEqual(2);
+    expect(mockSetConf.mock.calls[1][0]).toEqual({ error: true });
+
+    mockService.unsubConf = () => 'unsub conf';
+    listenConf(mockService);
+    expect(mockSetConf.mock.calls.length).toEqual(2);
+  });
+});
+
+describe('setConfProperties(service, props)', () => {
+  it('call updateDoc() with updatedAt.', async () => {
+    const confRef = { id: 'conf' };
+    mockDoc.mockImplementationOnce(() => confRef);
+    await setConfProperties(mockService, { key1: 'value1' });
+
+    expect(mockUpdateDoc.mock.calls.length).toEqual(1);
+    expect(mockUpdateDoc.mock.calls[0][0]).toEqual(confRef);
+    expect(mockUpdateDoc.mock.calls[0][1].key1).toEqual('value1');
+    expect(mockUpdateDoc.mock.calls[0][1].updatedAt).toBeDefined();
+  });
+});
+
 describe('listenMe(service, uid)', () => {
   it('start listening realtime data of account of me '
   + 'if unsub is empty.', () => {
@@ -635,32 +665,6 @@ describe('setAccountProperties(service, id, props)', () => {
     expect(mockUpdateDoc.mock.calls[0][0]).toEqual(meRef);
     expect(mockUpdateDoc.mock.calls[0][1].key1).toEqual('value1');
     expect(mockUpdateDoc.mock.calls[0][1].updatedAt).toBeDefined();
-  });
-});
-
-describe('setMyEmail(service, email)', () => {
-  it('call updateEmail(user, email).', async () => {
-    const email = 'test01@example.com';
-    const user = { uid: 'id01' };
-    mockService.auth = { currentUser: user };
-    await setMyEmail(mockService, email);
-
-    expect(mockUpdateEmail.mock.calls.length).toEqual(1);
-    expect(mockUpdateEmail.mock.calls[0][0]).toEqual(user);
-    expect(mockUpdateEmail.mock.calls[0][1]).toEqual(email);
-  });
-});
-
-describe('setMyPassword(service, password)', () => {
-  it('call updatePassword(user, password).', async () => {
-    const password = 'password01';
-    const user = { uid: 'id01' };
-    mockService.auth = { currentUser: user };
-    await setMyPassword(mockService, password);
-
-    expect(mockUpdatePassword.mock.calls.length).toEqual(1);
-    expect(mockUpdatePassword.mock.calls[0][0]).toEqual(user);
-    expect(mockUpdatePassword.mock.calls[0][1]).toEqual(password);
   });
 });
 

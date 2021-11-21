@@ -6,8 +6,6 @@ import React from 'react';
 import { i18n } from '../conf';
 import { resetMockService, mockService } from '../testConfig';
 
-jest.mock('firebase/firestore', () => ({}));
-
 const mockSetAccountProperties = jest.fn();
 jest.mock('../api', () => ({
   ...jest.requireActual('../api'),
@@ -26,17 +24,26 @@ describe('MyDisplayNamePanel', () => {
   const successMessage = i18n.t('completed saving data');
   const errorMessage = i18n.t('failed to save data') + i18n.t('retry failed or call admin');
 
-  it('enables button if data is valid and is modified.', async () => {
-    mockService.me = { id: 'id01', valid: true, name: 'User 01 ' };
+  it('disables button if data is not modified.', async () => {
+    mockService.me = { id: 'id01', vaid: true, name: 'User 01' };
     render(
       <ServiceContext.Provider value={mockService}>
         <MyDisplayNamePanel />
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
     expect(screen.queryByText(successMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
+  });
+
+  it('enables button if data is valid and is modified.', async () => {
+    mockService.me = { id: 'id01', valid: true, name: 'User 01' };
+    render(
+      <ServiceContext.Provider value={mockService}>
+        <MyDisplayNamePanel />
+      </ServiceContext.Provider>,
+    );
 
     userEvent.type(screen.queryByLabelText(i18n.t('Display name')), 'x');
     expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();
@@ -70,19 +77,6 @@ describe('MyDisplayNamePanel', () => {
 
     userEvent.type(screen.queryByLabelText(i18n.t('Display name')), '{backspace}');
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
-  });
-
-  it('disables button if data is not modified.', async () => {
-    mockService.me = { id: 'id01', vaid: true, name: 'User 01' };
-    render(
-      <ServiceContext.Provider value={mockService}>
-        <MyDisplayNamePanel />
-      </ServiceContext.Provider>,
-    );
-
-    expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
-    expect(screen.queryByText(successMessage)).toBeNull();
-    expect(screen.queryByText(errorMessage)).toBeNull();
   });
 
   it('shows error message on click button "save" with exception.', async () => {

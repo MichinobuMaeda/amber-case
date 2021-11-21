@@ -6,8 +6,6 @@ import React from 'react';
 import { i18n } from '../conf';
 import { resetMockService, mockService, mockSetThemeMode } from '../testConfig';
 
-jest.mock('firebase/firestore', () => ({}));
-
 const mockSetAccountProperties = jest.fn();
 jest.mock('../api', () => ({
   ...jest.requireActual('../api'),

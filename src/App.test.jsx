@@ -10,6 +10,7 @@ import {
 import { i18n } from './conf';
 
 jest.mock('firebase/firestore', () => ({}));
+jest.mock('react-markdown', () => 'div');
 
 beforeAll(() => {
   resetMockService();

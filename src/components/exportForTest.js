@@ -10,7 +10,7 @@ import ReauthenticationPanel from './ReauthenticationPanel';
 import SignInWithEmailLinkPanel from './SignInWithEmailLinkPanel';
 import SignInWithPasswordPanel from './SignInWithPasswordPanel';
 import SignOutPanel from './SignOutPanel';
-import ShowPasswordAdornment from './ShowPasswordAdornment';
+import ShowPasswordButton from './ShowPasswordButton';
 import ThemeModePanel from './ThemeModePanel';
 
 export {
@@ -25,6 +25,6 @@ export {
   SignInWithEmailLinkPanel,
   SignInWithPasswordPanel,
   SignOutPanel,
-  ShowPasswordAdornment,
+  ShowPasswordButton,
   ThemeModePanel,
 };

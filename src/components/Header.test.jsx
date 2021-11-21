@@ -7,8 +7,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { i18n } from '../conf';
 import { resetMockService, mockService } from '../testConfig';
 
-jest.mock('firebase/firestore', () => ({}));
-
 let mockNavigationType;
 const mockUseNavigate = jest.fn();
 

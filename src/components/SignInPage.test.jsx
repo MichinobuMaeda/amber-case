@@ -5,8 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-
-jest.mock('firebase/firestore', () => ({}));
+import '../testConfig';
 
 // work around for mocking problem.
 const { SignInPage } = require('.');

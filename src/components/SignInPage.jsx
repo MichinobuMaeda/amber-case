@@ -30,7 +30,7 @@ const SignInPage = () => {
       </Grid>
       <Grid item xs={12}>
         <p style={{ float: 'right', marginTop: 0 }}>
-          <Link href="#/policy">{t('Polycy')}</Link>
+          <Link href="#/policy">{t('Policy')}</Link>
         </p>
         <RadioButtons
           legend={t('select login method')}

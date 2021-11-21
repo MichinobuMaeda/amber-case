@@ -6,7 +6,6 @@ export {
 export {
   updateApp,
   initializeFirebase,
-  listenFirebase,
   handelSendSignInLinkToEmail,
   handleSignInWithPassword,
   handleSendEmailVerification,
@@ -14,9 +13,11 @@ export {
   handelReauthenticateLinkToEmail,
   handleReauthenticateWithPassword,
   handleSignOut,
-  setAccountProperties,
   setMyEmail,
   setMyPassword,
+  setConfProperties,
+  setAccountProperties,
+  listenFirebase,
   isSignedIn,
 } from './firebase';
 export * from './ui';

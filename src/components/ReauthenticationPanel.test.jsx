@@ -6,8 +6,6 @@ import React from 'react';
 import { i18n } from '../conf';
 import { resetMockService, mockService } from '../testConfig';
 
-jest.mock('firebase/firestore', () => ({}));
-
 const mockHandelReauthenticateLinkToEmail = jest.fn();
 const mockHandleReauthenticateWithPassword = jest.fn();
 jest.mock('../api', () => ({
@@ -97,7 +95,7 @@ describe('ReauthenticationPanel: Password', () => {
     const button = screen.queryByRole('button', { name: 'passwordConfiremation' });
     expect(button).toBeDisabled();
 
-    userEvent.type(screen.queryByLabelText(i18n.t('password')), 'a');
+    userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'a');
     expect(button).not.toBeDisabled();
 
     userEvent.click(button);
@@ -119,7 +117,7 @@ describe('ReauthenticationPanel: Password', () => {
     );
 
     const button = screen.queryByRole('button', { name: 'passwordConfiremation' });
-    userEvent.type(screen.queryByLabelText(i18n.t('password')), 'a');
+    userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'a');
 
     userEvent.click(button);
     await waitFor(() => expect(mockHandleReauthenticateWithPassword.mock.calls.length).toEqual(1));

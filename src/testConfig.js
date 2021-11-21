@@ -15,10 +15,6 @@ export const mockSetMe = jest.fn();
 export const mockSetAuthUser = jest.fn();
 export const mockSetReauthenticationTimeout = jest.fn();
 
-export const mockDocPath = 'mockDocPath';
-export const mockOnSnapshot = jest.fn(() => jest.fn());
-export const mockDoc = jest.fn();
-
 export const mockService = {};
 
 export const mockLocalStorage = {};
@@ -38,6 +34,21 @@ export const mockWindow = {
     removeItem: mockLocalStorageRemoveItem,
   },
 };
+
+export const mockDocPath = 'mockDocPath';
+export const mockOnSnapshot = jest.fn(() => jest.fn());
+export const mockDoc = jest.fn();
+export const mockConnectFirestoreEmulator = jest.fn();
+export const mockUpdateDoc = jest.fn();
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(() => ({})),
+  onSnapshot: mockOnSnapshot,
+  doc: mockDoc,
+  connectFirestoreEmulator: mockConnectFirestoreEmulator,
+  updateDoc: mockUpdateDoc,
+}));
+
+jest.mock('react-markdown', () => 'div');
 
 export const resetMockService = () => {
   jest.clearAllMocks();

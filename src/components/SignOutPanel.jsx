@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Grid, Alert, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { Logout } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';

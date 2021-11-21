@@ -3,14 +3,16 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-// work around for mocking problem.
-const { ShowPasswordAdornment } = require('./exportForTest');
+import '../testConfig';
 
-describe('ShowPasswordAdornment', () => {
+// work around for mocking problem.
+const { ShowPasswordButton } = require('./exportForTest');
+
+describe('ShowPasswordButton', () => {
   it('hides password chars on default and toggled visibility '
   + 'by button click or mouseDown.', () => {
     const mockOnChange = jest.fn();
-    render(<ShowPasswordAdornment onClick={mockOnChange} />);
+    render(<ShowPasswordButton onClick={mockOnChange} />);
     expect(screen.queryByTestId('VisibilityOffIcon')).toBeInTheDocument();
 
     userEvent.click(screen.queryByTestId('VisibilityOffIcon'));
@@ -21,7 +23,7 @@ describe('ShowPasswordAdornment', () => {
   it('shows password chars with value: true and toggled visibility '
   + 'by button click or mouseDown.', () => {
     const mockOnChange = jest.fn();
-    render(<ShowPasswordAdornment show onClick={mockOnChange} />);
+    render(<ShowPasswordButton show onClick={mockOnChange} />);
     expect(screen.queryByTestId('VisibilityIcon')).toBeInTheDocument();
 
     userEvent.click(screen.queryByTestId('VisibilityIcon'));

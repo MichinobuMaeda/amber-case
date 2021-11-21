@@ -7,8 +7,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { i18n } from '../conf';
 import { resetMockService, mockService } from '../testConfig';
 
-jest.mock('firebase/firestore', () => ({}));
-
 const mockHandleSendEmailVerification = jest.fn();
 const mockHandleReloadAuthUser = jest.fn();
 const mockHandleSignOut = jest.fn();

@@ -12,7 +12,7 @@ const HomePage = () => {
   return (
     <Grid container spacing={2} data-testid="home-page">
       <Grid item xs={12}>
-        <p style={{ float: 'right', marginTop: 0 }}><Link href="#/policy">{t('Polycy')}</Link></p>
+        <p style={{ float: 'right', marginTop: 0 }}><Link href="#/policy">{t('Policy')}</Link></p>
       </Grid>
     </Grid>
   );

@@ -27,7 +27,7 @@ const ControlledAccordion = ({ panels, expanded, onChange }) => {
             <Typography color="primary" variant="h3">{panel.title}</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <panel.body />
+            {panel.body}
           </AccordionDetails>
         </Accordion>
       ))}

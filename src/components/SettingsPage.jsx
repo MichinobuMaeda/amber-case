@@ -40,41 +40,41 @@ const SettingsPage = () => {
               priv: 'any',
               id: 'themeMode',
               title: t('Theme mode'),
-              body: () => <ThemeModePanel />,
+              body: <ThemeModePanel />,
             },
             {
               priv: 'user',
               id: 'myDisplayName',
               title: t('My display name'),
-              body: () => <MyDisplayNamePanel />,
+              body: <MyDisplayNamePanel />,
             },
             {
               priv: 'user',
               id: 'myPassword',
               title: t('My password'),
               body: service.reauthenticationTimeout
-                ? () => <MyPasswordPanel />
-                : () => <ReauthenticationPanel data-testid="reauthentication1-panel" />,
+                ? <MyPasswordPanel />
+                : <ReauthenticationPanel data-testid="reauthentication1-panel" />,
             },
             {
               priv: 'user',
               id: 'myEmail',
               title: t('My E-mail'),
               body: service.reauthenticationTimeout
-                ? () => <MyEmailPanel />
-                : () => <ReauthenticationPanel data-testid="reauthentication2-panel" />,
+                ? <MyEmailPanel />
+                : <ReauthenticationPanel data-testid="reauthentication2-panel" />,
             },
             {
               priv: 'admin',
               id: 'accounts',
               title: t('Accounts'),
-              body: () => <AccountsPanel />,
+              body: <AccountsPanel />,
             },
             {
               priv: 'user',
               id: 'signOut',
               title: t('Sign-out'),
-              body: () => <SignOutPanel />,
+              body: <SignOutPanel />,
             },
           ].filter(
             (panel) => panel.priv === 'any'

@@ -9,8 +9,6 @@ import {
   mockSetReauthenticationTimeout,
 } from '../testConfig';
 
-jest.mock('firebase/firestore', () => ({}));
-
 const mockNavigate = jest.fn();
 const mockUseParams = jest.fn();
 jest.mock('react-router-dom', () => ({

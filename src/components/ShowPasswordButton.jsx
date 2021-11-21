@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { InputAdornment, IconButton } from '@mui/material';
 import { VisibilityOff, Visibility } from '@mui/icons-material';
 
-const ShowPasswordAdornment = ({ position, show, onClick }) => (
+const ShowPasswordButton = ({ position, show, onClick }) => (
   <InputAdornment position={position}>
     <IconButton
       onClick={() => { onClick(!show); }}
@@ -14,16 +14,16 @@ const ShowPasswordAdornment = ({ position, show, onClick }) => (
   </InputAdornment>
 );
 
-ShowPasswordAdornment.propTypes = {
+ShowPasswordButton.propTypes = {
   position: PropTypes.string,
   show: PropTypes.bool,
   onClick: PropTypes.func,
 };
 
-ShowPasswordAdornment.defaultProps = {
+ShowPasswordButton.defaultProps = {
   position: 'end',
   show: false,
   onClick: null,
 };
 
-export default ShowPasswordAdornment;
+export default ShowPasswordButton;

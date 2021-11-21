@@ -5,8 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-
-jest.mock('firebase/firestore', () => ({}));
+import '../testConfig';
 
 const mockHandleSignInWithPassword = jest.fn();
 jest.mock('../api', () => ({
@@ -37,7 +36,7 @@ describe('SignInWithPasswordPanel', () => {
         />
       </MemoryRouter>,
     );
-    userEvent.type(screen.queryByLabelText(i18n.t('password')), 't');
+    userEvent.type(screen.queryByLabelText(i18n.t('Password')), 't');
     await waitFor(() => expect(screen.queryByRole('button', { name: 'sign-in' })).not.toBeDisabled());
 
     userEvent.click(screen.queryByRole('button', { name: 'sign-in' }));
@@ -66,7 +65,7 @@ describe('SignInWithPasswordPanel', () => {
         />
       </MemoryRouter>,
     );
-    userEvent.type(screen.queryByLabelText(i18n.t('password')), 't');
+    userEvent.type(screen.queryByLabelText(i18n.t('Password')), 't');
     await waitFor(() => expect(screen.queryByRole('button', { name: 'sign-in' })).toBeInTheDocument());
 
     userEvent.click(screen.queryByRole('button', { name: 'sign-in' }));
@@ -87,7 +86,7 @@ describe('SignInWithPasswordPanel', () => {
         />
       </MemoryRouter>,
     );
-    userEvent.type(screen.queryByLabelText(i18n.t('password')), 't');
+    userEvent.type(screen.queryByLabelText(i18n.t('Password')), 't');
     await waitFor(() => expect(screen.queryByRole('button', { name: 'sign-in' })).toBeDisabled());
 
     expect(screen.queryByText(errorMessage)).toBeNull();
@@ -104,7 +103,7 @@ describe('SignInWithPasswordPanel', () => {
         />
       </MemoryRouter>,
     );
-    userEvent.type(screen.queryByLabelText(i18n.t('password')), 't');
+    userEvent.type(screen.queryByLabelText(i18n.t('Password')), 't');
     await waitFor(() => expect(screen.queryByRole('button', { name: 'sign-in' })).toBeDisabled());
   });
 

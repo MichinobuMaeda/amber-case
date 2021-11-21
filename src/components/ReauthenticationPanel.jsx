@@ -12,7 +12,7 @@ import {
   handelReauthenticateLinkToEmail,
   handleReauthenticateWithPassword,
 } from '../api';
-import ShowPasswordAdornment from './ShowPasswordAdornment';
+import ShowPasswordButton from './ShowPasswordButton';
 
 const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
   const { t } = useTranslation();
@@ -77,10 +77,10 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
         <TextField
           id={`${dataTestid}-password`}
           type={showPassword ? 'text' : 'password'}
-          label={t('password')}
+          label={t('Password')}
           onChange={(e) => setPassword(e.target.value)}
           InputProps={{
-            endAdornment: <ShowPasswordAdornment show={showPassword} onClick={setShowPassword} />,
+            endAdornment: <ShowPasswordButton show={showPassword} onClick={setShowPassword} />,
           }}
         />
       </Grid>

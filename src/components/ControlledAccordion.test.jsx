@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
+import '../testConfig';
+
 // work around for mocking problem.
 const { ControlledAccordion } = require('./exportForTest');
 
@@ -15,17 +17,17 @@ describe('ControlledAccordion', () => {
           {
             id: 'panel01',
             title: 'Panel 01 title',
-            body: () => <div>Panel 01 body</div>,
+            body: <div>Panel 01 body</div>,
           },
           {
             id: 'panel02',
             title: 'Panel 02 title',
-            body: () => <div>Panel 02 body</div>,
+            body: <div>Panel 02 body</div>,
           },
           {
             id: 'panel03',
             title: 'Panel 03 title',
-            body: () => <div>Panel 03 body</div>,
+            body: <div>Panel 03 body</div>,
           },
         ]}
         expanded="panel02"

@@ -11,7 +11,7 @@ import {
   validateReuired, validateEmail,
 } from '../conf';
 import { ServiceContext, handleSignInWithPassword } from '../api';
-import ShowPasswordAdornment from './ShowPasswordAdornment';
+import ShowPasswordButton from './ShowPasswordButton';
 
 const SignInWithPasswordPanel = ({ email, errorMessage, onEmailChange }) => {
   const { t } = useTranslation();
@@ -44,11 +44,11 @@ const SignInWithPasswordPanel = ({ email, errorMessage, onEmailChange }) => {
       <Grid item xs={12} sm={8} md={6}>
         <TextField
           id="signInWithPassword-password"
-          label={t('password')}
+          label={t('Password')}
           type={showPassword ? 'text' : 'password'}
           onChange={(e) => setPassword(e.target.value)}
           InputProps={{
-            endAdornment: <ShowPasswordAdornment show={showPassword} onClick={setShowPassword} />,
+            endAdornment: <ShowPasswordButton show={showPassword} onClick={setShowPassword} />,
           }}
         />
       </Grid>

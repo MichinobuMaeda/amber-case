@@ -111,19 +111,6 @@ export const restoreAuthError = (service, window) => {
   window.localStorage.removeItem(localKeyError);
 };
 
-export const listenConf = (service) => {
-  const { db, setConf } = service;
-  if (!service.unsubConf) {
-    // eslint-disable-next-line no-param-reassign
-    service.unsubConf = onSnapshot(
-      doc(db, 'service', 'conf'),
-      (snapshot) => {
-        setConf(snapshot.exists ? castDoc(snapshot) : { error: true });
-      },
-    );
-  }
-};
-
 export const handelSendSignInLinkToEmail = async (service, window, email) => {
   window.localStorage.setItem(localKeyEmail, email);
   await sendSignInLinkToEmail(service.auth, email, {
@@ -199,6 +186,36 @@ export const handleSignOut = async (service) => {
   await signOut(service.auth);
 };
 
+export const listenConf = (service) => {
+  const { db, setConf } = service;
+  if (!service.unsubConf) {
+    // eslint-disable-next-line no-param-reassign
+    service.unsubConf = onSnapshot(
+      doc(db, 'service', 'conf'),
+      (snapshot) => {
+        setConf(snapshot.exists ? castDoc(snapshot) : { error: true });
+      },
+    );
+  }
+};
+
+export const setMyEmail = async (service, email) => {
+  await updateEmail(service.auth.currentUser, email);
+  await handleReloadAuthUser(service);
+};
+
+export const setMyPassword = async (service, password) => {
+  await updatePassword(service.auth.currentUser, password);
+};
+
+export const setConfProperties = async (service, props) => {
+  const { db } = service;
+  await updateDoc(doc(db, 'service', 'conf'), {
+    ...props,
+    updatedAt: new Date(),
+  });
+};
+
 export const listenMe = (service, uid) => {
   const { db, setMe, setThemeMode } = service;
   const meRef = doc(db, 'accounts', uid);
@@ -231,14 +248,6 @@ export const setAccountProperties = async (service, id, props) => {
     ...props,
     updatedAt: new Date(),
   });
-};
-
-export const setMyEmail = async (service, email) => {
-  await updateEmail(service.auth.currentUser, email);
-};
-
-export const setMyPassword = async (service, password) => {
-  await updatePassword(service.auth.currentUser, password);
 };
 
 export const listenFirebase = async (service, window) => {

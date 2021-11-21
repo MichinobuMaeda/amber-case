@@ -18,7 +18,7 @@ const MyDisplayNamePanel = () => {
   );
 
   const [name, setName] = useState(
-    validateReuired(service.me.name) ? service.me.name.trim() : '',
+    getValidationError(service.me.name) ? '' : service.me.name.trim(),
   );
   const [validationError, setValidationError] = useState(getValidationError(service.me.name));
   const [successStatus, setSuccessStatus] = useState(false);
@@ -44,7 +44,7 @@ const MyDisplayNamePanel = () => {
     <Grid container spacing={2} data-testid="myDisplayName-panel">
       <Grid item xs={12} sm={8} md={6}>
         <TextField
-          id="myDisplayName-panel"
+          id="myDisplayName-name"
           value={name}
           label={t('Display name')}
           onChange={(e) => onNameChange(e.target.value)}

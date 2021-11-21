@@ -4,6 +4,7 @@ import React from 'react';
 import { ArrowForward } from '@mui/icons-material';
 
 import { i18n } from '../conf';
+import '../testConfig';
 
 // work around for mocking problem.
 const { PageTitle } = require('./exportForTest');
