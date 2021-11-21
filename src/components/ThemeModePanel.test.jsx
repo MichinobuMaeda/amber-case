@@ -29,7 +29,7 @@ describe('ThemeModePanel', () => {
     mockService.authUser = { uid: 'id01', emailVerified: true };
     render(
       <ServiceContext.Provider value={mockService}>
-        <ThemeModePanel data-testid="themeMode-panel" />
+        <ThemeModePanel />
       </ServiceContext.Provider>,
     );
 

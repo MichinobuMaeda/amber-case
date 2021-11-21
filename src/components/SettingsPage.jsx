@@ -24,49 +24,6 @@ const SettingsPage = () => {
   const params = useParams();
   const service = useContext(ServiceContext);
 
-  const panels = [
-    {
-      priv: 'any',
-      id: 'themeMode',
-      title: t('Theme mode'),
-      body: () => <ThemeModePanel data-testid="themeMode-panel" />,
-    },
-    {
-      priv: 'user',
-      id: 'myDisplayName',
-      title: t('My display name'),
-      body: () => <MyDisplayNamePanel data-testid="myDisplayName-panel" />,
-    },
-    {
-      priv: 'user',
-      id: 'myPassword',
-      title: t('My password'),
-      body: service.reauthenticationTimeout
-        ? () => <MyPasswordPanel data-testid="myPassword-panel" />
-        : () => <ReauthenticationPanel data-testid="reauthentication1-panel" />,
-    },
-    {
-      priv: 'user',
-      id: 'myEmail',
-      title: t('My E-mail'),
-      body: service.reauthenticationTimeout
-        ? () => <MyEmailPanel data-testid="myEmail-panel" />
-        : () => <ReauthenticationPanel data-testid="reauthentication2-panel" />,
-    },
-    {
-      priv: 'admin',
-      id: 'accounts',
-      title: t('Accounts'),
-      body: () => <AccountsPanel data-testid="accounts-panel" />,
-    },
-    {
-      priv: 'user',
-      id: 'signOut',
-      title: t('Sign-out'),
-      body: () => <SignOutPanel data-testid="signOut-panel" />,
-    },
-  ];
-
   const handleOnChangePanel = (id) => {
     navigate(`/settings/${id}`);
   };
@@ -78,7 +35,48 @@ const SettingsPage = () => {
       </Grid>
       <Grid item xs={12}>
         <ControlledAccordion
-          panels={panels.filter(
+          panels={[
+            {
+              priv: 'any',
+              id: 'themeMode',
+              title: t('Theme mode'),
+              body: () => <ThemeModePanel />,
+            },
+            {
+              priv: 'user',
+              id: 'myDisplayName',
+              title: t('My display name'),
+              body: () => <MyDisplayNamePanel />,
+            },
+            {
+              priv: 'user',
+              id: 'myPassword',
+              title: t('My password'),
+              body: service.reauthenticationTimeout
+                ? () => <MyPasswordPanel />
+                : () => <ReauthenticationPanel data-testid="reauthentication1-panel" />,
+            },
+            {
+              priv: 'user',
+              id: 'myEmail',
+              title: t('My E-mail'),
+              body: service.reauthenticationTimeout
+                ? () => <MyEmailPanel />
+                : () => <ReauthenticationPanel data-testid="reauthentication2-panel" />,
+            },
+            {
+              priv: 'admin',
+              id: 'accounts',
+              title: t('Accounts'),
+              body: () => <AccountsPanel />,
+            },
+            {
+              priv: 'user',
+              id: 'signOut',
+              title: t('Sign-out'),
+              body: () => <SignOutPanel />,
+            },
+          ].filter(
             (panel) => panel.priv === 'any'
               || (panel.priv === 'user' && isSignedIn(service))
               || (panel.priv === 'admin' && isSignedIn(service) && service.me.admin),

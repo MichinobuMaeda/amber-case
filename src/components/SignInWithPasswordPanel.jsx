@@ -45,6 +45,7 @@ const SignInWithPasswordPanel = ({ email, errorMessage, onEmailChange }) => {
         <TextField
           id="signInWithPassword-password"
           label={t('password')}
+          type={showPassword ? 'text' : 'password'}
           onChange={(e) => setPassword(e.target.value)}
           InputProps={{
             endAdornment: <ShowPasswordAdornment show={showPassword} onClick={setShowPassword} />,

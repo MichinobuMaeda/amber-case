@@ -1,15 +1,13 @@
 import React, { useContext } from 'react';
-import PropTypes from 'prop-types';
 import { Grid, Alert, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Logout } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-// import { buttonVariant } from '../conf';
 import { ServiceContext, handleSignOut } from '../api';
 
-const SignOutPanel = ({ 'data-testid': dataTestid }) => {
+const SignOutPanel = () => {
   const { t } = useTranslation();
   const service = useContext(ServiceContext);
   const navigate = useNavigate();
@@ -20,7 +18,7 @@ const SignOutPanel = ({ 'data-testid': dataTestid }) => {
   };
 
   return (
-    <Grid container spacing={2} data-testid={dataTestid}>
+    <Grid container spacing={2} data-testid="signOut-panel">
       <Grid item xs={12}>
         <Alert severity="warning">{t('sign-out confirmation')}</Alert>
       </Grid>
@@ -37,14 +35,6 @@ const SignOutPanel = ({ 'data-testid': dataTestid }) => {
       </Grid>
     </Grid>
   );
-};
-
-SignOutPanel.propTypes = {
-  'data-testid': PropTypes.string,
-};
-
-SignOutPanel.defaultProps = {
-  'data-testid': null,
 };
 
 export default SignOutPanel;

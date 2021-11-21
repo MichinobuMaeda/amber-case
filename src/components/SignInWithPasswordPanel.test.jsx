@@ -48,6 +48,10 @@ describe('SignInWithPasswordPanel', () => {
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), 'a');
     expect(mockOnEmailChange.mock.calls.length).toEqual(1);
     expect(mockOnEmailChange.mock.calls[0][0]).toEqual(`${email}a`);
+
+    userEvent.click(screen.queryByTestId('VisibilityOffIcon'));
+    expect(screen.queryByTestId('VisibilityOffIcon')).toBeNull();
+    expect(screen.queryByTestId('VisibilityIcon')).toBeInTheDocument();
   });
 
   it('shows message for error.', async () => {

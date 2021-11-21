@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import PropTypes from 'prop-types';
 import {
   Grid, Alert, TextField, Button,
 } from '@mui/material';
@@ -9,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import '../conf/i18n';
 import { ServiceContext, setAccountProperties } from '../api';
 
-const MyDisplayNamePanel = ({ 'data-testid': dataTestid }) => {
+const MyDisplayNamePanel = () => {
   const { t } = useTranslation();
   const service = useContext(ServiceContext);
 
@@ -39,7 +38,7 @@ const MyDisplayNamePanel = ({ 'data-testid': dataTestid }) => {
   };
 
   return (
-    <Grid container spacing={2} data-testid={dataTestid}>
+    <Grid container spacing={2} data-testid="myDisplayName-panel">
       <Grid item xs={12} sm={8} md={6}>
         <TextField
           id="myDisplayName-panel"
@@ -76,14 +75,6 @@ const MyDisplayNamePanel = ({ 'data-testid': dataTestid }) => {
       )}
     </Grid>
   );
-};
-
-MyDisplayNamePanel.propTypes = {
-  'data-testid': PropTypes.string,
-};
-
-MyDisplayNamePanel.defaultProps = {
-  'data-testid': null,
 };
 
 export default MyDisplayNamePanel;
