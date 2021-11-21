@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { ControlledAccordion } from '.';
+// work around for mocking problem.
+const { ControlledAccordion } = require('./exportForTest');
 
 describe('ControlledAccordion', () => {
   it('shows all panels and handles click event of the closed title.', () => {

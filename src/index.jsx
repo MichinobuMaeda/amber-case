@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import { useMediaQuery } from '@material-ui/core';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container } from '@mui/material';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 
-import { firebaseConfig } from './conf';
+import { firebaseConfig, reauthentication } from './conf';
 import {
   initializeFirebase, listenFirebase,
   ServiceContext, selectThemeMode,
@@ -41,8 +41,24 @@ const AppBase = () => {
   service.me = me;
   service.setMe = setMe;
 
+  const [reauthenticationTimeout, setReauthenticationTimeout] = useState(0);
+  service.reauthenticationTimeout = reauthenticationTimeout;
+  service.setReauthenticationTimeout = setReauthenticationTimeout;
+
   useEffect(() => {
     listenFirebase(service, window);
+
+    const intervalId = setInterval(
+      () => {
+        if (service.reauthenticationTimeout > 0) {
+          const nextVal = service.reauthenticationTimeout - reauthentication.updateInterval;
+          setReauthenticationTimeout(nextVal < 0 ? 0 : nextVal);
+        }
+      },
+      reauthentication.updateInterval,
+    );
+
+    return () => clearInterval(intervalId);
   }, [service]);
 
   return (
@@ -50,9 +66,9 @@ const AppBase = () => {
       <ThemeProvider theme={createTheme(selectThemeMode(service))}>
         <CssBaseline />
         <Container>
-          <BrowserRouter>
+          <HashRouter>
             <App />
-          </BrowserRouter>
+          </HashRouter>
         </Container>
       </ThemeProvider>
     </React.StrictMode>

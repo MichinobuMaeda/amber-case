@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import {
   Header, LoadingPage, SignInPage, EmailVerificationPage,
   HomePage, SettingsPage, PolicyPage,
-} from './views';
+} from './components';
 import { ServiceContext, isSignedIn } from './api';
 
 const App = () => {

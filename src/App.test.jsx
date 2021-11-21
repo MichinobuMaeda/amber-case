@@ -30,7 +30,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-page')).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('loading config'))).toBeInTheDocument();
   });
 
@@ -43,7 +43,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-page')).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('loading config'))).toBeInTheDocument();
   });
 
@@ -56,7 +56,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-page')).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('loading config'))).toBeInTheDocument();
   });
 
@@ -71,7 +71,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-page')).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('failed to load config'))).toBeInTheDocument();
   });
 
@@ -86,7 +86,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-page')).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('failed to load config'))).toBeInTheDocument();
   });
 
@@ -101,7 +101,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('LoadingPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-page')).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('failed to load config'))).toBeInTheDocument();
   });
 
@@ -115,7 +115,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('SignInPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('signIn-page')).toBeInTheDocument();
   });
 
   it('show Settings if not signed in on "settings/:panel".', () => {
@@ -128,7 +128,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('SettingsPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-page')).toBeInTheDocument();
   });
 
   it('show PolicyPage if not signed in on "policy".', () => {
@@ -141,7 +141,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('PolicyPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('policy-page')).toBeInTheDocument();
   });
 
   it('show EmailVerificationPage if signed in but not email verified on "/".', () => {
@@ -156,7 +156,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('EmailVerificationPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('emailVerification-page')).toBeInTheDocument();
   });
 
   it('show HomePage if signed in and email verified on "/".', () => {
@@ -171,7 +171,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('HomePage')).toBeInTheDocument();
+    expect(screen.queryByTestId('home-page')).toBeInTheDocument();
   });
 
   it('show Settings if signed in on "settings/:panel".', () => {
@@ -185,7 +185,7 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('SettingsPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-page')).toBeInTheDocument();
   });
 
   it('show PolicyPage if signed in on "policy".', () => {
@@ -199,6 +199,6 @@ describe('App', () => {
       </ServiceContext.Provider>,
     );
 
-    expect(screen.queryByTestId('PolicyPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('policy-page')).toBeInTheDocument();
   });
 });

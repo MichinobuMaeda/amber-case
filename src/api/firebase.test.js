@@ -2,22 +2,25 @@ import {
   mockUrl, resetMockService, mockService, mockCurrentUser, mockAuth,
   mockSetConf, mockSetMe, mockSetAuthUser,
   mockDocPath, mockOnSnapshot, mockDoc,
-  mockLocalStorage, mockWindow, mockLocationReload, mockLocationReplace,
+  mockLocalStorage, mockLocalStorageSetItem, mockLocalStorageRemoveItem,
+  mockWindow, mockLocationReload, mockLocationReplace,
 } from '../testConfig';
 
 jest.mock('firebase/app', () => ({
   initializeApp: jest.fn(),
 }));
 
-const mockSignInWithEmailLink = jest
-  .fn(() => 'default')
-  .mockImplementationOnce(() => { throw new Error(); });
+const mockSignInWithEmailLink = jest.fn(() => 'default');
 const mockIsSignInWithEmailLink = jest.fn(() => false);
 const mockConnectAuthEmulator = jest.fn();
 const mockOnAuthStateChanged = jest.fn();
 const mockSendSignInLinkToEmail = jest.fn();
 const mockSignInWithEmailAndPassword = jest.fn();
 const mockSendEmailVerification = jest.fn();
+const mockReauthenticateWithCredential = jest.fn();
+const mockEmailAuthProviderCredential = jest.fn();
+const mockUpdateEmail = jest.fn();
+const mockUpdatePassword = jest.fn();
 const mockSignOut = jest.fn();
 const mockReload = jest.fn();
 jest.mock('firebase/auth', () => ({
@@ -28,10 +31,14 @@ jest.mock('firebase/auth', () => ({
   sendSignInLinkToEmail: mockSendSignInLinkToEmail,
   signInWithEmailAndPassword: mockSignInWithEmailAndPassword,
   sendEmailVerification: mockSendEmailVerification,
+  reauthenticateWithCredential: mockReauthenticateWithCredential,
   signOut: mockSignOut,
   isSignInWithEmailLink: mockIsSignInWithEmailLink,
+  updateEmail: mockUpdateEmail,
+  updatePassword: mockUpdatePassword,
   onAuthStateChanged: mockOnAuthStateChanged,
   reload: mockReload,
+  EmailAuthProvider: { credential: mockEmailAuthProviderCredential },
 }));
 
 const mockConnectFirestoreEmulator = jest.fn();
@@ -70,24 +77,25 @@ const {
   handelSendSignInLinkToEmail,
   handleSignInWithPassword,
   handleSendEmailVerification,
+  handelReauthenticateLinkToEmail,
+  handleReauthenticateWithEmailLink,
+  handleReauthenticateWithPassword,
   handleReloadAuthUser,
   onSignOut,
   handleSignOut,
   listenMe,
   setAccountProperties,
+  setMyEmail,
+  setMyPassword,
   listenFirebase,
   isSignedIn,
   localKeyEmail,
   localKeyError,
   actionEmailVerification,
+  actionReauthentication,
 } = require('./firebase');
 
-beforeAll(() => {
-  resetMockService();
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
+beforeEach(() => {
   resetMockService();
 });
 
@@ -231,13 +239,18 @@ describe('handleSignInWithEmailLink(service, window)', () => {
     const email01 = 'abc@example.com';
     const url01 = 'https://example.com/?name=value';
     mockLocalStorage[localKeyEmail] = email01;
-    mockLocalStorage[localKeyError] = 'dummy';
     mockWindow.location.href = url01;
-
+    mockSignInWithEmailLink.mockImplementationOnce(() => { throw new Error(); });
     await handleSignInWithEmailLink(mockService, mockWindow);
 
-    expect(mockLocalStorage[localKeyEmail]).not.toBeDefined();
-    expect(mockLocalStorage[localKeyError]).toEqual('check your email address');
+    expect(mockLocalStorageRemoveItem.mock.calls.length).toEqual(2);
+    expect(mockLocalStorageRemoveItem.mock.calls[0][0]).toEqual(localKeyEmail);
+    expect(mockLocalStorageRemoveItem.mock.calls[1][0]).toEqual(localKeyError);
+
+    expect(mockLocalStorageSetItem.mock.calls.length).toEqual(1);
+    expect(mockLocalStorageSetItem.mock.calls[0][0]).toEqual(localKeyError);
+    expect(mockLocalStorageSetItem.mock.calls[0][1]).toEqual('check your email address');
+
     expect(mockWindow.location.href).toEqual('https://example.com/');
   });
 
@@ -251,8 +264,10 @@ describe('handleSignInWithEmailLink(service, window)', () => {
 
     await handleSignInWithEmailLink(mockService, mockWindow);
 
-    expect(mockLocalStorage[localKeyEmail]).not.toBeDefined();
-    expect(mockLocalStorage[localKeyError]).not.toBeDefined();
+    expect(mockLocalStorageRemoveItem.mock.calls.length).toEqual(2);
+    expect(mockLocalStorageRemoveItem.mock.calls[0][0]).toEqual(localKeyEmail);
+    expect(mockLocalStorageRemoveItem.mock.calls[1][0]).toEqual(localKeyError);
+
     expect(mockSignInWithEmailLink.mock.calls.length).toEqual(1);
     expect(mockSignInWithEmailLink.mock.calls[0][0]).toEqual(mockAuth);
     expect(mockSignInWithEmailLink.mock.calls[0][1]).toEqual(email01);
@@ -268,8 +283,10 @@ describe('handleSignInWithEmailLink(service, window)', () => {
 
     await handleSignInWithEmailLink(mockService, mockWindow);
 
-    expect(mockLocalStorage[localKeyEmail]).not.toBeDefined();
-    expect(mockLocalStorage[localKeyError]).toEqual('failed to sign in');
+    expect(mockLocalStorageSetItem.mock.calls.length).toEqual(1);
+    expect(mockLocalStorageSetItem.mock.calls[0][0]).toEqual(localKeyError);
+    expect(mockLocalStorageSetItem.mock.calls[0][1]).toEqual('failed to sign in');
+
     expect(mockSignInWithEmailLink.mock.calls.length).toEqual(0);
     expect(mockWindow.location.href).toEqual('https://example.com/');
   });
@@ -282,12 +299,15 @@ describe('restoreAuthError(service, window)', () => {
     restoreAuthError(mockService, mockWindow);
 
     expect(mockService.authError).toEqual('test01');
-    expect(mockLocalStorage[localKeyError]).not.toBeDefined();
+    expect(mockLocalStorageRemoveItem.mock.calls.length).toEqual(1);
+    expect(mockLocalStorageRemoveItem.mock.calls[0][0]).toEqual(localKeyError);
 
+    delete mockLocalStorage[localKeyError];
     restoreAuthError(mockService, mockWindow);
 
     expect(mockService.authError).toBeFalsy();
-    expect(mockLocalStorage[localKeyError]).not.toBeDefined();
+    expect(mockLocalStorageRemoveItem.mock.calls.length).toEqual(2);
+    expect(mockLocalStorageRemoveItem.mock.calls[1][0]).toEqual(localKeyError);
   });
 });
 
@@ -324,8 +344,6 @@ describe('listenConf(service)', () => {
 
 describe('handelSendSignInLinkToEmail(service, window, email)', () => {
   it('calls signInWithEmailAndPassword(auth, email, { url, handleCodeInApp })', async () => {
-    const mockSetItem = jest.fn();
-    mockWindow.localStorage.setItem = mockSetItem;
     const handleCodeInApp = true;
     mockService.conf = { url: mockUrl };
     const email = 'test01@example.com';
@@ -333,9 +351,9 @@ describe('handelSendSignInLinkToEmail(service, window, email)', () => {
 
     await handelSendSignInLinkToEmail(mockService, mockWindow, email);
 
-    expect(mockSetItem.mock.calls.length).toEqual(1);
-    expect(mockSetItem.mock.calls[0][0]).toEqual(localKeyEmail);
-    expect(mockSetItem.mock.calls[0][1]).toEqual(email);
+    expect(mockLocalStorageSetItem.mock.calls.length).toEqual(1);
+    expect(mockLocalStorageSetItem.mock.calls[0][0]).toEqual(localKeyEmail);
+    expect(mockLocalStorageSetItem.mock.calls[0][1]).toEqual(email);
     expect(mockSendSignInLinkToEmail.mock.calls.length).toEqual(1);
     expect(mockSendSignInLinkToEmail.mock.calls[0][0]).toEqual(mockAuth);
     expect(mockSendSignInLinkToEmail.mock.calls[0][1]).toEqual(email);
@@ -366,6 +384,111 @@ describe('handleSendEmailVerification(service)', () => {
 
     expect(mockSendEmailVerification.mock.calls.length).toEqual(1);
     expect(mockSendEmailVerification.mock.calls[0][0]).toEqual(mockUser);
+  });
+});
+
+describe('handelReauthenticateLinkToEmail(service, window)', () => {
+  it('sets email to localStrage and call sendSignInLinkToEmail() with reauth param.', async () => {
+    const mockUser = { uid: 'id01', email: 'id01@example.com' };
+    mockService.auth = { currentUser: mockUser };
+    await handelReauthenticateLinkToEmail(mockService, mockWindow);
+
+    expect(mockLocalStorageSetItem.mock.calls.length).toEqual(1);
+    expect(mockLocalStorageSetItem.mock.calls[0][0]).toEqual(localKeyEmail);
+    expect(mockLocalStorageSetItem.mock.calls[0][1]).toEqual('id01@example.com');
+
+    expect(mockSendSignInLinkToEmail.mock.calls.length).toEqual(1);
+    expect(mockSendSignInLinkToEmail.mock.calls[0][0]).toEqual(mockService.auth);
+    expect(mockSendSignInLinkToEmail.mock.calls[0][1]).toEqual('id01@example.com');
+    expect(mockSendSignInLinkToEmail.mock.calls[0][2]).toEqual({
+      url: `${mockWindow.location.href}${actionReauthentication}`,
+      handleCodeInApp: true,
+    });
+  });
+});
+
+describe('handleReauthenticateWithEmailLink(service, window)', () => {
+  it('set localKeyError: "check your email address" '
+  + 'if failed to sign in.', async () => {
+    const email01 = 'abc@example.com';
+    const url01 = 'https://example.com/?name=value#/';
+    mockLocalStorage[localKeyEmail] = email01;
+    mockWindow.location.href = url01;
+    mockSignInWithEmailLink.mockImplementationOnce(() => { throw new Error(); });
+
+    await handleReauthenticateWithEmailLink(mockService, mockWindow);
+
+    expect(mockLocalStorageRemoveItem.mock.calls.length).toEqual(2);
+    expect(mockLocalStorageRemoveItem.mock.calls[0][0]).toEqual(localKeyEmail);
+    expect(mockLocalStorageRemoveItem.mock.calls[1][0]).toEqual(localKeyError);
+
+    expect(mockLocalStorageSetItem.mock.calls.length).toEqual(1);
+    expect(mockLocalStorageSetItem.mock.calls[0][0]).toEqual(localKeyError);
+    expect(mockLocalStorageSetItem.mock.calls[0][1]).toEqual('check your email address');
+
+    expect(mockLocationReplace.mock.calls.length).toEqual(1);
+    expect(mockLocationReplace.mock.calls[0][0]).toEqual('https://example.com/#/');
+  });
+
+  it('call signInWithEmailLink() '
+  + 'if an email address in localStorage.', async () => {
+    const email01 = 'abc@example.com';
+    const url01 = 'https://example.com/?name=value#/';
+    mockLocalStorage[localKeyEmail] = email01;
+    mockLocalStorage[localKeyError] = 'dummy';
+    mockWindow.location.href = url01;
+
+    await handleReauthenticateWithEmailLink(mockService, mockWindow);
+
+    expect(mockLocalStorageRemoveItem.mock.calls.length).toEqual(2);
+    expect(mockLocalStorageRemoveItem.mock.calls[0][0]).toEqual(localKeyEmail);
+    expect(mockLocalStorageRemoveItem.mock.calls[1][0]).toEqual(localKeyError);
+
+    expect(mockSignInWithEmailLink.mock.calls.length).toEqual(1);
+    expect(mockSignInWithEmailLink.mock.calls[0][0]).toEqual(mockAuth);
+    expect(mockSignInWithEmailLink.mock.calls[0][1]).toEqual(email01);
+    expect(mockSignInWithEmailLink.mock.calls[0][2]).toEqual(url01);
+
+    expect(mockLocationReplace.mock.calls.length).toEqual(1);
+    expect(mockLocationReplace.mock.calls[0][0]).toEqual('https://example.com/#/');
+  });
+
+  it('set localKeyError: "failed to sign in" '
+  + 'if no email address in localStorage.', async () => {
+    const url01 = 'https://example.com/?name=value#/';
+    mockLocalStorage[localKeyError] = 'dummy';
+    mockWindow.location.href = url01;
+
+    await handleReauthenticateWithEmailLink(mockService, mockWindow);
+
+    expect(mockLocalStorageSetItem.mock.calls.length).toEqual(1);
+    expect(mockLocalStorageSetItem.mock.calls[0][0]).toEqual(localKeyError);
+    expect(mockLocalStorageSetItem.mock.calls[0][1]).toEqual('failed to sign in');
+
+    expect(mockSignInWithEmailLink.mock.calls.length).toEqual(0);
+
+    expect(mockLocationReplace.mock.calls.length).toEqual(1);
+    expect(mockLocationReplace.mock.calls[0][0]).toEqual('https://example.com/#/');
+  });
+});
+
+describe('handleReauthenticateWithPassword(service, password)', () => {
+  it('calls reauthenticateWithCredential()', async () => {
+    const mockCredential = { name: 'credential object' };
+    const mockPassword = 'id01password';
+    const mockUser = { uid: 'id01', email: 'id01@example.com' };
+    mockEmailAuthProviderCredential.mockImplementationOnce(() => mockCredential);
+    mockService.auth = { currentUser: mockUser };
+
+    await handleReauthenticateWithPassword(mockService, mockPassword);
+
+    expect(mockEmailAuthProviderCredential.mock.calls.length).toEqual(1);
+    expect(mockEmailAuthProviderCredential.mock.calls[0][0]).toEqual(mockUser.email);
+    expect(mockEmailAuthProviderCredential.mock.calls[0][1]).toEqual(mockPassword);
+
+    expect(mockReauthenticateWithCredential.mock.calls.length).toEqual(1);
+    expect(mockReauthenticateWithCredential.mock.calls[0][0]).toEqual(mockUser);
+    expect(mockReauthenticateWithCredential.mock.calls[0][1]).toEqual(mockCredential);
   });
 });
 
@@ -515,7 +638,43 @@ describe('setAccountProperties(service, id, props)', () => {
   });
 });
 
+describe('setMyEmail(service, email)', () => {
+  it('call updateEmail(user, email).', async () => {
+    const email = 'test01@example.com';
+    const user = { uid: 'id01' };
+    mockService.auth = { currentUser: user };
+    await setMyEmail(mockService, email);
+
+    expect(mockUpdateEmail.mock.calls.length).toEqual(1);
+    expect(mockUpdateEmail.mock.calls[0][0]).toEqual(user);
+    expect(mockUpdateEmail.mock.calls[0][1]).toEqual(email);
+  });
+});
+
+describe('setMyPassword(service, password)', () => {
+  it('call updatePassword(user, password).', async () => {
+    const password = 'password01';
+    const user = { uid: 'id01' };
+    mockService.auth = { currentUser: user };
+    await setMyPassword(mockService, password);
+
+    expect(mockUpdatePassword.mock.calls.length).toEqual(1);
+    expect(mockUpdatePassword.mock.calls[0][0]).toEqual(user);
+    expect(mockUpdatePassword.mock.calls[0][1]).toEqual(password);
+  });
+});
+
 describe('listenFirebase(service, windows)', () => {
+  it('calls handleReauthenticateWithEmailLink() '
+  + 'if has param of actionReauthentication.', async () => {
+    mockWindow.location.href += actionReauthentication;
+    mockLocalStorage[localKeyEmail] = 'abc@example.com';
+
+    await listenFirebase(mockService, mockWindow);
+
+    expect(mockSignInWithEmailLink.mock.calls.length).toEqual(1);
+  });
+
   it('calls window.location.replace() '
   + 'if has param of actionEmailVerification.', async () => {
     mockWindow.location.href += actionEmailVerification;

@@ -13,6 +13,7 @@ export const mockSetThemeMode = jest.fn();
 export const mockSetConf = jest.fn();
 export const mockSetMe = jest.fn();
 export const mockSetAuthUser = jest.fn();
+export const mockSetReauthenticationTimeout = jest.fn();
 
 export const mockDocPath = 'mockDocPath';
 export const mockOnSnapshot = jest.fn(() => jest.fn());
@@ -21,6 +22,8 @@ export const mockDoc = jest.fn();
 export const mockService = {};
 
 export const mockLocalStorage = {};
+export const mockLocalStorageSetItem = jest.fn();
+export const mockLocalStorageRemoveItem = jest.fn();
 export const mockLocationReload = jest.fn();
 export const mockLocationReplace = jest.fn();
 export const mockWindow = {
@@ -31,12 +34,13 @@ export const mockWindow = {
   },
   localStorage: {
     getItem: (key) => mockLocalStorage[key],
-    setItem: (key, value) => { mockLocalStorage[key] = value; },
-    removeItem: (key) => { delete mockLocalStorage[key]; },
+    setItem: mockLocalStorageSetItem,
+    removeItem: mockLocalStorageRemoveItem,
   },
 };
 
 export const resetMockService = () => {
+  jest.clearAllMocks();
   mockService.version = '1.0.0';
   mockService.unsubConf = null;
   mockService.unsub = {};
@@ -53,6 +57,8 @@ export const resetMockService = () => {
   mockService.setAuthUser = mockSetAuthUser;
   mockService.me = {};
   mockService.setMe = mockSetMe;
+  mockService.reauthenticationTimeout = 0;
+  mockService.setReauthenticationTimeout = mockSetReauthenticationTimeout;
 
   const mockLocalStorageKeys = Object.keys(mockLocalStorage);
   mockLocalStorageKeys.forEach((key) => { delete mockLocalStorage[key]; });

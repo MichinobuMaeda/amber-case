@@ -4,6 +4,8 @@ import {
   isSignInWithEmailLink, onAuthStateChanged,
   sendSignInLinkToEmail, signInWithEmailAndPassword,
   signInWithEmailLink, sendEmailVerification, signOut,
+  reauthenticateWithCredential, updateEmail, updatePassword,
+  EmailAuthProvider,
 } from 'firebase/auth';
 import {
   getFirestore, connectFirestoreEmulator,
@@ -11,6 +13,11 @@ import {
 } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+
+import { reauthentication } from '../conf';
+
+export const actionEmailVerification = '?action=emailverification';
+export const actionReauthentication = '?action=reauthentication';
 
 export const localKeyEmail = 'AmberBowlEmail';
 export const localKeyError = 'AmberBowlError';
@@ -129,13 +136,49 @@ export const handleSignInWithPassword = async (service, email, password) => {
   await signInWithEmailAndPassword(service.auth, email, password);
 };
 
-export const actionEmailVerification = '?action=emailverification';
-
 export const handleSendEmailVerification = async (service) => {
   await sendEmailVerification(service.auth.currentUser, {
     url: `${window.location.href}${actionEmailVerification}`,
     handleCodeInApp: true,
   });
+};
+
+export const handelReauthenticateLinkToEmail = async (service, window) => {
+  const { email } = service.auth.currentUser;
+  window.localStorage.setItem(localKeyEmail, email);
+  await sendSignInLinkToEmail(service.auth, email, {
+    url: `${window.location.href}${actionReauthentication}`,
+    handleCodeInApp: true,
+  });
+};
+
+export const handleReauthenticateWithEmailLink = async (service, window) => {
+  const url = window.location.href.replace(actionReauthentication, '');
+  const email = window.localStorage.getItem(localKeyEmail);
+  window.localStorage.removeItem(localKeyEmail);
+  window.localStorage.removeItem(localKeyError);
+  if (email) {
+    try {
+      await signInWithEmailLink(service.auth, email, url);
+    } catch (e) {
+      window.localStorage.setItem(localKeyError, 'check your email address');
+    }
+  } else {
+    window.localStorage.setItem(localKeyError, 'failed to sign in');
+  }
+
+  window.location.replace(url.replace(/\?.*#\//, '#/'));
+};
+
+export const handleReauthenticateWithPassword = async (service, password) => {
+  await reauthenticateWithCredential(
+    service.auth.currentUser,
+    EmailAuthProvider.credential(
+      service.auth.currentUser.email,
+      password,
+    ),
+  );
+  service.setReauthenticationTimeout(reauthentication.timeout);
 };
 
 export const handleReloadAuthUser = async (service) => {
@@ -148,6 +191,7 @@ export const onSignOut = (service) => {
   unsubUserData(service);
   service.setMe({});
   service.setAuthUser({});
+  service.setReauthenticationTimeout(0);
 };
 
 export const handleSignOut = async (service) => {
@@ -189,8 +233,18 @@ export const setAccountProperties = async (service, id, props) => {
   });
 };
 
+export const setMyEmail = async (service, email) => {
+  await updateEmail(service.auth.currentUser, email);
+};
+
+export const setMyPassword = async (service, password) => {
+  await updatePassword(service.auth.currentUser, password);
+};
+
 export const listenFirebase = async (service, window) => {
-  if (window.location.href.includes(actionEmailVerification)) {
+  if (window.location.href.includes(actionReauthentication)) {
+    await handleReauthenticateWithEmailLink(service, window);
+  } else if (window.location.href.includes(actionEmailVerification)) {
     window.location.replace(
       window.location.href.replace(actionEmailVerification, ''),
     );
@@ -207,6 +261,7 @@ export const listenFirebase = async (service, window) => {
         }
         service.setAuthUser(user);
         listenMe(service, user.uid);
+        service.setReauthenticationTimeout(reauthentication.timeout);
       } else if (prevUid) {
         onSignOut(service);
       }
