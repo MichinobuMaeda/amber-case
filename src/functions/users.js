@@ -9,11 +9,11 @@ const createUser = async (firebase, name, admin, tester, group, email, password)
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-  if (name.length === 0) {
+  if (name.trim().length === 0) {
     throw new Error('Param name is missing.');
   }
 
-  if (email?.length === 0) {
+  if (email?.trim().length === 0) {
     throw new Error('Param email is empty.');
   }
 
