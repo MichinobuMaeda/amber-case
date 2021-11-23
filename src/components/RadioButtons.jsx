@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  FormControl, FormLabel, RadioGroup, FormControlLabel, Radio,
-} from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Radio from '@mui/material/Radio';
 
 const RadioButtons = ({
   'aria-label': ariaLabel, legend, items, value, onChange,

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -19,7 +19,7 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { ServiceContext } = require('../api');
+const { AppContext } = require('../api');
 const { PolicyPage } = require('.');
 
 beforeEach(() => {
@@ -30,36 +30,36 @@ describe('MyPasswordPanel', () => {
   const errorMessage = i18n.t('failed to save data') + i18n.t('retry failed or call admin');
 
   it('disables button edit for guest.', async () => {
-    mockService.conf.policy = 'text';
-    mockService.me = {};
+    mockContext.conf.policy = 'text';
+    mockContext.me = {};
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <PolicyPage />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'edit-policy' })).toBeNull();
   });
 
   it('disables button edit for user without admin priv.', async () => {
-    mockService.conf.policy = 'text';
-    mockService.me = { id: 'id01', valid: true, admin: false };
+    mockContext.conf.policy = 'text';
+    mockContext.me = { id: 'id01', valid: true, admin: false };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <PolicyPage />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'edit-policy' })).toBeNull();
   });
 
   it('disables button save if data is not modified.', async () => {
-    mockService.conf.policy = 'text';
-    mockService.me = { id: 'id01', valid: true, admin: true };
+    mockContext.conf.policy = 'text';
+    mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <PolicyPage />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'edit-policy' })).toBeInTheDocument();
@@ -72,12 +72,12 @@ describe('MyPasswordPanel', () => {
   });
 
   it('enables button if data is modified.', async () => {
-    mockService.conf.policy = 'text';
-    mockService.me = { id: 'id01', valid: true, admin: true };
+    mockContext.conf.policy = 'text';
+    mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <PolicyPage />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.click(screen.queryByRole('button', { name: 'edit-policy' }));
@@ -95,12 +95,12 @@ describe('MyPasswordPanel', () => {
   });
 
   it('exits edit mode on click button cancel.', async () => {
-    mockService.conf.policy = 'text';
-    mockService.me = { id: 'id01', valid: true, admin: true };
+    mockContext.conf.policy = 'text';
+    mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <PolicyPage />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.click(screen.queryByRole('button', { name: 'edit-policy' }));
@@ -112,12 +112,12 @@ describe('MyPasswordPanel', () => {
 
   it('shows error message on click button "save" with exception.', async () => {
     mockSetConfProperties.mockImplementationOnce(() => { throw Error(''); });
-    mockService.conf.policy = 'text';
-    mockService.me = { id: 'id01', valid: true, admin: true };
+    mockContext.conf.policy = 'text';
+    mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <PolicyPage />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.click(screen.queryByRole('button', { name: 'edit-policy' }));

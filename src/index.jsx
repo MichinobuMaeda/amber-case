@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { useMediaQuery } from '@material-ui/core';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Container } from '@mui/material';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
+import createTheme from '@mui/material/styles/createTheme';
+import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
 import { HashRouter } from 'react-router-dom';
 
 import { firebaseConfig, reauthentication } from './conf';
 import {
   initializeFirebase, listenFirebase,
-  ServiceContext, selectThemeMode,
+  AppContext, selectThemeMode,
 } from './api';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
@@ -18,40 +20,45 @@ const {
 } = initializeFirebase(firebaseConfig);
 
 const AppBase = () => {
-  const service = useContext(ServiceContext);
-  service.auth = auth;
-  service.db = db;
-  service.storage = storage;
-  service.functions = functions;
+  const context = useContext(AppContext);
+  context.auth = auth;
+  context.db = db;
+  context.storage = storage;
+  context.functions = functions;
 
   const [themeMode, setThemeMode] = useState('light');
-  service.themeMode = themeMode;
-  service.setThemeMode = setThemeMode;
-  service.preferColorScheme = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+  context.themeMode = themeMode;
+  context.setThemeMode = setThemeMode;
+  context.preferColorScheme = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+  context.xs = useMediaQuery('(max-width:600px)');
 
   const [conf, setConf] = useState({});
-  service.conf = conf;
-  service.setConf = setConf;
+  context.conf = conf;
+  context.setConf = setConf;
 
   const [authUser, setAuthUser] = useState({});
-  service.authUser = authUser;
-  service.setAuthUser = setAuthUser;
+  context.authUser = authUser;
+  context.setAuthUser = setAuthUser;
 
   const [me, setMe] = useState({});
-  service.me = me;
-  service.setMe = setMe;
+  context.me = me;
+  context.setMe = setMe;
+
+  const [groups, setGroups] = useState([]);
+  context.groups = groups;
+  context.setGroups = setGroups;
 
   const [reauthenticationTimeout, setReauthenticationTimeout] = useState(0);
-  service.reauthenticationTimeout = reauthenticationTimeout;
-  service.setReauthenticationTimeout = setReauthenticationTimeout;
+  context.reauthenticationTimeout = reauthenticationTimeout;
+  context.setReauthenticationTimeout = setReauthenticationTimeout;
 
   useEffect(() => {
-    listenFirebase(service, window);
+    listenFirebase(context, window);
 
     const intervalId = setInterval(
       () => {
-        if (service.reauthenticationTimeout > 0) {
-          const nextVal = service.reauthenticationTimeout - reauthentication.updateInterval;
+        if (context.reauthenticationTimeout > 0) {
+          const nextVal = context.reauthenticationTimeout - reauthentication.updateInterval;
           setReauthenticationTimeout(nextVal < 0 ? 0 : nextVal);
         }
       },
@@ -59,11 +66,11 @@ const AppBase = () => {
     );
 
     return () => clearInterval(intervalId);
-  }, [service]);
+  }, [context]);
 
   return (
     <React.StrictMode>
-      <ThemeProvider theme={createTheme(selectThemeMode(service))}>
+      <ThemeProvider theme={createTheme(selectThemeMode(context))}>
         <CssBaseline />
         <Container>
           <HashRouter>

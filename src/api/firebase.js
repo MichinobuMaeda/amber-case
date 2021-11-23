@@ -9,12 +9,12 @@ import {
 } from 'firebase/auth';
 import {
   getFirestore, connectFirestoreEmulator,
-  onSnapshot, doc, updateDoc,
+  onSnapshot, doc, collection, where, query, updateDoc,
 } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
-import { reauthentication } from '../conf';
+import { region, reauthentication } from '../conf';
 
 export const actionEmailVerification = '?action=emailverification';
 export const actionReauthentication = '?action=reauthentication';
@@ -27,7 +27,7 @@ export const initializeFirebase = (firebaseConfig) => {
   const auth = getAuth(firebaseApp);
   const db = getFirestore(firebaseApp);
   const storage = getStorage(firebaseApp);
-  const functions = getFunctions(firebaseApp);
+  const functions = getFunctions(firebaseApp, region);
 
   auth.languageCode = 'ja';
 
@@ -105,48 +105,48 @@ export const handleSignInWithEmailLink = async ({ auth }, window) => {
   window.location.href = window.location.href.replace(/\?.*/, '');
 };
 
-export const restoreAuthError = (service, window) => {
+export const restoreAuthError = (context, window) => {
   // eslint-disable-next-line no-param-reassign
-  service.authError = window.localStorage.getItem(localKeyError);
+  context.authError = window.localStorage.getItem(localKeyError);
   window.localStorage.removeItem(localKeyError);
 };
 
-export const handelSendSignInLinkToEmail = async (service, window, email) => {
+export const handelSendSignInLinkToEmail = async (context, window, email) => {
   window.localStorage.setItem(localKeyEmail, email);
-  await sendSignInLinkToEmail(service.auth, email, {
-    url: service.conf.url,
+  await sendSignInLinkToEmail(context.auth, email, {
+    url: context.conf.url,
     handleCodeInApp: true,
   });
 };
 
-export const handleSignInWithPassword = async (service, email, password) => {
-  await signInWithEmailAndPassword(service.auth, email, password);
+export const handleSignInWithPassword = async (context, email, password) => {
+  await signInWithEmailAndPassword(context.auth, email, password);
 };
 
-export const handleSendEmailVerification = async (service) => {
-  await sendEmailVerification(service.auth.currentUser, {
+export const handleSendEmailVerification = async (context) => {
+  await sendEmailVerification(context.auth.currentUser, {
     url: `${window.location.href}${actionEmailVerification}`,
     handleCodeInApp: true,
   });
 };
 
-export const handelReauthenticateLinkToEmail = async (service, window) => {
-  const { email } = service.auth.currentUser;
+export const handelReauthenticateLinkToEmail = async (context, window) => {
+  const { email } = context.auth.currentUser;
   window.localStorage.setItem(localKeyEmail, email);
-  await sendSignInLinkToEmail(service.auth, email, {
+  await sendSignInLinkToEmail(context.auth, email, {
     url: `${window.location.href}${actionReauthentication}`,
     handleCodeInApp: true,
   });
 };
 
-export const handleReauthenticateWithEmailLink = async (service, window) => {
+export const handleReauthenticateWithEmailLink = async (context, window) => {
   const url = window.location.href.replace(actionReauthentication, '');
   const email = window.localStorage.getItem(localKeyEmail);
   window.localStorage.removeItem(localKeyEmail);
   window.localStorage.removeItem(localKeyError);
   if (email) {
     try {
-      await signInWithEmailLink(service.auth, email, url);
+      await signInWithEmailLink(context.auth, email, url);
     } catch (e) {
       window.localStorage.setItem(localKeyError, 'check your email address');
     }
@@ -157,40 +157,40 @@ export const handleReauthenticateWithEmailLink = async (service, window) => {
   window.location.replace(url.replace(/\?.*#\//, '#/'));
 };
 
-export const handleReauthenticateWithPassword = async (service, password) => {
+export const handleReauthenticateWithPassword = async (context, password) => {
   await reauthenticateWithCredential(
-    service.auth.currentUser,
+    context.auth.currentUser,
     EmailAuthProvider.credential(
-      service.auth.currentUser.email,
+      context.auth.currentUser.email,
       password,
     ),
   );
-  service.setReauthenticationTimeout(reauthentication.timeout);
+  context.setReauthenticationTimeout(reauthentication.timeout);
 };
 
-export const handleReloadAuthUser = async (service) => {
-  await reload(service.authUser);
-  service.setAuthUser({});
-  service.setAuthUser(service.auth.currentUser);
+export const handleReloadAuthUser = async (context) => {
+  await reload(context.authUser);
+  context.setAuthUser({});
+  context.setAuthUser(context.auth.currentUser);
 };
 
-export const onSignOut = (service) => {
-  unsubUserData(service);
-  service.setMe({});
-  service.setAuthUser({});
-  service.setReauthenticationTimeout(0);
+export const onSignOut = (context) => {
+  unsubUserData(context);
+  context.setMe({});
+  context.setAuthUser({});
+  context.setReauthenticationTimeout(0);
 };
 
-export const handleSignOut = async (service) => {
-  onSignOut(service);
-  await signOut(service.auth);
+export const handleSignOut = async (context) => {
+  onSignOut(context);
+  await signOut(context.auth);
 };
 
-export const listenConf = (service) => {
-  const { db, setConf } = service;
-  if (!service.unsubConf) {
+export const listenConf = (context) => {
+  const { db, setConf } = context;
+  if (!context.unsubConf) {
     // eslint-disable-next-line no-param-reassign
-    service.unsubConf = onSnapshot(
+    context.unsubConf = onSnapshot(
       doc(db, 'service', 'conf'),
       (snapshot) => {
         setConf(snapshot.exists ? castDoc(snapshot) : { error: true });
@@ -199,29 +199,54 @@ export const listenConf = (service) => {
   }
 };
 
-export const setMyEmail = async (service, email) => {
-  await updateEmail(service.auth.currentUser, email);
-  await handleReloadAuthUser(service);
+export const setMyEmail = async (context, email) => {
+  await updateEmail(context.auth.currentUser, email);
+  await handleReloadAuthUser(context);
 };
 
-export const setMyPassword = async (service, password) => {
-  await updatePassword(service.auth.currentUser, password);
+export const setMyPassword = async (context, password) => {
+  await updatePassword(context.auth.currentUser, password);
 };
 
-export const setConfProperties = async (service, props) => {
-  const { db } = service;
-  await updateDoc(doc(db, 'service', 'conf'), {
+const setDocProperties = async (context, collectionName, id, props) => {
+  const { db } = context;
+  await updateDoc(doc(db, collectionName, id), {
     ...props,
     updatedAt: new Date(),
   });
 };
 
-export const listenMe = (service, uid) => {
-  const { db, setMe, setThemeMode } = service;
+export const setConfProperties = async (
+  context, props,
+) => setDocProperties(context, 'service', 'conf', props);
+
+export const listenGroups = (context) => {
+  const { db, me, setGroups } = context;
+  if (context.unsub.groups) {
+    context.unsub.groups();
+  }
+  // eslint-disable-next-line no-param-reassign
+  context.unsub.groups = onSnapshot(
+    query(
+      collection(db, 'groups'),
+      where('accounts', 'array-contains', me.id),
+    ),
+    async (snapshot) => {
+      setGroups(snapshot.docs.map(castDoc));
+    },
+  );
+};
+
+export const setGroupProperties = (
+  context, id, props,
+) => setDocProperties(context, 'groups', id, props);
+
+export const listenMe = (context, uid) => {
+  const { db, setMe, setThemeMode } = context;
   const meRef = doc(db, 'accounts', uid);
-  if (!service.unsub[meRef.path]) {
+  if (!context.unsub[meRef.path]) {
     // eslint-disable-next-line no-param-reassign
-    service.unsub[meRef.path] = onSnapshot(
+    context.unsub[meRef.path] = onSnapshot(
       meRef,
       async (snapshot) => {
         if (
@@ -232,50 +257,47 @@ export const listenMe = (service, uid) => {
           const me = castDoc(snapshot);
           setMe(me);
           setThemeMode(me.themeMode || 'light');
+          listenGroups(context);
         } else {
           // eslint-disable-next-line no-param-reassign
-          service.authError = 'unregistered account';
-          await handleSignOut(service);
+          context.authError = 'unregistered account';
+          await handleSignOut(context);
         }
       },
     );
   }
 };
 
-export const setAccountProperties = async (service, id, props) => {
-  const { db } = service;
-  await updateDoc(doc(db, 'accounts', id), {
-    ...props,
-    updatedAt: new Date(),
-  });
-};
+export const setAccountProperties = (
+  context, id, props,
+) => setDocProperties(context, 'accounts', id, props);
 
-export const listenFirebase = async (service, window) => {
+export const listenFirebase = async (context, window) => {
   if (window.location.href.includes(actionReauthentication)) {
-    await handleReauthenticateWithEmailLink(service, window);
+    await handleReauthenticateWithEmailLink(context, window);
   } else if (window.location.href.includes(actionEmailVerification)) {
     window.location.replace(
       window.location.href.replace(actionEmailVerification, ''),
     );
-  } else if (isSignInWithEmailLink(service.auth, window.location.href)) {
-    await handleSignInWithEmailLink(service, window);
+  } else if (isSignInWithEmailLink(context.auth, window.location.href)) {
+    await handleSignInWithEmailLink(context, window);
   } else {
-    restoreAuthError(service, window);
-    listenConf(service);
-    onAuthStateChanged(service.auth, (user) => {
-      const prevUid = service.authUser.uid;
+    restoreAuthError(context, window);
+    listenConf(context);
+    onAuthStateChanged(context.auth, (user) => {
+      const prevUid = context.authUser.uid;
       if (user) {
         if (prevUid && prevUid !== user.uid) {
-          unsubUserData(service);
+          unsubUserData(context);
         }
-        service.setAuthUser(user);
-        listenMe(service, user.uid);
-        service.setReauthenticationTimeout(reauthentication.timeout);
+        context.setAuthUser(user);
+        listenMe(context, user.uid);
+        context.setReauthenticationTimeout(reauthentication.timeout);
       } else if (prevUid) {
-        onSignOut(service);
+        onSignOut(context);
       }
     });
   }
 };
 
-export const isSignedIn = (service) => service.me.id && service.authUser.emailVerified;
+export const isSignedIn = (context) => context.me.id && context.authUser.emailVerified;

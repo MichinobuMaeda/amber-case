@@ -1,7 +1,7 @@
-import ServiceContext from './ServiceContext';
+import AppContext from './AppContext';
 
 export {
-  ServiceContext,
+  AppContext,
 };
 export {
   updateApp,
@@ -16,6 +16,7 @@ export {
   setMyEmail,
   setMyPassword,
   setConfProperties,
+  setGroupProperties,
   setAccountProperties,
   listenFirebase,
   isSignedIn,

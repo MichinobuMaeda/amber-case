@@ -1,13 +1,13 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ArrowForward } from '@mui/icons-material';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 
 import { i18n } from '../conf';
 import '../testConfig';
 
 // work around for mocking problem.
-const { PageTitle } = require('./exportForTest');
+const { PageTitle } = require('./indexTest');
 
 describe('PageTitle', () => {
   it('show icon if given and title.', () => {

@@ -1,19 +1,21 @@
 import React, { useContext } from 'react';
-import { Grid, Alert, Button } from '@mui/material';
-import { Logout } from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Logout from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-import { ServiceContext, handleSignOut } from '../api';
+import { AppContext, handleSignOut } from '../api';
 
 const SignOutPanel = () => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   const navigate = useNavigate();
 
   const onClickSignOut = async () => {
-    await handleSignOut(service);
+    await handleSignOut(context);
     navigate('/', { replace: true });
   };
 

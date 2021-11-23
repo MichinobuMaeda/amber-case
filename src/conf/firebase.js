@@ -8,6 +8,8 @@ export const firebaseConfig = {
   measurementId: 'G-BNQ8TFSEGR',
 };
 
+export const region = 'asia-northeast1';
+
 export const reauthentication = {
   timeout: 15 * 60 * 1000,
   updateInterval: 60 * 1000,

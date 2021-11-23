@@ -5,7 +5,7 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   ja: {
     translation: {
-      'app name': 'Amber case',
+      'App name': 'Amber case',
       'OK': 'OK',
       'Cancel': '中止',
       'Send': '送信',
@@ -27,7 +27,10 @@ const resources = {
       'My password': 'パスワードの変更',
       'My E-mail': 'メールアドレスの変更',
       'Accounts': 'アカウントの管理',
+      'Groups': 'グループの管理',
       'Policy': 'プライバシー・ポリシー',
+      'Description': '説明',
+      'Group name': 'グループ名',
       'Update app': 'アプリを更新してください。',
       'failed to sign in': 'ログインできませんでした。',
       'check your email address': 'メールアドレスを確認してください。',

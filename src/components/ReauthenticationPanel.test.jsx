@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 const mockHandelReauthenticateLinkToEmail = jest.fn();
 const mockHandleReauthenticateWithPassword = jest.fn();
@@ -15,8 +15,8 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { ServiceContext } = require('../api');
-const { ReauthenticationPanel } = require('./exportForTest');
+const { AppContext } = require('../api');
+const { ReauthenticationPanel } = require('./indexTest');
 
 beforeEach(() => {
   resetMockService();
@@ -28,12 +28,12 @@ describe('ReauthenticationPanel: Email', () => {
 
   it('shows button send for valid email.', async () => {
     const email = 'test01@example.com';
-    mockService.auth = { currentUser: { email } };
+    mockContext.auth = { currentUser: { email } };
 
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <ReauthenticationPanel data-testid="testid01" />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByText(completeMessage)).toBeNull();
@@ -56,14 +56,14 @@ describe('ReauthenticationPanel: Email', () => {
 
   it('shows message for error.', async () => {
     const email = 'test01@example.com';
-    mockService.auth = { currentUser: { email } };
+    mockContext.auth = { currentUser: { email } };
     mockHandelReauthenticateLinkToEmail
       .mockImplementationOnce(() => { throw new Error(); });
 
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <ReauthenticationPanel data-testid="testid01" />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByText(completeMessage)).toBeNull();
@@ -83,12 +83,12 @@ describe('ReauthenticationPanel: Password', () => {
 
   it('shows button check with password value.', async () => {
     const email = 'test01@example.com';
-    mockService.auth = { currentUser: { email } };
+    mockContext.auth = { currentUser: { email } };
 
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <ReauthenticationPanel data-testid="testid01" />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByText(errorMessage)).toBeNull();
@@ -106,14 +106,14 @@ describe('ReauthenticationPanel: Password', () => {
 
   it('shows message for error.', async () => {
     const email = 'test01@example.com';
-    mockService.auth = { currentUser: { email } };
+    mockContext.auth = { currentUser: { email } };
     mockHandleReauthenticateWithPassword
       .mockImplementationOnce(() => { throw new Error(); });
 
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <ReauthenticationPanel data-testid="testid01" />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     const button = screen.queryByRole('button', { name: 'passwordConfiremation' });

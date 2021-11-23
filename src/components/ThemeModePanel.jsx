@@ -1,19 +1,19 @@
 import React, { useContext } from 'react';
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-import { ServiceContext, isSignedIn, setAccountProperties } from '../api';
+import { AppContext, isSignedIn, setAccountProperties } from '../api';
 import RadioButtons from './RadioButtons';
 
 const ThemeModePanel = () => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
 
   const handleChange = async (mode) => {
-    service.setThemeMode(mode);
-    if (isSignedIn(service)) {
-      await setAccountProperties(service, service.me.id, { themeMode: mode });
+    context.setThemeMode(mode);
+    if (isSignedIn(context)) {
+      await setAccountProperties(context, context.me.id, { themeMode: mode });
     }
   };
 
@@ -27,7 +27,7 @@ const ThemeModePanel = () => {
             { value: 'dark', label: t('Dark mode') },
             { value: 'system', label: t('Accept system settings') },
           ]}
-          value={service.themeMode}
+          value={context.themeMode}
         />
       </Grid>
     </Grid>

@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ExpandMore } from '@mui/icons-material';
-import {
-  Typography, Accordion, AccordionSummary, AccordionDetails,
-} from '@mui/material';
+import Typography from '@mui/material/Typography';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 
 const ControlledAccordion = ({ panels, expanded, onChange }) => {
   const handleChange = (id) => (event, isExpanded) => {

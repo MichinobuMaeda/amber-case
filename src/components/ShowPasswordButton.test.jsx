@@ -6,7 +6,7 @@ import React from 'react';
 import '../testConfig';
 
 // work around for mocking problem.
-const { ShowPasswordButton } = require('./exportForTest');
+const { ShowPasswordButton } = require('./indexTest');
 
 describe('ShowPasswordButton', () => {
   it('hides password chars on default and toggled visibility '

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -20,8 +20,8 @@ jest.mock('../api', () => ({
 
 // work around for mocking problem.
 const { MemoryRouter } = require('react-router-dom');
-const { ServiceContext } = require('../api');
-const { MyEmailPanel } = require('./exportForTest');
+const { AppContext } = require('../api');
+const { MyEmailPanel } = require('./indexTest');
 
 beforeEach(() => {
   resetMockService();
@@ -32,13 +32,13 @@ describe('MyEmailPanel', () => {
   const errorMessage = i18n.t('failed to save data') + i18n.t('retry failed or call admin');
 
   it('disables button if data is not modified.', async () => {
-    mockService.auth.currentUser = { uid: 'id01', email: 'abc@def.ghi' };
+    mockContext.auth.currentUser = { uid: 'id01', email: 'abc@def.ghi' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/myEmail' }]}>
           <MyEmailPanel />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
@@ -47,13 +47,13 @@ describe('MyEmailPanel', () => {
   });
 
   it('enables button if data is valid and is modified.', async () => {
-    mockService.auth.currentUser = { uid: 'id01', email: 'abc@def.gh' };
+    mockContext.auth.currentUser = { uid: 'id01', email: 'abc@def.gh' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/myEmail' }]}>
           <MyEmailPanel />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), 'i');
@@ -84,13 +84,13 @@ describe('MyEmailPanel', () => {
   });
 
   it('disables button if data is invalid.', async () => {
-    mockService.auth.currentUser = { uid: 'id01', email: 'abc@def.ghi' };
+    mockContext.auth.currentUser = { uid: 'id01', email: 'abc@def.ghi' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/myEmail' }]}>
           <MyEmailPanel />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), '{backspace}');
@@ -121,13 +121,13 @@ describe('MyEmailPanel', () => {
 
   it('shows error message on click button "save" with exception.', async () => {
     mockSetMyEmail.mockImplementationOnce(() => { throw Error(''); });
-    mockService.auth.currentUser = { uid: 'id01', email: 'abc@def.gh' };
+    mockContext.auth.currentUser = { uid: 'id01', email: 'abc@def.gh' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/myEmail' }]}>
           <MyEmailPanel />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), 'i');
@@ -150,13 +150,13 @@ describe('MyEmailPanel', () => {
   });
 
   it('require data.', async () => {
-    mockService.auth.currentUser = { uid: 'id01', email: '' };
+    mockContext.auth.currentUser = { uid: 'id01', email: '' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/myEmail' }]}>
           <MyEmailPanel />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();

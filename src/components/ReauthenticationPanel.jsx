@@ -1,14 +1,16 @@
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Grid, Alert, TextField, Button,
-} from '@mui/material';
-import { Send, Check } from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Send from '@mui/icons-material/Send';
+import Check from '@mui/icons-material/Check';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import {
-  ServiceContext,
+  AppContext,
   handelReauthenticateLinkToEmail,
   handleReauthenticateWithPassword,
 } from '../api';
@@ -16,7 +18,7 @@ import ShowPasswordButton from './ShowPasswordButton';
 
 const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   const [sendEmailCompletion, setSendEmailCompletion] = useState(false);
   const [sendEmailErrorStatus, setSendEmailErrorStatus] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +27,7 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
 
   const onClickSend = async () => {
     try {
-      await handelReauthenticateLinkToEmail(service, window);
+      await handelReauthenticateLinkToEmail(context, window);
       setSendEmailCompletion(true);
     } catch (e) {
       setSendEmailErrorStatus(true);
@@ -34,7 +36,7 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
 
   const onClikckPasswordConfiremation = async () => {
     try {
-      await handleReauthenticateWithPassword(service, password);
+      await handleReauthenticateWithPassword(context, password);
     } catch (e) {
       setPasswordError(true);
     }

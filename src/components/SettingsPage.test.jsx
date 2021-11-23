@@ -5,7 +5,7 @@ import React from 'react';
 
 import { i18n, firebaseConfig } from '../conf';
 import {
-  resetMockService, mockService,
+  resetMockService, mockContext,
   mockSetReauthenticationTimeout,
 } from '../testConfig';
 
@@ -25,7 +25,7 @@ jest.mock('../api', () => ({
 
 // work around for mocking problem.
 const { MemoryRouter } = require('react-router-dom');
-const { ServiceContext } = require('../api');
+const { AppContext } = require('../api');
 const { SettingsPage } = require('.');
 
 beforeEach(() => {
@@ -36,15 +36,15 @@ describe('SettingsPage', () => {
   it('shows panels for user '
   + 'if user has signed in and email has verified.', async () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
-    mockService.me = { id: 'id01', valid: true };
-    mockService.authUser = { uid: 'id01', emailVerified: true };
-    mockService.reauthenticationTimeout = 1;
+    mockContext.me = { id: 'id01', valid: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.reauthenticationTimeout = 1;
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByTestId('themeMode-title')).toBeInTheDocument();
@@ -57,6 +57,8 @@ describe('SettingsPage', () => {
     expect(screen.queryByTestId('myEmail-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('accounts-title')).toBeNull();
     expect(screen.queryByTestId('accounts-panel')).toBeNull();
+    expect(screen.queryByTestId('groups-title')).toBeNull();
+    expect(screen.queryByTestId('groups-panel')).toBeNull();
     expect(screen.queryByTestId('signOut-title')).toBeInTheDocument();
     expect(screen.queryByTestId('signOut-panel')).toBeInTheDocument();
 
@@ -67,15 +69,15 @@ describe('SettingsPage', () => {
   it('shows panels for user with reauthentication panel '
   + 'if reauthentication timer was expired.', async () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
-    mockService.me = { id: 'id01', valid: true };
-    mockService.authUser = { uid: 'id01', emailVerified: true };
-    mockService.reauthenticationTimeout = 0;
+    mockContext.me = { id: 'id01', valid: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.reauthenticationTimeout = 0;
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByTestId('themeMode-title')).toBeInTheDocument();
@@ -88,6 +90,8 @@ describe('SettingsPage', () => {
     expect(screen.queryByTestId('reauthentication2-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('accounts-title')).toBeNull();
     expect(screen.queryByTestId('accounts-panel')).toBeNull();
+    expect(screen.queryByTestId('groups-title')).toBeNull();
+    expect(screen.queryByTestId('groups-panel')).toBeNull();
     expect(screen.queryByTestId('signOut-title')).toBeInTheDocument();
     expect(screen.queryByTestId('signOut-panel')).toBeInTheDocument();
 
@@ -98,15 +102,15 @@ describe('SettingsPage', () => {
   it('shows panels for admin '
   + 'if admin user has signed in and email has verified.', async () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
-    mockService.me = { id: 'id01', valid: true, admin: true };
-    mockService.authUser = { uid: 'id01', emailVerified: true };
-    mockService.reauthenticationTimeout = 1;
+    mockContext.me = { id: 'id01', valid: true, admin: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.reauthenticationTimeout = 1;
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByTestId('themeMode-title')).toBeInTheDocument();
@@ -119,6 +123,8 @@ describe('SettingsPage', () => {
     expect(screen.queryByTestId('myEmail-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('accounts-title')).toBeInTheDocument();
     expect(screen.queryByTestId('accounts-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('groups-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('groups-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('signOut-title')).toBeInTheDocument();
     expect(screen.queryByTestId('signOut-panel')).toBeInTheDocument();
 
@@ -129,15 +135,15 @@ describe('SettingsPage', () => {
   it('hides panels for guest '
   + 'if email has not verified.', async () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
-    mockService.me = { id: 'id01', valid: true };
-    mockService.authUser = { uid: 'id01', emailVerified: false };
-    mockService.reauthenticationTimeout = 1;
+    mockContext.me = { id: 'id01', valid: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: false };
+    mockContext.reauthenticationTimeout = 1;
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'sign-out' })).toBeNull();
@@ -151,6 +157,8 @@ describe('SettingsPage', () => {
     expect(screen.queryByTestId('myEmail-panel')).toBeNull();
     expect(screen.queryByTestId('accounts-title')).toBeNull();
     expect(screen.queryByTestId('accounts-panel')).toBeNull();
+    expect(screen.queryByTestId('groups-title')).toBeNull();
+    expect(screen.queryByTestId('groups-panel')).toBeNull();
     expect(screen.queryByTestId('signOut-title')).toBeNull();
     expect(screen.queryByTestId('signOut-panel')).toBeNull();
 
@@ -161,15 +169,15 @@ describe('SettingsPage', () => {
   it('hides panels for guest '
   + 'if user has not signed in.', async () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
-    mockService.me = {};
-    mockService.authUser = {};
-    mockService.reauthenticationTimeout = 1;
+    mockContext.me = {};
+    mockContext.authUser = {};
+    mockContext.reauthenticationTimeout = 1;
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'sign-out' })).toBeNull();
@@ -183,6 +191,8 @@ describe('SettingsPage', () => {
     expect(screen.queryByTestId('myEmail-panel')).toBeNull();
     expect(screen.queryByTestId('accounts-title')).toBeNull();
     expect(screen.queryByTestId('accounts-panel')).toBeNull();
+    expect(screen.queryByTestId('groups-title')).toBeNull();
+    expect(screen.queryByTestId('groups-panel')).toBeNull();
     expect(screen.queryByTestId('signOut-title')).toBeNull();
     expect(screen.queryByTestId('signOut-panel')).toBeNull();
 
@@ -192,15 +202,15 @@ describe('SettingsPage', () => {
 
   it('shows the body of the selected panel.', async () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'myPassword' }));
-    mockService.me = { id: 'id01', valid: true, admin: true };
-    mockService.authUser = { uid: 'id01', emailVerified: true };
-    mockService.reauthenticationTimeout = 1;
+    mockContext.me = { id: 'id01', valid: true, admin: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.reauthenticationTimeout = 1;
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/myPassword' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.click(screen.queryByTestId(i18n.t('themeMode-title')));
@@ -234,11 +244,11 @@ describe('SettingsPage', () => {
     firebaseConfig.apiKey = 'api key for production';
 
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'test' })).toBeNull();
@@ -250,11 +260,11 @@ describe('SettingsPage', () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
 
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SettingsPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.getByRole('button', { name: 'test' })).toBeInTheDocument();

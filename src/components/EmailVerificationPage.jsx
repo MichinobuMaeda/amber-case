@@ -1,15 +1,18 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Grid, Alert, Button } from '@mui/material';
-import {
-  MarkEmailRead, Send, Cached, Logout,
-} from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import MarkEmailRead from '@mui/icons-material/MarkEmailRead';
+import Send from '@mui/icons-material/Send';
+import Cached from '@mui/icons-material/Cached';
+import Logout from '@mui/icons-material/Logout';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 // import { buttonVariant } from '../conf';
 import {
-  ServiceContext, handleSendEmailVerification,
+  AppContext, handleSendEmailVerification,
   handleReloadAuthUser, handleSignOut,
 } from '../api';
 import PageTitle from './PageTitle';
@@ -17,13 +20,13 @@ import PageTitle from './PageTitle';
 const EmailVerificationPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   const [completion, setCompletion] = useState(false);
   const [errorStatus, setErrorStatus] = useState(false);
 
   const onSubmit = async () => {
     try {
-      await handleSendEmailVerification(service);
+      await handleSendEmailVerification(context);
       setCompletion(true);
     } catch (e) {
       setErrorStatus(true);
@@ -31,7 +34,7 @@ const EmailVerificationPage = () => {
   };
 
   const onClickSignOut = async () => {
-    await handleSignOut(service);
+    await handleSignOut(context);
     navigate(-1);
   };
 
@@ -76,7 +79,7 @@ const EmailVerificationPage = () => {
       {completion && (
       <Grid item xs={12}>
         <Button
-          onClick={() => handleReloadAuthUser(service)}
+          onClick={() => handleReloadAuthUser(context)}
           aria-label="reload"
           startIcon={<Cached />}
           // variant={buttonVariant}

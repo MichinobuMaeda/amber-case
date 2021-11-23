@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 // import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 const mockNavigate = jest.fn();
 const mockUseParams = jest.fn();
@@ -22,8 +22,8 @@ jest.mock('../api', () => ({
 
 // work around for mocking problem.
 const { MemoryRouter } = require('react-router-dom');
-const { ServiceContext } = require('../api');
-const { SignOutPanel } = require('./exportForTest');
+const { AppContext } = require('../api');
+const { SignOutPanel } = require('./indexTest');
 
 beforeEach(() => {
   resetMockService();
@@ -32,14 +32,14 @@ beforeEach(() => {
 describe('SignOutPanel', () => {
   it('shows button Sign-out.', async () => {
     mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
-    mockService.me = { id: 'id01', valid: true };
-    mockService.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.me = { id: 'id01', valid: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
           <SignOutPanel />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'sign-out' })).toBeInTheDocument();

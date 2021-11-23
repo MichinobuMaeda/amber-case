@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 const mockSetAccountProperties = jest.fn();
 jest.mock('../api', () => ({
@@ -13,8 +13,8 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { ServiceContext } = require('../api');
-const { MyDisplayNamePanel } = require('./exportForTest');
+const { AppContext } = require('../api');
+const { MyDisplayNamePanel } = require('./indexTest');
 
 beforeEach(() => {
   resetMockService();
@@ -25,11 +25,11 @@ describe('MyDisplayNamePanel', () => {
   const errorMessage = i18n.t('failed to save data') + i18n.t('retry failed or call admin');
 
   it('disables button if data is not modified.', async () => {
-    mockService.me = { id: 'id01', vaid: true, name: 'User 01' };
+    mockContext.me = { id: 'id01', vaid: true, name: 'User 01' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyDisplayNamePanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
@@ -38,11 +38,11 @@ describe('MyDisplayNamePanel', () => {
   });
 
   it('enables button if data is valid and is modified.', async () => {
-    mockService.me = { id: 'id01', valid: true, name: 'User 01' };
+    mockContext.me = { id: 'id01', valid: true, name: 'User 01' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyDisplayNamePanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.type(screen.queryByLabelText(i18n.t('Display name')), 'x');
@@ -61,11 +61,11 @@ describe('MyDisplayNamePanel', () => {
   });
 
   it('disables button if data is invalid.', async () => {
-    mockService.me = { id: 'id01', valid: true, name: '' };
+    mockContext.me = { id: 'id01', valid: true, name: '' };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyDisplayNamePanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
@@ -80,12 +80,12 @@ describe('MyDisplayNamePanel', () => {
   });
 
   it('shows error message on click button "save" with exception.', async () => {
-    mockService.me = { id: 'id01', valid: true, name: 'User 01 ' };
+    mockContext.me = { id: 'id01', valid: true, name: 'User 01 ' };
     mockSetAccountProperties.mockImplementationOnce(() => { throw Error(''); });
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyDisplayNamePanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();

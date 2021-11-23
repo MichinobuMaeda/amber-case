@@ -1,28 +1,29 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Grid, Alert, TextField, Button,
-} from '@mui/material';
-import { Login } from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Login from '@mui/icons-material/Login';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import {
   validateReuired, validateEmail,
 } from '../conf';
-import { ServiceContext, handleSignInWithPassword } from '../api';
+import { AppContext, handleSignInWithPassword } from '../api';
 import ShowPasswordButton from './ShowPasswordButton';
 
 const SignInWithPasswordPanel = ({ email, errorMessage, onEmailChange }) => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [errorStatus, setErrorStatus] = useState(false);
 
   const onSubmit = async () => {
     try {
-      await handleSignInWithPassword(service, email, password);
+      await handleSignInWithPassword(context, email, password);
     } catch (e) {
       setErrorStatus(true);
     }

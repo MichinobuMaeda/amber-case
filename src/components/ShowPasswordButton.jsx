@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { InputAdornment, IconButton } from '@mui/material';
-import { VisibilityOff, Visibility } from '@mui/icons-material';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Visibility from '@mui/icons-material/Visibility';
 
 const ShowPasswordButton = ({ position, show, onClick }) => (
   <InputAdornment position={position}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import IconButton from '@mui/material/IconButton';
+import Edit from '@mui/icons-material/Edit';
 
 const EditButton = ({ 'aria-label': ariaLabel, onClick }) => (
   <IconButton

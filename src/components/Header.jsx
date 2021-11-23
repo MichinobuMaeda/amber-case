@@ -1,20 +1,28 @@
 import React, { useContext } from 'react';
 import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
-import {
-  AppBar, Toolbar, Typography, IconButton, Box, Button,
-} from '@mui/material';
-import { ArrowBackIosNew, Settings, SystemUpdateAlt } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import ArrowBackIosNew from '@mui/icons-material/ArrowBackIosNew';
+import Settings from '@mui/icons-material/Settings';
+import SystemUpdateAlt from '@mui/icons-material/SystemUpdateAlt';
+import { useTranslation } from 'react-i18next/';
+
 import '../conf/i18n';
-import { ServiceContext, updateApp } from '../api';
+import { firebaseConfig } from '../conf';
+import { AppContext, updateApp } from '../api';
+import Debug from './Debug';
 
 const Header = () => {
   const navigate = useNavigate();
   const navigationType = useNavigationType();
   const location = useLocation();
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
-  const loaded = !!service.conf.id;
+  const context = useContext(AppContext);
+  const loaded = !!context.conf.id;
 
   return (
     <>
@@ -38,7 +46,7 @@ const Header = () => {
             </IconButton>
           )}
           <Typography variant="h1" component="div" sx={{ flexGrow: 1 }}>
-            {t('app name')}
+            {t('App name')}
           </Typography>
           {loaded && (
             <IconButton
@@ -51,10 +59,11 @@ const Header = () => {
               <Settings />
             </IconButton>
           )}
+          {loaded && (firebaseConfig.apiKey === 'FIREBASE_API_KEY' || context.me.tester) && <Debug />}
         </Toolbar>
       </AppBar>
       <Box sx={{ height: 64 }} />
-      {service.conf.version && service.conf.version !== service.version && (
+      {context.conf.version && context.conf.version !== context.version && (
         <Button
           aria-label="updateApp"
           startIcon={<SystemUpdateAlt />}

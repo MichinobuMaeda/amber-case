@@ -15,7 +15,7 @@ export const mockSetMe = jest.fn();
 export const mockSetAuthUser = jest.fn();
 export const mockSetReauthenticationTimeout = jest.fn();
 
-export const mockService = {};
+export const mockContext = {};
 
 export const mockLocalStorage = {};
 export const mockLocalStorageSetItem = jest.fn();
@@ -52,24 +52,25 @@ jest.mock('react-markdown', () => 'div');
 
 export const resetMockService = () => {
   jest.clearAllMocks();
-  mockService.version = '1.0.0';
-  mockService.unsubConf = null;
-  mockService.unsub = {};
-  mockService.auth = mockAuth;
-  mockService.db = mockDb;
-  mockService.storage = mockStorage;
-  mockService.functions = mockFunctions;
-  mockService.themeMode = 'light';
-  mockService.setThemeMode = mockSetThemeMode;
-  mockService.preferColorScheme = 'light';
-  mockService.conf = {};
-  mockService.setConf = mockSetConf;
-  mockService.authUser = {};
-  mockService.setAuthUser = mockSetAuthUser;
-  mockService.me = {};
-  mockService.setMe = mockSetMe;
-  mockService.reauthenticationTimeout = 0;
-  mockService.setReauthenticationTimeout = mockSetReauthenticationTimeout;
+  mockContext.version = '1.0.0';
+  mockContext.unsubConf = null;
+  mockContext.unsub = {};
+  mockContext.auth = mockAuth;
+  mockContext.db = mockDb;
+  mockContext.storage = mockStorage;
+  mockContext.functions = mockFunctions;
+  mockContext.themeMode = 'light';
+  mockContext.setThemeMode = mockSetThemeMode;
+  mockContext.preferColorScheme = 'light';
+  mockContext.conf = {};
+  mockContext.setConf = mockSetConf;
+  mockContext.authUser = {};
+  mockContext.setAuthUser = mockSetAuthUser;
+  mockContext.me = {};
+  mockContext.groups = [];
+  mockContext.setMe = mockSetMe;
+  mockContext.reauthenticationTimeout = 0;
+  mockContext.setReauthenticationTimeout = mockSetReauthenticationTimeout;
 
   const mockLocalStorageKeys = Object.keys(mockLocalStorage);
   mockLocalStorageKeys.forEach((key) => { delete mockLocalStorage[key]; });

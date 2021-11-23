@@ -5,7 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 const mockHandleSendEmailVerification = jest.fn();
 const mockHandleReloadAuthUser = jest.fn();
@@ -19,7 +19,7 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { ServiceContext } = require('../api');
+const { AppContext } = require('../api');
 const { EmailVerificationPage } = require('.');
 
 beforeEach(() => {
@@ -33,14 +33,14 @@ describe('EmailVerificationPage', () => {
 
   it('shows button send and button sign-out on initial state, '
   + 'and shows button reload after click button send.', async () => {
-    mockService.me = { id: 'id01' };
-    mockService.authUser = { emailVerified: false };
+    mockContext.me = { id: 'id01' };
+    mockContext.authUser = { emailVerified: false };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <EmailVerificationPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
     expect(screen.queryByRole('button', { name: 'send' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'reload' })).toBeNull();
@@ -68,16 +68,16 @@ describe('EmailVerificationPage', () => {
 
   it('shows button send and button sign-out on initial state, '
   + 'and shows error messeege after click button send is failed.', async () => {
-    mockService.me = { id: 'id01' };
-    mockService.authUser = { emailVerified: false };
+    mockContext.me = { id: 'id01' };
+    mockContext.authUser = { emailVerified: false };
     mockHandleSendEmailVerification
       .mockImplementationOnce(() => { throw Error(); });
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <EmailVerificationPage />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
     expect(screen.queryByRole('button', { name: 'send' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'reload' })).toBeNull();

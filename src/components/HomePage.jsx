@@ -1,13 +1,14 @@
 import React from 'react';
-import { Grid, Link } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-// import { ServiceContext } from '../api';
+// import { AppContext } from '../api';
 
 const HomePage = () => {
   const { t } = useTranslation();
-  // const service = useContext(ServiceContext);
+  // const context = useContext(AppContext);
 
   return (
     <Grid container spacing={2} data-testid="home-page">

@@ -1,21 +1,22 @@
-import React, { useState, useContext } from 'react';
-import {
-  Grid, Alert, TextField, Button,
-} from '@mui/material';
-import { SaveAlt } from '@mui/icons-material';
+import React, { useContext, useState } from 'react';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import SaveAlt from '@mui/icons-material/SaveAlt';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateReuired, validateEmail } from '../conf';
-import { ServiceContext, setMyEmail } from '../api';
+import { AppContext, setMyEmail } from '../api';
 
 const MyEmailPanel = () => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   const navigate = useNavigate();
   const confirmationErrorMessage = t('do not match the confirmation input');
-  const currentEmail = () => service.auth.currentUser.email;
+  const currentEmail = () => context.auth.currentUser.email;
 
   const getValidationError = (text) => {
     if (!validateReuired(text)) { return t('input is required'); }
@@ -49,7 +50,7 @@ const MyEmailPanel = () => {
 
   const onSubmit = async () => {
     try {
-      await setMyEmail(service, email);
+      await setMyEmail(context, email);
       setSuccessStatus(true);
       navigate('/', { replace: true });
     } catch (e) {

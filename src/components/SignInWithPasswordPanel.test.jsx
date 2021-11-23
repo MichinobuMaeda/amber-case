@@ -14,7 +14,7 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { SignInWithPasswordPanel } = require('./exportForTest');
+const { SignInWithPasswordPanel } = require('./indexTest');
 
 const mockOnEmailChange = jest.fn();
 

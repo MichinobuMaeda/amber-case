@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -19,8 +19,8 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { ServiceContext } = require('../api');
-const { MyPasswordPanel } = require('./exportForTest');
+const { AppContext } = require('../api');
+const { MyPasswordPanel } = require('./indexTest');
 
 beforeEach(() => {
   resetMockService();
@@ -32,9 +32,9 @@ describe('MyPasswordPanel', () => {
 
   it('enables button if data is valid and is modified.', async () => {
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyPasswordPanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
@@ -81,9 +81,9 @@ describe('MyPasswordPanel', () => {
 
   it('disables button if data is invalid.', async () => {
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyPasswordPanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'T');
@@ -121,9 +121,9 @@ describe('MyPasswordPanel', () => {
   it('shows error message on click button "save" with exception.', async () => {
     mockSetMyPassword.mockImplementationOnce(() => { throw Error(''); });
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyPasswordPanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'T');
@@ -152,9 +152,9 @@ describe('MyPasswordPanel', () => {
 
   it('require data.', async () => {
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MyPasswordPanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();

@@ -4,23 +4,23 @@ import {
   Header, LoadingPage, SignInPage, EmailVerificationPage,
   HomePage, SettingsPage, PolicyPage,
 } from './components';
-import { ServiceContext, isSignedIn } from './api';
+import { AppContext, isSignedIn } from './api';
 
 const App = () => {
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   return (
     <>
       <Header />
-      {!service.conf.id && (<LoadingPage error={service.conf.error} />)}
-      {service.conf.id && (
+      {!context.conf.id && (<LoadingPage error={context.conf.error} />)}
+      {context.conf.id && (
       <Routes>
         <Route
           path="/"
           element={(
             <>
-              {!service.me.id && <SignInPage />}
-              {service.me.id && !isSignedIn(service) && <EmailVerificationPage />}
-              {isSignedIn(service) && <HomePage />}
+              {!context.me.id && <SignInPage />}
+              {context.me.id && !isSignedIn(context) && <EmailVerificationPage />}
+              {isSignedIn(context) && <HomePage />}
             </>
           )}
         />

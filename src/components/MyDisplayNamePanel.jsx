@@ -1,26 +1,27 @@
-import React, { useState, useContext } from 'react';
-import {
-  Grid, Alert, TextField, Button,
-} from '@mui/material';
-import { SaveAlt } from '@mui/icons-material';
+import React, { useContext, useState } from 'react';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import SaveAlt from '@mui/icons-material/SaveAlt';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateReuired } from '../conf';
-import { ServiceContext, setAccountProperties } from '../api';
+import { AppContext, setAccountProperties } from '../api';
 
 const MyDisplayNamePanel = () => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
 
   const getValidationError = (text) => (
     validateReuired(text) ? null : t('input is required')
   );
 
   const [name, setName] = useState(
-    getValidationError(service.me.name) ? '' : service.me.name.trim(),
+    getValidationError(context.me.name) ? '' : context.me.name.trim(),
   );
-  const [validationError, setValidationError] = useState(getValidationError(service.me.name));
+  const [validationError, setValidationError] = useState(getValidationError(context.me.name));
   const [successStatus, setSuccessStatus] = useState(false);
   const [errorStatus, setErrorStatus] = useState(false);
 
@@ -33,7 +34,7 @@ const MyDisplayNamePanel = () => {
 
   const onSubmit = async () => {
     try {
-      await setAccountProperties(service, service.me.id, { name });
+      await setAccountProperties(context, context.me.id, { name });
       setSuccessStatus(true);
     } catch (e) {
       setErrorStatus(true);
@@ -54,7 +55,7 @@ const MyDisplayNamePanel = () => {
       </Grid>
       <Grid item xs={12} sm="auto">
         <Button
-          disabled={!name.trim() || name.trim() === service.me.name}
+          disabled={!name.trim() || name.trim() === context.me.name}
           onClick={onSubmit}
           aria-label="save"
           startIcon={<SaveAlt />}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Grid, Link } from '@mui/material';
-import { Login } from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Login from '@mui/icons-material/Login';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
@@ -42,10 +43,7 @@ const SignInPage = () => {
           value={signInMethod}
         />
       </Grid>
-      <Grid item xs={12}>
-        {t('no login method worked or call admin')}
-      </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ my: 2 }}>
         {signInMethod === withEmailLink && (
         <SignInWithEmailLinkPanel
           email={email}
@@ -60,6 +58,9 @@ const SignInPage = () => {
           onEmailChange={handleEmailChange}
         />
         )}
+      </Grid>
+      <Grid item xs={12}>
+        {t('no login method worked or call admin')}
       </Grid>
     </Grid>
   );

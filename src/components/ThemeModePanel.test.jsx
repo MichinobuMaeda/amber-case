@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService, mockSetThemeMode } from '../testConfig';
+import { resetMockService, mockContext, mockSetThemeMode } from '../testConfig';
 
 const mockSetAccountProperties = jest.fn();
 jest.mock('../api', () => ({
@@ -13,8 +13,8 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { ServiceContext } = require('../api');
-const { ThemeModePanel } = require('./exportForTest');
+const { AppContext } = require('../api');
+const { ThemeModePanel } = require('./indexTest');
 
 beforeEach(() => {
   resetMockService();
@@ -23,12 +23,12 @@ beforeEach(() => {
 describe('ThemeModePanel', () => {
   it('set the selected theme mode to app context and user data '
   + 'with signed-in status.', async () => {
-    mockService.me = { id: 'id01', valid: true };
-    mockService.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.me = { id: 'id01', valid: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <ThemeModePanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.click(screen.queryByText(i18n.t('Accept system settings')));
@@ -41,12 +41,12 @@ describe('ThemeModePanel', () => {
 
   it('set the selected theme mode to app context and user data '
   + 'without signed-in status.', async () => {
-    mockService.me = { id: 'id01', valid: true };
-    mockService.authUser = { uid: 'id01', emailVerified: false };
+    mockContext.me = { id: 'id01', valid: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: false };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <ThemeModePanel />
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
 
     userEvent.click(screen.queryByText(i18n.t('Accept system settings')));

@@ -2,7 +2,7 @@ import { selectThemeMode } from '.';
 
 import '../testConfig';
 
-describe('selectThemeMode(service)', () => {
+describe('selectThemeMode(context)', () => {
   it('return the dark theme options '
   + 'for themeMode: "dark", preferColorScheme: "dark".', async () => {
     expect(selectThemeMode({

@@ -5,7 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-import { resetMockService, mockService } from '../testConfig';
+import { resetMockService, mockContext } from '../testConfig';
 
 let mockNavigationType;
 const mockUseNavigate = jest.fn();
@@ -23,7 +23,7 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { ServiceContext } = require('../api');
+const { AppContext } = require('../api');
 const { Header } = require('.');
 
 beforeEach(() => {
@@ -32,85 +32,85 @@ beforeEach(() => {
 
 describe('Header', () => {
   it('hides the back button and hides the settings button, '
-    + 'on "/" and if the service is not loaded.', () => {
+    + 'on "/" and if the conf is not loaded.', () => {
     render(
-      <ServiceContext.Provider value={{ conf: {} }}>
+      <AppContext.Provider value={{ conf: {} }}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
-    expect(screen.queryByText(i18n.t('app name'))).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'back' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'settings' })).toBeNull();
   });
 
   it('hides the back button and shows the settings button, '
-    + 'on "/" and if the service is loaded.', () => {
+    + 'on "/" and if the conf is loaded.', () => {
     render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
+      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
-    expect(screen.queryByText(i18n.t('app name'))).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'back' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'settings' })).toBeInTheDocument();
   });
 
   it('shows back button and hides settings button, '
-    + 'on "/settings/x" and if the service is not loaded.', () => {
+    + 'on "/settings/x" and if the conf is not loaded.', () => {
     render(
-      <ServiceContext.Provider value={{ conf: {} }}>
+      <AppContext.Provider value={{ conf: {} }}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
-    expect(screen.queryByText(i18n.t('app name'))).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'settings' })).toBeNull();
   });
 
   it('shows back button and disables settings button, '
-    + 'on "/settings/x" and if the service is loaded.', () => {
+    + 'on "/settings/x" and if the conf is loaded.', () => {
     render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
+      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
-    expect(screen.queryByText(i18n.t('app name'))).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'settings' })).toHaveAttribute('disabled');
   });
 
   it('shows back button and shows settings button, '
-    + 'on "/policy" and if the service is not loaded.', () => {
+    + 'on "/policy" and if the conf is not loaded.', () => {
     render(
-      <ServiceContext.Provider value={{ conf: {} }}>
+      <AppContext.Provider value={{ conf: {} }}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
-    expect(screen.queryByText(i18n.t('app name'))).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'settings' })).toBeNull();
   });
 
   it('shows back button and shows settings button, '
-    + 'on "/policy" and if the service is loaded.', () => {
+    + 'on "/policy" and if the conf is loaded.', () => {
     render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
+      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
-    expect(screen.queryByText(i18n.t('app name'))).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'settings' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'settings' })).not.toHaveAttribute('disabled');
@@ -120,11 +120,11 @@ describe('Header', () => {
   + 'if history has no entry.', () => {
     mockNavigationType = 'POP';
     render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
+      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
     userEvent.click(screen.queryByRole('button', { name: 'back' }));
     expect(mockUseNavigate.mock.calls.length).toEqual(1);
@@ -137,11 +137,11 @@ describe('Header', () => {
   + 'if history has entries.', () => {
     mockNavigationType = 'PUSH';
     render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
+      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
     userEvent.click(screen.queryByRole('button', { name: 'back' }));
     expect(mockUseNavigate.mock.calls.length).toEqual(1);
@@ -152,11 +152,11 @@ describe('Header', () => {
   it('calls navigation("/settings/themeMode") on the settings button.', () => {
     mockNavigationType = 'PUSH';
     render(
-      <ServiceContext.Provider value={{ conf: { id: 'conf' } }}>
+      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
     userEvent.click(screen.queryByRole('button', { name: 'settings' }));
     expect(mockUseNavigate.mock.calls.length).toEqual(1);
@@ -165,31 +165,31 @@ describe('Header', () => {
   });
 
   it('do not shows button appUpdate if this app is latest version.', () => {
-    mockService.conf = {
+    mockContext.conf = {
       id: 'conf',
-      version: mockService.version,
+      version: mockContext.version,
     };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
     expect(screen.queryByRole('button', { name: 'updateApp' })).toBeNull();
   });
 
   it('shows button appUpdate if this app is out of date.', () => {
-    mockService.conf = {
+    mockContext.conf = {
       id: 'conf',
       version: 'x.x.x',
     };
     render(
-      <ServiceContext.Provider value={mockService}>
+      <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
           <Header />
         </MemoryRouter>
-      </ServiceContext.Provider>,
+      </AppContext.Provider>,
     );
     expect(screen.queryByRole('button', { name: 'updateApp' })).toBeInTheDocument();
 

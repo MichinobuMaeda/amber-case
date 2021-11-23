@@ -1,6 +1,9 @@
 // work around for mocking problem.
 import AccountsPanel from './AccountsPanel';
 import ControlledAccordion from './ControlledAccordion';
+import Debug from './Debug';
+import EditButton from './EditButton';
+import GroupsPanel from './GroupsPanel';
 import MyDisplayNamePanel from './MyDisplayNamePanel';
 import MyEmailPanel from './MyEmailPanel';
 import MyPasswordPanel from './MyPasswordPanel';
@@ -16,6 +19,9 @@ import ThemeModePanel from './ThemeModePanel';
 export {
   AccountsPanel,
   ControlledAccordion,
+  Debug,
+  EditButton,
+  GroupsPanel,
   MyDisplayNamePanel,
   MyEmailPanel,
   MyPasswordPanel,

@@ -1,18 +1,19 @@
-import React, { useState, useContext } from 'react';
-import {
-  Grid, Alert, TextField, Button,
-} from '@mui/material';
-import { SaveAlt } from '@mui/icons-material';
+import React, { useContext, useState } from 'react';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import SaveAlt from '@mui/icons-material/SaveAlt';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateReuired, validatePassword } from '../conf';
-import { ServiceContext, setMyPassword } from '../api';
+import { AppContext, setMyPassword } from '../api';
 import ShowPasswordButton from './ShowPasswordButton';
 
 const MyPasswordPanel = () => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   const confirmationErrorMessage = t('do not match the confirmation input');
 
   const getValidationError = (text) => {
@@ -44,7 +45,7 @@ const MyPasswordPanel = () => {
 
   const onSubmit = async () => {
     try {
-      await setMyPassword(service, password);
+      await setMyPassword(context, password);
       setSuccessStatus(true);
     } catch (e) {
       setErrorStatus(true);

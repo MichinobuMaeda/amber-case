@@ -1,9 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Grid, Alert, TextField, Button,
-} from '@mui/material';
-import { Send } from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Send from '@mui/icons-material/Send';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
@@ -11,18 +12,18 @@ import {
   validateReuired, validateEmail, firebaseConfig,
 } from '../conf';
 import {
-  ServiceContext, handelSendSignInLinkToEmail, handleSignInWithPassword,
+  AppContext, handelSendSignInLinkToEmail, handleSignInWithPassword,
 } from '../api';
 
 const SignInWithEmailLinkPanel = ({ email, errorMessage, onEmailChange }) => {
   const { t } = useTranslation();
-  const service = useContext(ServiceContext);
+  const context = useContext(AppContext);
   const [completion, setCompletion] = useState(false);
   const [errorStatus, setErrorStatus] = useState(false);
 
   const onSubmit = async () => {
     try {
-      await handelSendSignInLinkToEmail(service, window, email);
+      await handelSendSignInLinkToEmail(context, window, email);
       setCompletion(true);
     } catch (e) {
       setErrorStatus(true);
@@ -68,7 +69,7 @@ const SignInWithEmailLinkPanel = ({ email, errorMessage, onEmailChange }) => {
       {firebaseConfig.apiKey === 'FIREBASE_API_KEY' && !email && (
       <Grid item xs={12}>
         <Button
-          onClick={() => handleSignInWithPassword(service, 'primary@example.com', 'password')}
+          onClick={() => handleSignInWithPassword(context, 'primary@example.com', 'password')}
           aria-label="test"
           color="secondary"
         >

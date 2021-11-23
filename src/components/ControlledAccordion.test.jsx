@@ -6,7 +6,7 @@ import React from 'react';
 import '../testConfig';
 
 // work around for mocking problem.
-const { ControlledAccordion } = require('./exportForTest');
+const { ControlledAccordion } = require('./indexTest');
 
 describe('ControlledAccordion', () => {
   it('shows all panels and handles click event of the closed title.', () => {
