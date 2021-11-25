@@ -20,7 +20,7 @@ jest.mock('../api', () => ({
 
 // work around for mocking problem.
 const { AppContext } = require('../api');
-const { PolicyPage } = require('.');
+const { PolicyPanel } = require('.');
 
 beforeEach(() => {
   resetMockService();
@@ -34,7 +34,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = {};
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPage />
+        <PolicyPanel />
       </AppContext.Provider>,
     );
 
@@ -46,7 +46,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: false };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPage />
+        <PolicyPanel />
       </AppContext.Provider>,
     );
 
@@ -58,7 +58,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPage />
+        <PolicyPanel />
       </AppContext.Provider>,
     );
 
@@ -76,7 +76,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPage />
+        <PolicyPanel />
       </AppContext.Provider>,
     );
 
@@ -99,7 +99,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPage />
+        <PolicyPanel />
       </AppContext.Provider>,
     );
 
@@ -116,7 +116,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPage />
+        <PolicyPanel />
       </AppContext.Provider>,
     );
 

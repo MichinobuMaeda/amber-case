@@ -14,7 +14,7 @@ jest.mock('../api', () => ({
 
 // work around for mocking problem.
 const { AppContext } = require('../api');
-const { ThemeModePanel } = require('./indexTest');
+const { ThemeModePanel } = require('.');
 
 beforeEach(() => {
   resetMockService();

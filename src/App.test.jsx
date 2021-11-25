@@ -25,7 +25,7 @@ describe('App', () => {
   it('show LoadingPage without service.conf on "/".', () => {
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+        <MemoryRouter initialEntries={['/']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -51,7 +51,7 @@ describe('App', () => {
   it('show LoadingPage without service.conf on "policy".', () => {
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+        <MemoryRouter initialEntries={[{ pathname: '/info/policy' }]}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -66,7 +66,7 @@ describe('App', () => {
     mockContext.conf = { error: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+        <MemoryRouter initialEntries={['/']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -96,7 +96,7 @@ describe('App', () => {
     mockContext.conf = { error: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+        <MemoryRouter initialEntries={[{ pathname: '/info/policy' }]}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -110,7 +110,7 @@ describe('App', () => {
     mockContext.conf = { id: 'conf' };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+        <MemoryRouter initialEntries={['/']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -119,11 +119,11 @@ describe('App', () => {
     expect(screen.queryByTestId('signIn-page')).toBeInTheDocument();
   });
 
-  it('show Settings if not signed in on "settings/:panel".', () => {
+  it('show Settings if not signed in on "/settings/:panel".', () => {
     mockContext.conf = { id: 'conf' };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
+        <MemoryRouter initialEntries={['/settings/x']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -132,11 +132,11 @@ describe('App', () => {
     expect(screen.queryByTestId('settings-page')).toBeInTheDocument();
   });
 
-  it('show PolicyPage if not signed in on "policy".', () => {
+  it('show PolicyPanel if not signed in on "policy".', () => {
     mockContext.conf = { id: 'conf' };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+        <MemoryRouter initialEntries={['/info/policy']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -151,7 +151,7 @@ describe('App', () => {
     mockContext.me = { id: 'id01' };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+        <MemoryRouter initialEntries={['/']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -166,7 +166,7 @@ describe('App', () => {
     mockContext.me = { id: 'id01' };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+        <MemoryRouter initialEntries={['/']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -175,9 +175,11 @@ describe('App', () => {
     expect(screen.queryByTestId('home-page')).toBeInTheDocument();
   });
 
-  it('show Settings if signed in on "settings/:panel".', () => {
+  it('shows panels for guest on route /settings/x.', () => {
     mockContext.conf = { id: 'conf' };
-    mockContext.me = { id: 'id01' };
+    mockContext.me = { id: 'id01', valid: true, admin: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: false };
+    mockContext.reauthenticationTimeout = 1;
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
@@ -186,20 +188,119 @@ describe('App', () => {
       </AppContext.Provider>,
     );
 
-    expect(screen.queryByTestId('settings-page')).toBeInTheDocument();
+    expect(screen.queryByTestId('themeMode-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('themeMode-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myDisplayName-title')).toBeNull();
+    expect(screen.queryByTestId('myDisplayName-panel')).toBeNull();
+    expect(screen.queryByTestId('myPassword-title')).toBeNull();
+    expect(screen.queryByTestId('myPassword-panel')).toBeNull();
+    expect(screen.queryByTestId('myEmail-title')).toBeNull();
+    expect(screen.queryByTestId('myEmail-panel')).toBeNull();
+    expect(screen.queryByTestId('accounts-title')).toBeNull();
+    expect(screen.queryByTestId('accounts-panel')).toBeNull();
+    expect(screen.queryByTestId('groups-title')).toBeNull();
+    expect(screen.queryByTestId('groups-panel')).toBeNull();
+    expect(screen.queryByTestId('signOut-title')).toBeNull();
+    expect(screen.queryByTestId('signOut-panel')).toBeNull();
+
+    expect(screen.queryByTestId('reauthentication1-panel')).toBeNull();
+    expect(screen.queryByTestId('reauthentication2-panel')).toBeNull();
   });
 
-  it('show PolicyPage if signed in on "policy".', () => {
+  it('shows panels for user on route /settings/x.', () => {
     mockContext.conf = { id: 'conf' };
-    mockContext.me = { id: 'id01' };
+    mockContext.me = { id: 'id01', valid: true, admin: false };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.reauthenticationTimeout = 1;
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
     );
 
-    expect(screen.queryByTestId('policy-page')).toBeInTheDocument();
+    expect(screen.queryByTestId('themeMode-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('themeMode-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myDisplayName-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('myDisplayName-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myPassword-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('myPassword-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myEmail-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('myEmail-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('accounts-title')).toBeNull();
+    expect(screen.queryByTestId('accounts-panel')).toBeNull();
+    expect(screen.queryByTestId('groups-title')).toBeNull();
+    expect(screen.queryByTestId('groups-panel')).toBeNull();
+    expect(screen.queryByTestId('signOut-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('signOut-panel')).toBeInTheDocument();
+
+    expect(screen.queryByTestId('reauthentication1-panel')).toBeNull();
+    expect(screen.queryByTestId('reauthentication2-panel')).toBeNull();
+  });
+
+  it('shows panels for admin on route /settings/x.', () => {
+    mockContext.conf = { id: 'conf' };
+    mockContext.me = { id: 'id01', valid: true, admin: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.reauthenticationTimeout = 1;
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
+          <App />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByTestId('themeMode-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('themeMode-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myDisplayName-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('myDisplayName-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myPassword-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('myPassword-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myEmail-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('myEmail-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('accounts-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('accounts-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('groups-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('groups-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('signOut-title')).toBeInTheDocument();
+    expect(screen.queryByTestId('signOut-panel')).toBeInTheDocument();
+
+    expect(screen.queryByTestId('reauthentication1-panel')).toBeNull();
+    expect(screen.queryByTestId('reauthentication2-panel')).toBeNull();
+  });
+
+  it('shows reauthentication panels if authenticaatoin expired.', () => {
+    mockContext.conf = { id: 'conf' };
+    mockContext.me = { id: 'id01', valid: true, admin: true };
+    mockContext.authUser = { uid: 'id01', emailVerified: true };
+    mockContext.reauthenticationTimeout = 0;
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/themeMode' }]}>
+          <App />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByTestId('reauthentication1-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('reauthentication2-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('myEmail-panel')).toBeNull();
+    expect(screen.queryByTestId('myPassword-panel')).toBeNull();
+  });
+
+  it('show PolicyPanel if signed in on "/info/policy".', () => {
+    mockContext.conf = { id: 'conf' };
+    mockContext.me = { id: 'id01' };
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/info/policy' }]}>
+          <App />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByTestId('info-page')).toBeInTheDocument();
   });
 });

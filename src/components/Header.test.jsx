@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { i18n } from '../conf';
+import { i18n, firebaseConfig } from '../conf';
 import { resetMockService, mockContext } from '../testConfig';
 
 let mockNavigationType;
@@ -195,5 +195,64 @@ describe('Header', () => {
 
     userEvent.click(screen.queryByRole('button', { name: 'updateApp' }));
     expect(mockUpdateApp.mock.calls.length).toEqual(1);
+  });
+
+  it('shows debug dialog on click button debug.', async () => {
+    mockContext.conf = { id: 'conf' };
+    mockContext.me = { id: 'id01', valid: true, tester: true };
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Header />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    userEvent.click(screen.queryByRole('button', { name: 'debug' }));
+    expect(screen.getByRole('button', { label: 'close' })).toBeInTheDocument();
+  });
+
+  it('hides button debug before loading.', async () => {
+    mockContext.conf = {};
+    mockContext.me = { id: 'id01', valid: true, tester: true };
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Header />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'debug' })).toBeNull();
+  });
+
+  it('hides button debug on production without tester priv.', async () => {
+    mockContext.conf = { id: 'conf' };
+    mockContext.me = { id: 'id01', valid: true, tester: false };
+    firebaseConfig.apiKey = 'production key';
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Header />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'debug' })).toBeNull();
+  });
+
+  it('shows button debug on production with tester priv.', async () => {
+    mockContext.conf = { id: 'conf' };
+    mockContext.me = { id: 'id01', valid: true, tester: true };
+    firebaseConfig.apiKey = 'production key';
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Header />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'debug' })).toBeInTheDocument();
   });
 });

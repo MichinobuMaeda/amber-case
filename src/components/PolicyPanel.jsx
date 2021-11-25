@@ -3,18 +3,16 @@ import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Policy from '@mui/icons-material/Policy';
 import SaveAlt from '@mui/icons-material/SaveAlt';
 import Cancel from '@mui/icons-material/Cancel';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
 import '../conf/i18n';
-import PageTitle from './PageTitle';
 import { AppContext, setConfProperties } from '../api';
 import EditButton from './EditButton';
 
-const PolicyPage = () => {
+const PolicyPanel = () => {
   const { t } = useTranslation();
   const context = useContext(AppContext);
   const [editPolicy, setEditPolicy] = useState(false);
@@ -39,9 +37,6 @@ const PolicyPage = () => {
 
   return (
     <Grid container spacing={2} data-testid="policy-page">
-      <Grid item xs={12}>
-        <PageTitle icon={<Policy />} title={t('Policy')} />
-      </Grid>
       {context.me.admin && editPolicy && (
       <Grid item xs={12} container spacing={2}>
         <Grid item xs={12}>
@@ -98,4 +93,4 @@ const PolicyPage = () => {
   );
 };
 
-export default PolicyPage;
+export default PolicyPanel;

@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ArrowBackIosNew from '@mui/icons-material/ArrowBackIosNew';
 import Settings from '@mui/icons-material/Settings';
+import Info from '@mui/icons-material/Info';
 import SystemUpdateAlt from '@mui/icons-material/SystemUpdateAlt';
 import { useTranslation } from 'react-i18next/';
 
@@ -48,6 +49,17 @@ const Header = () => {
           <Typography variant="h1" component="div" sx={{ flexGrow: 1 }}>
             {t('App name')}
           </Typography>
+          {loaded && (
+            <IconButton
+              size="large"
+              color="inherit"
+              aria-label="info"
+              disabled={location.pathname.startsWith('/info')}
+              onClick={() => { navigate('/info/policy'); }}
+            >
+              <Info />
+            </IconButton>
+          )}
           {loaded && (
             <IconButton
               size="large"

@@ -23,7 +23,7 @@ jest.mock('../api', () => ({
 // work around for mocking problem.
 const { MemoryRouter } = require('react-router-dom');
 const { AppContext } = require('../api');
-const { SignOutPanel } = require('./indexTest');
+const { SignOutPanel } = require('.');
 
 beforeEach(() => {
   resetMockService();

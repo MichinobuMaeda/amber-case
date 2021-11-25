@@ -19,7 +19,7 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { SignInWithEmailLinkPanel } = require('./indexTest');
+const { SignInWithEmailLinkPanel } = require('.');
 
 const mockOnEmailChange = jest.fn();
 

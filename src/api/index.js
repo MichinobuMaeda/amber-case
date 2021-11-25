@@ -20,5 +20,8 @@ export {
   setAccountProperties,
   listenFirebase,
   isSignedIn,
+  acceptAny,
+  acceptUser,
+  acceptAdmin,
 } from './firebase';
 export * from './ui';

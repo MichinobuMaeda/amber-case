@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
 import Login from '@mui/icons-material/Login';
 import { useTranslation } from 'react-i18next';
 
@@ -30,9 +29,6 @@ const SignInPage = () => {
         <PageTitle icon={<Login />} title={t('Sign-in')} />
       </Grid>
       <Grid item xs={12}>
-        <p style={{ float: 'right', marginTop: 0 }}>
-          <Link href="#/policy">{t('Policy')}</Link>
-        </p>
         <RadioButtons
           legend={t('select login method')}
           onChange={setSignInMethod}

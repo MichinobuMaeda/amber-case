@@ -301,3 +301,6 @@ export const listenFirebase = async (context, window) => {
 };
 
 export const isSignedIn = (context) => context.me.id && context.authUser.emailVerified;
+export const acceptAny = () => true;
+export const acceptUser = (context) => isSignedIn(context);
+export const acceptAdmin = (context) => isSignedIn(context) && context.me.admin;

@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-import { validateReuired, validateEmail } from '../conf';
+import { validateReuired, validateEmail, firebaseConfig } from '../conf';
 import { AppContext, setMyEmail } from '../api';
 
 const MyEmailPanel = () => {
@@ -108,6 +108,18 @@ const MyEmailPanel = () => {
         <Alert severity="error">
           {t('failed to save data') + t('retry failed or call admin')}
         </Alert>
+      </Grid>
+      )}
+      {firebaseConfig.apiKey === 'FIREBASE_API_KEY' && (
+      <Grid item xs={12}>
+        <Button
+          onClick={() => { context.setReauthenticationTimeout(0); }}
+          aria-label="test"
+          color="secondary"
+        >
+          Test
+        </Button>
+        <span style={{ margin: '1em' }}>{context.reauthenticationTimeout}</span>
       </Grid>
       )}
     </Grid>

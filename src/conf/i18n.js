@@ -28,6 +28,7 @@ const resources = {
       'My E-mail': 'メールアドレスの変更',
       'Accounts': 'アカウントの管理',
       'Groups': 'グループの管理',
+      'Information': '情報',
       'Policy': 'プライバシー・ポリシー',
       'Description': '説明',
       'Group name': 'グループ名',

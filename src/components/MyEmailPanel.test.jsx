@@ -3,8 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { i18n } from '../conf';
-import { resetMockService, mockContext } from '../testConfig';
+import { i18n, firebaseConfig } from '../conf';
+import {
+  resetMockService, mockContext,
+  mockSetReauthenticationTimeout,
+} from '../testConfig';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -13,15 +16,17 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockSetMyEmail = jest.fn();
+const mockUseParams = jest.fn();
 jest.mock('../api', () => ({
   ...jest.requireActual('../api'),
   setMyEmail: mockSetMyEmail,
+  useParams: mockUseParams,
 }));
 
 // work around for mocking problem.
 const { MemoryRouter } = require('react-router-dom');
 const { AppContext } = require('../api');
-const { MyEmailPanel } = require('./indexTest');
+const { MyEmailPanel } = require('.');
 
 beforeEach(() => {
   resetMockService();
@@ -170,5 +175,42 @@ describe('MyEmailPanel', () => {
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), '{backspace}');
     expect(screen.queryByText(i18n.t('input is required'))).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('do not match the confirmation input'))).toBeNull();
+  });
+
+  it('hides button test if env is production and email is not empty.', async () => {
+    mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
+
+    const keyOrg = firebaseConfig.apiKey;
+    firebaseConfig.apiKey = 'api key for production';
+
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/myEmail' }]}>
+          <MyEmailPanel />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'test' })).toBeNull();
+
+    firebaseConfig.apiKey = keyOrg;
+  });
+
+  it('resets reauthenticationTimeout on click button test.', async () => {
+    mockUseParams.mockImplementationOnce(() => ({ panel: 'themeMode' }));
+
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/settings/myEmail' }]}>
+          <MyEmailPanel />
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'test' })).toBeInTheDocument();
+
+    userEvent.click(screen.queryByRole('button', { name: 'test' }));
+    expect(mockSetReauthenticationTimeout.mock.calls.length).toEqual(1);
+    expect(mockSetReauthenticationTimeout.mock.calls[0][0]).toEqual(0);
   });
 });
