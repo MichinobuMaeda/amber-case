@@ -149,11 +149,11 @@ export const handleReauthenticateWithEmailLink = async (context, window) => {
       window.location.replace(`${context.conf.url}#/me`);
     } catch (e) {
       window.localStorage.setItem(localKeyError, 'check your email address');
-      window.location.replace(window.location.replace(/\?.*#\//, '#/'));
+      window.location.replace(window.location.href.replace(/\?.*#\//, '#/'));
     }
   } else {
     window.localStorage.setItem(localKeyError, 'failed to sign in');
-    window.location.replace(window.location.replace(/\?.*#\//, '#/'));
+    window.location.replace(window.location.href.replace(/\?.*#\//, '#/'));
   }
 };
 
@@ -277,6 +277,7 @@ export const setGroupProperties = (
 export const updateMe = (context, me) => {
   const { setMe, setThemeMode } = context;
   if (!me
+    || !me.id
     || !me.valid
     || me.deletedAt
     || (context.me.id && context.me.id !== me.id)

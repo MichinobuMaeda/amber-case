@@ -1,5 +1,5 @@
 export const currentPriv = (context) => {
-  if (context.conf.uninitialized || context.authUser.uninitialized) return 'loading';
+  if (!context.conf.id || context.authUser.uninitialized) return 'loading';
   if (!context.me.id) return 'guest';
   if (context.authUser.email && !context.authUser.emailVerified) return 'pending';
   if (!context.me.admin) return 'user';

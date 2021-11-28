@@ -12,6 +12,8 @@ export const mockFunctions = { name: 'mockFunctions' };
 export const mockSetThemeMode = jest.fn();
 export const mockSetConf = jest.fn();
 export const mockSetMe = jest.fn();
+export const mockSetAccounts = jest.fn();
+export const mockSetGroups = jest.fn();
 export const mockSetAuthUser = jest.fn();
 export const mockSetReauthenticationTimeout = jest.fn();
 
@@ -38,12 +40,20 @@ export const mockWindow = {
 export const mockDocPath = 'mockDocPath';
 export const mockOnSnapshot = jest.fn(() => jest.fn());
 export const mockDoc = jest.fn();
+export const mockCollection = jest.fn();
+export const mockQuery = jest.fn();
+export const mockWhere = jest.fn();
+export const mockGetDoc = jest.fn();
 export const mockConnectFirestoreEmulator = jest.fn();
 export const mockUpdateDoc = jest.fn();
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(() => ({})),
   onSnapshot: mockOnSnapshot,
   doc: mockDoc,
+  collection: mockCollection,
+  query: mockQuery,
+  where: mockWhere,
+  getDoc: mockGetDoc,
   connectFirestoreEmulator: mockConnectFirestoreEmulator,
   updateDoc: mockUpdateDoc,
 }));
@@ -64,9 +74,12 @@ export const resetMockService = () => {
   mockContext.preferColorScheme = 'light';
   mockContext.conf = {};
   mockContext.setConf = mockSetConf;
+  mockContext.setAccounts = mockSetAccounts;
+  mockContext.setGroups = mockSetGroups;
   mockContext.authUser = {};
   mockContext.setAuthUser = mockSetAuthUser;
   mockContext.me = {};
+  mockContext.accounts = [];
   mockContext.groups = [];
   mockContext.setMe = mockSetMe;
   mockContext.reauthenticationTimeout = 0;
