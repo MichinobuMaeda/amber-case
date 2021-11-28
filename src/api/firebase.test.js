@@ -79,7 +79,6 @@ const {
   listenMe,
   setAccountProperties,
   listenFirebase,
-  isSignedIn,
   localKeyEmail,
   localKeyError,
   actionEmailVerification,
@@ -754,24 +753,5 @@ describe('listenFirebase(context, windows)', () => {
     expect(mockSetAuthUser.mock.calls.length).toEqual(3);
     expect(mockOnSnapshot.mock.calls.length).toEqual(1);
     expect(mockSetMe.mock.calls.length).toEqual(1);
-  });
-});
-
-describe('isSignedIn(context)', () => {
-  it('returns true with me.id and authUser.emailVerified', () => {
-    mockContext.me.id = 'id01';
-    mockContext.authUser.emailVerified = true;
-    expect(isSignedIn(mockContext)).toBeTruthy();
-  });
-
-  it('returns true with me.id and without authUser.emailVerified', () => {
-    mockContext.me.id = 'id01';
-    mockContext.authUser.emailVerified = false;
-    expect(isSignedIn(mockContext)).toBeFalsy();
-  });
-
-  it('returns true without me.id', () => {
-    mockContext.me = {};
-    expect(isSignedIn(mockContext)).toBeFalsy();
   });
 });

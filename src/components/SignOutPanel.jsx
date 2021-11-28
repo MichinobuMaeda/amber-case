@@ -16,7 +16,7 @@ const SignOutPanel = () => {
 
   const onClickSignOut = async () => {
     await handleSignOut(context);
-    navigate('/', { replace: true });
+    navigate('/signin');
   };
 
   return (

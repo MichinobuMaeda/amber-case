@@ -20,7 +20,7 @@ service cloud.firestore {
     }
     match /groups/{group} {
       allow  read, write: if isAdmin();
-      allow read, update: if request.auth.uid in resource.data.users;
+      allow read, update: if request.auth.uid in resource.data.accounts;
     }
     match /people/{person} {
       allow read, write: if selectedGroup() in resource.data.groups;

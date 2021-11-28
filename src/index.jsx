@@ -12,14 +12,14 @@ import {
   initializeFirebase, listenFirebase,
   AppContext, selectThemeMode,
 } from './api';
-import App from './App';
+import Router from './Router';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 const {
   auth, db, storage, functions,
 } = initializeFirebase(firebaseConfig);
 
-const AppBase = () => {
+const App = () => {
   const context = useContext(AppContext);
   context.auth = auth;
   context.db = db;
@@ -30,19 +30,22 @@ const AppBase = () => {
   context.themeMode = themeMode;
   context.setThemeMode = setThemeMode;
   context.preferColorScheme = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
-  context.xs = useMediaQuery('(max-width:600px)');
 
-  const [conf, setConf] = useState({});
+  const [conf, setConf] = useState({ uninitialized: true });
   context.conf = conf;
   context.setConf = setConf;
 
-  const [authUser, setAuthUser] = useState({});
+  const [authUser, setAuthUser] = useState({ uninitialized: true });
   context.authUser = authUser;
   context.setAuthUser = setAuthUser;
 
   const [me, setMe] = useState({});
   context.me = me;
   context.setMe = setMe;
+
+  const [accounts, setAccounts] = useState([]);
+  context.accounts = accounts;
+  context.setAccounts = setAccounts;
 
   const [groups, setGroups] = useState([]);
   context.groups = groups;
@@ -74,7 +77,7 @@ const AppBase = () => {
         <CssBaseline />
         <Container>
           <HashRouter>
-            <App />
+            <Router />
           </HashRouter>
         </Container>
       </ThemeProvider>
@@ -82,6 +85,6 @@ const AppBase = () => {
   );
 };
 
-ReactDOM.render(<AppBase />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById('root'));
 
 serviceWorkerRegistration.register();

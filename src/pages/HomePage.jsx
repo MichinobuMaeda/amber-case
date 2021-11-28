@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid';
 
 import '../conf/i18n';
 // import { AppContext } from '../api';
+import Guard from '../components/Guard';
 
 // eslint-disable-next-line arrow-body-style
 const HomePage = () => {
@@ -11,11 +12,13 @@ const HomePage = () => {
   // const context = useContext(AppContext);
 
   return (
-    <Grid container spacing={2} data-testid="home-page">
-      <Grid item xs={12}>
-        Home
+    <Guard require="user" redirect>
+      <Grid container spacing={2} data-testid="home-page">
+        <Grid item xs={12}>
+          Home
+        </Grid>
       </Grid>
-    </Grid>
+    </Guard>
   );
 };
 

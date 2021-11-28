@@ -1,37 +1,31 @@
-import AccordionPage from './AccordionPage';
-import AccountsPanel from './AccountsPanel';
-import EmailVerificationPage from './EmailVerificationPage';
-import GroupsPanel from './GroupsPanel';
-import MyDisplayNamePanel from './MyDisplayNamePanel';
+import AccordionSection from './AccordionSection';
+import Debug from './Debug';
+import EditButton from './EditButton';
 import MyEmailPanel from './MyEmailPanel';
 import MyPasswordPanel from './MyPasswordPanel';
-import Header from './Header';
-import HomePage from './HomePage';
-import LoadingPage from './LoadingPage';
-import PolicyPanel from './PolicyPanel';
+import RadioButtons from './RadioButtons';
 import ReauthenticationPanel from './ReauthenticationPanel';
+import Section from './Section';
+import ShowPasswordButton from './ShowPasswordButton';
 import SignInWithEmailLinkPanel from './SignInWithEmailLinkPanel';
 import SignInWithPasswordPanel from './SignInWithPasswordPanel';
 import SignOutPanel from './SignOutPanel';
-import SignInPage from './SignInPage';
+import TextEdit from './TextEdit';
 import ThemeModePanel from './ThemeModePanel';
 
 export {
-  AccordionPage,
-  AccountsPanel,
-  EmailVerificationPage,
-  GroupsPanel,
-  MyDisplayNamePanel,
+  AccordionSection,
+  Debug,
+  EditButton,
   MyEmailPanel,
   MyPasswordPanel,
-  Header,
-  HomePage,
-  LoadingPage,
-  PolicyPanel,
+  RadioButtons,
   ReauthenticationPanel,
+  Section,
+  ShowPasswordButton,
   SignInWithEmailLinkPanel,
   SignInWithPasswordPanel,
   SignOutPanel,
-  SignInPage,
+  TextEdit,
   ThemeModePanel,
 };

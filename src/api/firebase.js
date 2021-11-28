@@ -9,7 +9,7 @@ import {
 } from 'firebase/auth';
 import {
   getFirestore, connectFirestoreEmulator,
-  onSnapshot, doc, collection, where, query, updateDoc,
+  onSnapshot, doc, collection, where, query, updateDoc, getDoc,
 } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
@@ -134,27 +134,27 @@ export const handelReauthenticateLinkToEmail = async (context, window) => {
   const { email } = context.auth.currentUser;
   window.localStorage.setItem(localKeyEmail, email);
   await sendSignInLinkToEmail(context.auth, email, {
-    url: `${window.location.href}${actionReauthentication}`,
+    url: `${context.conf.url}${actionReauthentication}`,
     handleCodeInApp: true,
   });
 };
 
 export const handleReauthenticateWithEmailLink = async (context, window) => {
-  const url = window.location.href.replace(actionReauthentication, '');
   const email = window.localStorage.getItem(localKeyEmail);
   window.localStorage.removeItem(localKeyEmail);
   window.localStorage.removeItem(localKeyError);
   if (email) {
     try {
-      await signInWithEmailLink(context.auth, email, url);
+      await signInWithEmailLink(context.auth, email, window.location.href);
+      window.location.replace(`${context.conf.url}#/me`);
     } catch (e) {
       window.localStorage.setItem(localKeyError, 'check your email address');
+      window.location.replace(window.location.replace(/\?.*#\//, '#/'));
     }
   } else {
     window.localStorage.setItem(localKeyError, 'failed to sign in');
+    window.location.replace(window.location.replace(/\?.*#\//, '#/'));
   }
-
-  window.location.replace(url.replace(/\?.*#\//, '#/'));
 };
 
 export const handleReauthenticateWithPassword = async (context, password) => {
@@ -176,6 +176,8 @@ export const handleReloadAuthUser = async (context) => {
 
 export const onSignOut = (context) => {
   unsubUserData(context);
+  context.setGroups([]);
+  context.setAccounts([]);
   context.setMe({});
   context.setAuthUser({});
   context.setReauthenticationTimeout(0);
@@ -186,19 +188,6 @@ export const handleSignOut = async (context) => {
   await signOut(context.auth);
 };
 
-export const listenConf = (context) => {
-  const { db, setConf } = context;
-  if (!context.unsubConf) {
-    // eslint-disable-next-line no-param-reassign
-    context.unsubConf = onSnapshot(
-      doc(db, 'service', 'conf'),
-      (snapshot) => {
-        setConf(snapshot.exists ? castDoc(snapshot) : { error: true });
-      },
-    );
-  }
-};
-
 export const setMyEmail = async (context, email) => {
   await updateEmail(context.auth.currentUser, email);
   await handleReloadAuthUser(context);
@@ -206,6 +195,48 @@ export const setMyEmail = async (context, email) => {
 
 export const setMyPassword = async (context, password) => {
   await updatePassword(context.auth.currentUser, password);
+};
+
+// export for test
+export const handleListenError = async (context) => {
+  // eslint-disable-next-line no-param-reassign
+  context.listenError = 'firestore listen error';
+  await handleSignOut(context);
+};
+
+// export for test
+export const mergeUpdatedDocs = (snapshot, old) => snapshot.docChanges().reduce(
+  (ret, cur) => {
+    const exclusives = ret.filter((item) => item.id !== cur.doc.id);
+    if (['added', 'modified'].includes(cur.type)) {
+      return [...exclusives, castDoc(cur.doc)];
+    }
+    if (cur.type === 'removed') {
+      return exclusives;
+    }
+    return ret;
+  },
+  old,
+);
+
+export const listenConf = async (context) => {
+  const { db, setConf } = context;
+  if (!context.unsubConf) {
+    try {
+      const confRef = doc(db, 'service', 'conf');
+      const conf = await getDoc(confRef);
+      setConf(conf.exists ? castDoc(conf) : { error: true });
+      // eslint-disable-next-line no-param-reassign
+      context.unsubConf = onSnapshot(
+        confRef,
+        (snapshot) => {
+          setConf(snapshot.exists ? castDoc(snapshot) : { error: true });
+        },
+      );
+    } catch (e) {
+      setConf({ error: true });
+    }
+  }
 };
 
 const setDocProperties = async (context, collectionName, id, props) => {
@@ -222,49 +253,80 @@ export const setConfProperties = async (
 
 export const listenGroups = (context) => {
   const { db, me, setGroups } = context;
-  if (context.unsub.groups) {
-    context.unsub.groups();
+  if (!context.unsub.groups) {
+    // eslint-disable-next-line no-param-reassign
+    context.unsub.groups = onSnapshot(
+      query(
+        collection(db, 'groups'),
+        where('accounts', 'array-contains', me.id),
+      ),
+      async (snapshot) => {
+        const groups = mergeUpdatedDocs(snapshot, context.groups);
+        setGroups(groups);
+      },
+      async () => { await handleListenError(context); },
+    );
   }
-  // eslint-disable-next-line no-param-reassign
-  context.unsub.groups = onSnapshot(
-    query(
-      collection(db, 'groups'),
-      where('accounts', 'array-contains', me.id),
-    ),
-    async (snapshot) => {
-      setGroups(snapshot.docs.map(castDoc));
-    },
-  );
 };
 
 export const setGroupProperties = (
   context, id, props,
 ) => setDocProperties(context, 'groups', id, props);
 
-export const listenMe = (context, uid) => {
-  const { db, setMe, setThemeMode } = context;
-  const meRef = doc(db, 'accounts', uid);
-  if (!context.unsub[meRef.path]) {
+// export for test
+export const updateMe = (context, me) => {
+  const { setMe, setThemeMode } = context;
+  if (!me
+    || !me.valid
+    || me.deletedAt
+    || (context.me.id && context.me.id !== me.id)
+    || (context.me.id && context.me.admin !== me.admin)
+    || (context.me.id && context.me.tester !== me.tester)
+  ) {
+    throw Error();
+  }
+  setMe(me);
+  setThemeMode(me.themeMode || 'light');
+  listenGroups(context);
+  return true;
+};
+
+export const listenAccounts = async (context, uid) => {
+  const { db, setAccounts } = context;
+  const meDoc = await getDoc(doc(db, 'accounts', uid));
+  try {
+    updateMe(context, meDoc.exists ? castDoc(meDoc) : null);
+    if (context.unsub.accounts) {
+      return true;
+    }
+    const isAdmin = meDoc.data().admin;
     // eslint-disable-next-line no-param-reassign
-    context.unsub[meRef.path] = onSnapshot(
-      meRef,
-      async (snapshot) => {
-        if (
-          snapshot.exists
-          && snapshot.data().valid
-          && !snapshot.data().deletedAt
-        ) {
-          const me = castDoc(snapshot);
-          setMe(me);
-          setThemeMode(me.themeMode || 'light');
-          listenGroups(context);
-        } else {
-          // eslint-disable-next-line no-param-reassign
-          context.authError = 'unregistered account';
-          await handleSignOut(context);
-        }
-      },
-    );
+    context.unsub.accounts = isAdmin
+      ? onSnapshot(
+        collection(db, 'accounts'),
+        async (snapshot) => {
+          try {
+            const accounts = mergeUpdatedDocs(snapshot, context.accounts);
+            const me = accounts.find((item) => item.id === uid);
+            updateMe(context, me);
+            setAccounts(accounts);
+          } catch (e) { await handleListenError(context); }
+        },
+        async () => { await handleListenError(context); },
+      )
+      : onSnapshot(
+        doc(db, 'accounts', uid),
+        async (snapshot) => {
+          try {
+            updateMe(context, snapshot.exists ? castDoc(snapshot) : null);
+          } catch (e) { await handleListenError(context); }
+        },
+        async () => { await handleListenError(context); },
+      );
+    return true;
+  } catch (e) {
+    await handleListenError(context);
+    return false;
   }
 };
 
@@ -273,34 +335,30 @@ export const setAccountProperties = (
 ) => setDocProperties(context, 'accounts', id, props);
 
 export const listenFirebase = async (context, window) => {
+  await listenConf(context);
   if (window.location.href.includes(actionReauthentication)) {
     await handleReauthenticateWithEmailLink(context, window);
   } else if (window.location.href.includes(actionEmailVerification)) {
-    window.location.replace(
-      window.location.href.replace(actionEmailVerification, ''),
-    );
+    window.location.replace(`${context.conf.url}#/`);
   } else if (isSignInWithEmailLink(context.auth, window.location.href)) {
     await handleSignInWithEmailLink(context, window);
   } else {
     restoreAuthError(context, window);
-    listenConf(context);
-    onAuthStateChanged(context.auth, (user) => {
+    onAuthStateChanged(context.auth, async (user) => {
       const prevUid = context.authUser.uid;
       if (user) {
         if (prevUid && prevUid !== user.uid) {
           unsubUserData(context);
         }
-        context.setAuthUser(user);
-        listenMe(context, user.uid);
-        context.setReauthenticationTimeout(reauthentication.timeout);
+        if (await listenAccounts(context, user.uid)) {
+          context.setReauthenticationTimeout(reauthentication.timeout);
+          context.setAuthUser(user);
+        }
       } else if (prevUid) {
         onSignOut(context);
+      } else if (context.authUser.uninitialized) {
+        context.setAuthUser({});
       }
     });
   }
 };
-
-export const isSignedIn = (context) => context.me.id && context.authUser.emailVerified;
-export const acceptAny = () => true;
-export const acceptUser = (context) => isSignedIn(context);
-export const acceptAdmin = (context) => isSignedIn(context) && context.me.admin;

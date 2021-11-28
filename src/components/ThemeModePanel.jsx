@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-import { AppContext, isSignedIn, setAccountProperties } from '../api';
+import { AppContext, setAccountProperties, currentPriv } from '../api';
 import RadioButtons from './RadioButtons';
 
 const ThemeModePanel = () => {
@@ -12,7 +12,7 @@ const ThemeModePanel = () => {
 
   const handleChange = async (mode) => {
     context.setThemeMode(mode);
-    if (isSignedIn(context)) {
+    if (['user', 'admin'].includes(currentPriv(context))) {
       await setAccountProperties(context, context.me.id, { themeMode: mode });
     }
   };
@@ -21,6 +21,7 @@ const ThemeModePanel = () => {
     <Grid container spacing={2} data-testid="themeMode-panel">
       <Grid item xs={12}>
         <RadioButtons
+          legend={t('Theme mode')}
           onChange={handleChange}
           items={[
             { value: 'light', label: t('Light mode') },

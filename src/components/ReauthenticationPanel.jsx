@@ -49,7 +49,7 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
           {t('reauthentication required')}
         </Alert>
       </Grid>
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         {t('receive email link for reauthentication')}
       </Grid>
       <Grid item xs={12} sm="auto">
@@ -75,7 +75,7 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
         </Alert>
       </Grid>
       )}
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id={`${dataTestid}-password`}
           type={showPassword ? 'text' : 'password'}

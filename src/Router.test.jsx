@@ -51,7 +51,7 @@ describe('App', () => {
   it('show LoadingPage without service.conf on "policy".', () => {
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/info/policy' }]}>
+        <MemoryRouter initialEntries={[{ pathname: '/info/Info' }]}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -96,7 +96,7 @@ describe('App', () => {
     mockContext.conf = { error: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/info/policy' }]}>
+        <MemoryRouter initialEntries={[{ pathname: '/info/Info' }]}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -136,7 +136,7 @@ describe('App', () => {
     mockContext.conf = { id: 'conf' };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={['/info/policy']}>
+        <MemoryRouter initialEntries={['/info/Info']}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,
@@ -290,12 +290,12 @@ describe('App', () => {
     expect(screen.queryByTestId('myPassword-panel')).toBeNull();
   });
 
-  it('show PolicyPanel if signed in on "/info/policy".', () => {
+  it('show PolicyPanel if signed in on "/info/Info".', () => {
     mockContext.conf = { id: 'conf' };
     mockContext.me = { id: 'id01' };
     render(
       <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/info/policy' }]}>
+        <MemoryRouter initialEntries={[{ pathname: '/info/Info' }]}>
           <App />
         </MemoryRouter>
       </AppContext.Provider>,

@@ -60,10 +60,10 @@ exports.setUserPassword = functions.region(REGION)
     );
   });
 
-// Warning: Firebase Authentication triggers are beta at 2021-11-21.
-exports.onCreateAuthUser = functions.auth.user()
-  .onCreate((user) => users.onCreateAuthUser(firebase, user));
+// Warning: Firebase Authentication triggers were beta at 2021-11-21.
+exports.onCreateAuthUser = functions.region(REGION)
+  .auth.user().onCreate((user) => users.onCreateAuthUser(firebase, user));
 
-exports.onUpdateAccount = functions.firestore
-  .document('accounts/{accountId}')
+exports.onUpdateAccount = functions.region(REGION)
+  .firestore.document('accounts/{accountId}')
   .onUpdate((change) => users.onAccountUpdate(firebase, change));

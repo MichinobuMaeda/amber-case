@@ -19,9 +19,6 @@ export {
   setGroupProperties,
   setAccountProperties,
   listenFirebase,
-  isSignedIn,
-  acceptAny,
-  acceptUser,
-  acceptAdmin,
 } from './firebase';
 export * from './ui';
+export * from './authorization';

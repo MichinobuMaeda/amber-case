@@ -20,13 +20,13 @@ jest.mock('../api', () => ({
 
 // work around for mocking problem.
 const { AppContext } = require('../api');
-const { PolicyPanel } = require('.');
+const { InfoPage } = require('.');
 
 beforeEach(() => {
   resetMockService();
 });
 
-describe('MyPasswordPanel', () => {
+describe('InfoPage', () => {
   const errorMessage = i18n.t('failed to save data') + i18n.t('retry failed or call admin');
 
   it('disables button edit for guest.', async () => {
@@ -34,7 +34,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = {};
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPanel />
+        <InfoPage />
       </AppContext.Provider>,
     );
 
@@ -46,7 +46,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: false };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPanel />
+        <InfoPage />
       </AppContext.Provider>,
     );
 
@@ -58,7 +58,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPanel />
+        <InfoPage />
       </AppContext.Provider>,
     );
 
@@ -76,7 +76,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPanel />
+        <InfoPage />
       </AppContext.Provider>,
     );
 
@@ -99,7 +99,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPanel />
+        <InfoPage />
       </AppContext.Provider>,
     );
 
@@ -116,7 +116,7 @@ describe('MyPasswordPanel', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     render(
       <AppContext.Provider value={mockContext}>
-        <PolicyPanel />
+        <InfoPage />
       </AppContext.Provider>,
     );
 

@@ -23,7 +23,7 @@ const MyPasswordPanel = () => {
   };
 
   const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState(getValidationError(''));
+  const [validationError, setValidationError] = useState(null);
   const [confirmation, setConfirmation] = useState('');
   const [confirmationError, setConfirmationError] = useState('');
   const [successStatus, setSuccessStatus] = useState(false);
@@ -53,8 +53,8 @@ const MyPasswordPanel = () => {
   };
 
   return (
-    <Grid container spacing={2} data-testid="myPassword-panel">
-      <Grid item xs={12} sm={8} md={6}>
+    <Grid container spacing={2} data-testid="myPassword-panel" alignItems="center">
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="myPassword-email"
           type={showPassword ? 'text' : 'password'}
@@ -68,7 +68,7 @@ const MyPasswordPanel = () => {
         />
       </Grid>
       <Grid item xs={12} sm="auto" />
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="myPassword-confirmation"
           type={showPassword ? 'text' : 'password'}

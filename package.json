@@ -1,16 +1,16 @@
 {
   "name": "amber-case",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
+    "dev:setup": "curl http://localhost:5001/amber-case/asia-northeast1/api/setup",
+    "start": "firebase emulators:exec --only auth,functions,firestore,storage --ui 'yarn dev:setup && react-scripts start'",
     "build": "react-scripts build",
     "deploy": "firebase deploy",
     "lint": "eslint src",
     "functions:config:set": "firebase functions:config:set",
-    "test:setup": "curl http://localhost:5001/amber-case/asia-northeast1/api/setup",
     "test": "react-scripts test -w 1 --coverage --watchAll=false",
-    "start": "firebase emulators:exec --only auth,functions,firestore,storage --ui 'yarn test:setup && react-scripts start'",
-    "emulate": "yarn build && firebase emulators:start"
+    "emulate": "yarn build && firebase emulators:start && yarn dev:setup"
   },
   "dependencies": {
     "@emotion/react": "^11.5.0",
@@ -30,7 +30,6 @@
     "react-markdown": "^7.1.0",
     "react-router-dom": "6",
     "react-scripts": "4.0.3",
-    "web-vitals": "^0.2.4",
     "workbox-background-sync": "^5.1.3",
     "workbox-broadcast-update": "^5.1.3",
     "workbox-cacheable-response": "^5.1.3",

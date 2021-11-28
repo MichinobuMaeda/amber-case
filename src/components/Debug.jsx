@@ -100,7 +100,6 @@ const Debug = () => {
     <>
       <IconButton
         aria-label="debug"
-        size="large"
         color="inherit"
         onClick={() => setOpen(true)}
       >

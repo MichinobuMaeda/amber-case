@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export */
+export const menuWidth = 320;
 
 // https://mui.com/customization/default-theme/
 const components = {
@@ -11,6 +11,7 @@ const components = {
     defaultProps: {
       variant: 'standard', // 'standard', 'outlined', 'filled'
       fullWidth: true,
+      sx: { minHeight: '4.5em' },
     },
   },
 };

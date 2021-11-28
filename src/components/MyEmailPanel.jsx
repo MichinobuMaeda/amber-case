@@ -27,9 +27,7 @@ const MyEmailPanel = () => {
   const [email, setEmail] = useState(
     getValidationError(currentEmail()) ? '' : currentEmail(),
   );
-  const [validationError, setValidationError] = useState(
-    getValidationError(currentEmail()),
-  );
+  const [validationError, setValidationError] = useState(null);
   const [confirmation, setConfirmation] = useState('');
   const [confirmationError, setConfirmationError] = useState('');
   const [successStatus, setSuccessStatus] = useState(false);
@@ -59,13 +57,13 @@ const MyEmailPanel = () => {
   };
 
   return (
-    <Grid container spacing={2} data-testid="myEmail-panel">
+    <Grid container spacing={2} data-testid="myEmail-panel" alignItems="center">
       <Grid item xs={12}>
         <Alert severity="warning">
           {t('please verify email after change')}
         </Alert>
       </Grid>
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="myEmail-email"
           value={email}
@@ -76,7 +74,7 @@ const MyEmailPanel = () => {
         />
       </Grid>
       <Grid item xs={12} sm="auto" />
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="myEmail-confirmation"
           value={confirmation}

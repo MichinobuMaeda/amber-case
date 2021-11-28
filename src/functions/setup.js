@@ -77,6 +77,12 @@ const install = async (firebase, email, password, url) => {
     url,
     seed,
     invitationExpirationTime: 3 * 24 * 3600 * 1000,
+    copyright: `Copyright &copy; 2021 Michinobu Maeda.
+
+The program of this app is distributed under the MIT license.
+
+<https://github.com/MichinobuMaeda/amber-case>
+`,
     policy: `## Heading 2
 
 ### Heading 3
@@ -87,9 +93,9 @@ The quick brown fox jumps over the lazy dog.
 The quick brown fox jumps over the lazy dog.
 The quick brown fox jumps over the lazy dog.
 
-<https://flutter.dev/>
+<https://reactjs.org//>
 
-[Flutter](https://flutter.dev/)
+[React](https://reactjs.org/)
 
 - List item 1
 - List item 2

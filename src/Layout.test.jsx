@@ -4,8 +4,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { i18n, firebaseConfig } from '../conf';
-import { resetMockService, mockContext } from '../testConfig';
+import { i18n, firebaseConfig } from './conf';
+import { resetMockService, mockContext } from './testConfig';
 
 let mockNavigationType;
 const mockUseNavigate = jest.fn();
@@ -23,20 +23,20 @@ jest.mock('../api', () => ({
 }));
 
 // work around for mocking problem.
-const { AppContext } = require('../api');
-const { Header } = require('.');
+const { AppContext } = require('./api');
+const { Layout } = require('.');
 
 beforeEach(() => {
   resetMockService();
 });
 
-describe('Header', () => {
+describe('Layout', () => {
   it('hides the back button and hides the settings button, '
     + 'on "/" and if the conf is not loaded.', () => {
     render(
       <AppContext.Provider value={{ conf: {} }}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -50,7 +50,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -64,7 +64,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={{ conf: {} }}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -78,7 +78,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -88,11 +88,11 @@ describe('Header', () => {
   });
 
   it('shows back button and shows settings button, '
-    + 'on "/policy" and if the conf is not loaded.', () => {
+    + 'on "/Info" and if the conf is not loaded.', () => {
     render(
       <AppContext.Provider value={{ conf: {} }}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-          <Header />
+        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -102,11 +102,11 @@ describe('Header', () => {
   });
 
   it('shows back button and shows settings button, '
-    + 'on "/policy" and if the conf is loaded.', () => {
+    + 'on "/Info" and if the conf is loaded.', () => {
     render(
       <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-          <Header />
+        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -121,8 +121,8 @@ describe('Header', () => {
     mockNavigationType = 'POP';
     render(
       <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-          <Header />
+        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -138,8 +138,8 @@ describe('Header', () => {
     mockNavigationType = 'PUSH';
     render(
       <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/policy' }]}>
-          <Header />
+        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -154,7 +154,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={{ conf: { id: 'conf' } }}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -172,7 +172,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -187,7 +187,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -203,7 +203,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -218,7 +218,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -233,7 +233,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );
@@ -248,7 +248,7 @@ describe('Header', () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Header />
+          <Layout />
         </MemoryRouter>
       </AppContext.Provider>,
     );

@@ -30,8 +30,8 @@ const SignInWithPasswordPanel = ({ email, errorMessage, onEmailChange }) => {
   };
 
   return (
-    <Grid container spacing={2} data-testid="signInWithPassword-panel">
-      <Grid item xs={12} sm={8} md={6}>
+    <Grid container spacing={2} data-testid="signInWithPassword-panel" alignItems="center">
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="signInWithPassword-email"
           value={email}
@@ -42,7 +42,7 @@ const SignInWithPasswordPanel = ({ email, errorMessage, onEmailChange }) => {
         />
       </Grid>
       <Grid item xs={12} sm="auto" />
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="signInWithPassword-password"
           label={t('Password')}

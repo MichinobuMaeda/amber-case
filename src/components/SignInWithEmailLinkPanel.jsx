@@ -31,8 +31,8 @@ const SignInWithEmailLinkPanel = ({ email, errorMessage, onEmailChange }) => {
   };
 
   return (
-    <Grid container spacing={2} data-testid="signInWithEmailLink-panel">
-      <Grid item xs={12} sm={8} md={6}>
+    <Grid container spacing={2} data-testid="signInWithEmailLink-panel" alignItems="center">
+      <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="signInWithEmailLink-email"
           value={email}
