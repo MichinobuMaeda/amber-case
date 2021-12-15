@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import SaveAlt from '@mui/icons-material/SaveAlt';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import InputAdornment from '@mui/material/InputAdornment';
 import Cancel from '@mui/icons-material/Cancel';
 import { useTranslation } from 'react-i18next';
@@ -18,15 +18,13 @@ const TextEdit = ({
 }) => {
   const { t } = useTranslation();
 
-  const handleValidate = (text) => validate(text).reduce((ret, cur) => cur || ret, null);
-
   const [changed, setChanged] = useState(value);
-  const [validateError, setValidateError] = useState(handleValidate(value));
+  const [validateError, setValidateError] = useState(validate(value));
   const [saveError, setSaveError] = useState(null);
 
   const onChange = (text) => {
     setChanged(text);
-    setValidateError(handleValidate(text));
+    setValidateError(validate(text));
     setSaveError(null);
   };
 
@@ -42,7 +40,7 @@ const TextEdit = ({
 
   const onCancel = () => {
     setChanged(value);
-    setValidateError(handleValidate(value));
+    setValidateError(validate(value));
     setSaveError(null);
   };
 
@@ -61,11 +59,16 @@ const TextEdit = ({
           onChange={(e) => onChange(e.target.value)}
           error={!!validateError}
           helperText={validateError}
+          inputProps={{
+            'aria-label': `${dataTestid}-input`,
+          }}
+          // eslint-disable-next-line react/jsx-no-duplicate-props
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
                   onClick={onCancel}
+                  aria-label={`${dataTestid}-cancel`}
                   edge="end"
                   disabled={value === changed}
                 >
@@ -80,8 +83,8 @@ const TextEdit = ({
         <Button
           disabled={!!validateError || value === changed}
           onClick={onSubmit}
-          aria-label="save"
-          startIcon={<SaveAlt />}
+          aria-label={`${dataTestid}-save`}
+          startIcon={<SaveAltIcon />}
         >
           {t('Save')}
         </Button>
@@ -108,7 +111,7 @@ TextEdit.propTypes = {
 
 TextEdit.defaultProps = {
   'data-testid': null,
-  value: null,
+  value: '',
   saveErrorMessage: null,
 };
 

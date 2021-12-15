@@ -11,9 +11,11 @@ import '../conf/i18n';
 import {
   validateReuired, validateEmail, firebaseConfig,
 } from '../conf';
+import AppContext from '../api/AppContext';
 import {
-  AppContext, handelSendSignInLinkToEmail, handleSignInWithPassword,
-} from '../api';
+  handelSendSignInLinkToEmail,
+  handleSignInWithPassword,
+} from '../api/authentication';
 
 const SignInWithEmailLinkPanel = ({ email, errorMessage, onEmailChange }) => {
   const { t } = useTranslation();

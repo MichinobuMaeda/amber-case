@@ -3,9 +3,8 @@ import AppContext from './AppContext';
 export {
   AppContext,
 };
+export { initializeFirebase } from './firebase';
 export {
-  updateApp,
-  initializeFirebase,
   handelSendSignInLinkToEmail,
   handleSignInWithPassword,
   handleSendEmailVerification,
@@ -15,10 +14,10 @@ export {
   handleSignOut,
   setMyEmail,
   setMyPassword,
-  setConfProperties,
-  setGroupProperties,
-  setAccountProperties,
   listenFirebase,
-} from './firebase';
+} from './authentication';
+export { setConfProperties } from './service';
+export { setAccountProperties } from './accounts';
+export { setGroupProperties } from './groups';
 export * from './ui';
 export * from './authorization';

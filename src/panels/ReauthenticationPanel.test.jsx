@@ -1,25 +1,24 @@
-import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockContext } from '../testConfig';
+import { initialieMock, mockContext } from '../setupTests';
+import AppContext from '../api/AppContext';
+import {
+  handelReauthenticateLinkToEmail,
+  handleReauthenticateWithPassword,
+} from '../api/authentication';
+import ReauthenticationPanel from './ReauthenticationPanel';
 
-const mockHandelReauthenticateLinkToEmail = jest.fn();
-const mockHandleReauthenticateWithPassword = jest.fn();
-jest.mock('../api', () => ({
-  ...jest.requireActual('../api'),
-  handelReauthenticateLinkToEmail: mockHandelReauthenticateLinkToEmail,
-  handleReauthenticateWithPassword: mockHandleReauthenticateWithPassword,
+jest.mock('../api/authentication', () => ({
+  ...jest.requireActual('../api/authentication'),
+  handelReauthenticateLinkToEmail: jest.fn(),
+  handleReauthenticateWithPassword: jest.fn(),
 }));
 
-// work around for mocking problem.
-const { AppContext } = require('../api');
-const { ReauthenticationPanel } = require('.');
-
 beforeEach(() => {
-  resetMockService();
+  initialieMock();
 });
 
 describe('ReauthenticationPanel: Email', () => {
@@ -38,26 +37,26 @@ describe('ReauthenticationPanel: Email', () => {
 
     expect(screen.queryByText(completeMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
-    expect(screen.queryByTestId('VisibilityOffIcon')).toBeInTheDocument();
+    expect(screen.getByTestId('VisibilityOffIcon')).toBeInTheDocument();
     expect(screen.queryByTestId('VisibilityIcon')).toBeNull();
 
     const button = screen.queryByRole('button', { name: 'sendReauthLinkEmail' });
 
     userEvent.click(button);
-    await waitFor(() => expect(mockHandelReauthenticateLinkToEmail.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handelReauthenticateLinkToEmail.mock.calls.length).toEqual(1));
 
-    expect(screen.queryByText(completeMessage)).toBeInTheDocument();
+    expect(screen.getByText(completeMessage)).toBeInTheDocument();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.click(screen.queryByTestId('VisibilityOffIcon'));
     expect(screen.queryByTestId('VisibilityOffIcon')).toBeNull();
-    expect(screen.queryByTestId('VisibilityIcon')).toBeInTheDocument();
+    expect(screen.getByTestId('VisibilityIcon')).toBeInTheDocument();
   });
 
   it('shows message for error.', async () => {
     const email = 'test01@example.com';
     mockContext.auth = { currentUser: { email } };
-    mockHandelReauthenticateLinkToEmail
+    handelReauthenticateLinkToEmail
       .mockImplementationOnce(() => { throw new Error(); });
 
     render(
@@ -71,10 +70,10 @@ describe('ReauthenticationPanel: Email', () => {
     const button = screen.queryByRole('button', { name: 'sendReauthLinkEmail' });
 
     userEvent.click(button);
-    await waitFor(() => expect(mockHandelReauthenticateLinkToEmail.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handelReauthenticateLinkToEmail.mock.calls.length).toEqual(1));
 
     expect(screen.queryByText(completeMessage)).toBeNull();
-    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 });
 
@@ -99,7 +98,7 @@ describe('ReauthenticationPanel: Password', () => {
     expect(button).not.toBeDisabled();
 
     userEvent.click(button);
-    await waitFor(() => expect(mockHandleReauthenticateWithPassword.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleReauthenticateWithPassword.mock.calls.length).toEqual(1));
 
     expect(screen.queryByText(errorMessage)).toBeNull();
   });
@@ -107,7 +106,7 @@ describe('ReauthenticationPanel: Password', () => {
   it('shows message for error.', async () => {
     const email = 'test01@example.com';
     mockContext.auth = { currentUser: { email } };
-    mockHandleReauthenticateWithPassword
+    handleReauthenticateWithPassword
       .mockImplementationOnce(() => { throw new Error(); });
 
     render(
@@ -120,8 +119,8 @@ describe('ReauthenticationPanel: Password', () => {
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'a');
 
     userEvent.click(button);
-    await waitFor(() => expect(mockHandleReauthenticateWithPassword.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleReauthenticateWithPassword.mock.calls.length).toEqual(1));
 
-    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 });

@@ -1,25 +1,20 @@
-import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n, firebaseConfig } from '../conf';
-import '../testConfig';
+import {
+  handelSendSignInLinkToEmail,
+  handleSignInWithPassword,
+} from '../api/authentication';
+import SignInWithEmailLinkPanel from './SignInWithEmailLinkPanel';
 
-const mockHandelSendSignInLinkToEmail = jest
-  .fn(() => {})
-  .mockImplementationOnce(() => {})
-  .mockImplementationOnce(() => { throw new Error(); });
-const mockHandleSignInWithPassword = jest.fn();
-jest.mock('../api', () => ({
-  ...jest.requireActual('../api'),
-  handelSendSignInLinkToEmail: mockHandelSendSignInLinkToEmail,
-  handleSignInWithPassword: mockHandleSignInWithPassword,
+jest.mock('../api/authentication', () => ({
+  ...jest.requireActual('../api/authentication'),
+  handelSendSignInLinkToEmail: jest.fn(),
+  handleSignInWithPassword: jest.fn(),
 }));
-
-// work around for mocking problem.
-const { SignInWithEmailLinkPanel } = require('.');
 
 const mockOnEmailChange = jest.fn();
 
@@ -46,12 +41,12 @@ describe('SignInWithEmailLinkPanel', () => {
     expect(screen.queryByText(completeMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
-    expect(screen.queryByRole('button', { name: 'send' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'send' })).toBeInTheDocument();
 
     userEvent.click(screen.queryByRole('button', { name: 'send' }));
-    await waitFor(() => expect(mockHandelSendSignInLinkToEmail.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handelSendSignInLinkToEmail.mock.calls.length).toEqual(1));
 
-    expect(screen.queryByText(completeMessage)).toBeInTheDocument();
+    expect(screen.getByText(completeMessage)).toBeInTheDocument();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), 'a');
@@ -61,6 +56,7 @@ describe('SignInWithEmailLinkPanel', () => {
 
   it('shows message for error.', async () => {
     const email = 'test01@example.com';
+    handelSendSignInLinkToEmail.mockImplementationOnce(() => { throw new Error(); });
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
@@ -74,13 +70,13 @@ describe('SignInWithEmailLinkPanel', () => {
     expect(screen.queryByText(completeMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
-    expect(screen.queryByRole('button', { name: 'send' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'send' })).toBeInTheDocument();
 
     userEvent.click(screen.queryByRole('button', { name: 'send' }));
-    await waitFor(() => expect(mockHandelSendSignInLinkToEmail.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handelSendSignInLinkToEmail.mock.calls.length).toEqual(1));
 
     expect(screen.queryByText(completeMessage)).toBeNull();
-    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
   it('disables button send for invalid email.', async () => {
@@ -126,10 +122,10 @@ describe('SignInWithEmailLinkPanel', () => {
         />
       </MemoryRouter>,
     );
-    expect(screen.queryByRole('button', { name: 'test' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'test' })).toBeInTheDocument();
 
     userEvent.click(screen.queryByRole('button', { name: 'test' }));
-    await waitFor(() => expect(mockHandleSignInWithPassword.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleSignInWithPassword.mock.calls.length).toEqual(1));
 
     firebaseConfig.apiKey = keyOrg;
   });

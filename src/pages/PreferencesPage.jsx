@@ -3,23 +3,24 @@ import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateReuired } from '../conf';
-import { AppContext, setAccountProperties } from '../api';
+import AppContext from '../api/AppContext';
+import { setAccountProperties } from '../api/accounts';
 import Guard from '../components/Guard';
-import MyEmailPanel from '../components/MyEmailPanel';
-import MyPasswordPanel from '../components/MyPasswordPanel';
-import ReauthenticationPanel from '../components/ReauthenticationPanel';
-import SignOutPanel from '../components/SignOutPanel';
-import ThemeModePanel from '../components/ThemeModePanel';
 import Section from '../components/Section';
 import TextEdit from '../components/TextEdit';
+import ThemeModePanel from '../panels/ThemeModePanel';
+import SignOutPanel from '../panels/SignOutPanel';
+import ReauthenticationPanel from '../panels/ReauthenticationPanel';
+import MyEmailPanel from '../panels/MyEmailPanel';
+import MyPasswordPanel from '../panels/MyPasswordPanel';
 
 const PreferencesPage = () => {
   const { t } = useTranslation();
   const context = useContext(AppContext);
 
   return (
-    <Guard require="loaded" redirect data-testid="preferences-page">
-      <Section>
+    <>
+      <Section data-testid="preferences-page">
         <ThemeModePanel />
       </Section>
       <Guard require="user">
@@ -28,9 +29,7 @@ const PreferencesPage = () => {
             data-testid="myDisplayName"
             value={context.me.name}
             label={t('Display name')}
-            validate={(v) => [
-              !validateReuired(v) && t('input is required'),
-            ]}
+            validate={(v) => !validateReuired(v) && t('input is required')}
             onSave={(v) => setAccountProperties(context, context.me.id, { name: v })}
           />
         </Section>
@@ -52,7 +51,7 @@ const PreferencesPage = () => {
           <SignOutPanel />
         </Section>
       </Guard>
-    </Guard>
+    </>
   );
 };
 

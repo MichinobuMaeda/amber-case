@@ -11,8 +11,9 @@ import '../conf/i18n';
 import {
   validateReuired, validateEmail,
 } from '../conf';
-import { AppContext, handleSignInWithPassword } from '../api';
-import ShowPasswordButton from './ShowPasswordButton';
+import AppContext from '../api/AppContext';
+import { handleSignInWithPassword } from '../api/authentication';
+import ShowPasswordButton from '../components/ShowPasswordButton';
 
 const SignInWithPasswordPanel = ({ email, errorMessage, onEmailChange }) => {
   const { t } = useTranslation();

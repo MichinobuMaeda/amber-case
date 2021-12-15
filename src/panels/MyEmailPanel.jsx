@@ -9,14 +9,14 @@ import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateReuired, validateEmail, firebaseConfig } from '../conf';
-import { AppContext, setMyEmail } from '../api';
+import AppContext from '../api/AppContext';
+import { setMyEmail } from '../api/authentication';
 
 const MyEmailPanel = () => {
   const { t } = useTranslation();
   const context = useContext(AppContext);
   const navigate = useNavigate();
   const confirmationErrorMessage = t('do not match the confirmation input');
-  const currentEmail = () => context.auth.currentUser.email;
 
   const getValidationError = (text) => {
     if (!validateReuired(text)) { return t('input is required'); }
@@ -24,9 +24,7 @@ const MyEmailPanel = () => {
     return null;
   };
 
-  const [email, setEmail] = useState(
-    getValidationError(currentEmail()) ? '' : currentEmail(),
-  );
+  const [email, setEmail] = useState('');
   const [validationError, setValidationError] = useState(null);
   const [confirmation, setConfirmation] = useState('');
   const [confirmationError, setConfirmationError] = useState('');
@@ -63,11 +61,20 @@ const MyEmailPanel = () => {
           {t('please verify email after change')}
         </Alert>
       </Grid>
+      <Grid item xs={12} container spacing={1}>
+        <Grid item xs="auto">
+          {t('Current E-mail')}
+          :
+        </Grid>
+        <Grid item xs="auto">
+          {context.auth.currentUser.email}
+        </Grid>
+      </Grid>
       <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
           id="myEmail-email"
           value={email}
-          label={t('E-mail')}
+          label={t('New E-mail')}
           onChange={(e) => onEmailChange(e.target.value)}
           error={!!validationError}
           helperText={validationError}
@@ -86,7 +93,9 @@ const MyEmailPanel = () => {
       </Grid>
       <Grid item xs={12} sm="auto">
         <Button
-          disabled={!!validationError || !!confirmationError || email.trim() === currentEmail()}
+          disabled={!!validationError
+            || !!confirmationError
+            || email.trim() === (context.auth.currentUser.email || '')}
           onClick={onSubmit}
           aria-label="save"
           startIcon={<SaveAlt />}

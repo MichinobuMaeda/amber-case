@@ -1,18 +1,10 @@
-import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-import '../testConfig';
-
-// work around for mocking problem.
-const { SignInPage } = require('.');
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
+import SignInPage from './SignInPage';
 
 describe('SignInPage', () => {
   it('shows SignInWithEmailLinkPage as default '
@@ -22,17 +14,17 @@ describe('SignInPage', () => {
         <SignInPage />
       </MemoryRouter>,
     );
-    expect(screen.queryByTestId('signInWithEmailLink-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('signInWithEmailLink-panel')).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('correct your email address'))).toBeNull();
 
     userEvent.click(screen.queryByLabelText(i18n.t('email address and password')));
-    expect(screen.queryByTestId('signInWithPassword-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('signInWithPassword-panel')).toBeInTheDocument();
 
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), 'a');
-    expect(screen.queryByText(i18n.t('correct your email address'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('correct your email address'))).toBeInTheDocument();
 
     userEvent.click(screen.queryByLabelText(i18n.t('sign in with email link')));
-    expect(screen.queryByTestId('signInWithEmailLink-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('signInWithEmailLink-panel')).toBeInTheDocument();
 
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), '@');
     userEvent.type(screen.queryByLabelText(i18n.t('E-mail')), 'b');

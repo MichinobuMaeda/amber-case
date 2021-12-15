@@ -1,29 +1,28 @@
-import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-import { resetMockService, mockContext } from '../testConfig';
+import { initialieMock, mockContext } from '../setupTests';
+import AppContext from '../api/AppContext';
+import {
+  handleSendEmailVerification,
+  handleReloadAuthUser,
+  handleSignOut,
+} from '../api/authentication';
+import EmailVerificationPage from './EmailVerificationPage';
 
-const mockHandleSendEmailVerification = jest.fn();
-const mockHandleReloadAuthUser = jest.fn();
-const mockHandleSignOut = jest.fn();
-jest.mock('../api', () => ({
+jest.mock('../api/authentication', () => ({
   __esModule: true,
-  ...jest.requireActual('../api'),
-  handleSendEmailVerification: mockHandleSendEmailVerification,
-  handleReloadAuthUser: mockHandleReloadAuthUser,
-  handleSignOut: mockHandleSignOut,
+  ...jest.requireActual('../api/authentication'),
+  handleSendEmailVerification: jest.fn(),
+  handleReloadAuthUser: jest.fn(),
+  handleSignOut: jest.fn(),
 }));
 
-// work around for mocking problem.
-const { AppContext } = require('../api');
-const { EmailVerificationPage } = require('.');
-
 beforeEach(() => {
-  resetMockService();
+  initialieMock();
 });
 
 describe('EmailVerificationPage', () => {
@@ -42,35 +41,35 @@ describe('EmailVerificationPage', () => {
         </MemoryRouter>
       </AppContext.Provider>,
     );
-    expect(screen.queryByRole('button', { name: 'send' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'send' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'reload' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'sign-out' })).toBeInTheDocument();
-    expect(screen.queryByText(initialMessage)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sign-out' })).toBeInTheDocument();
+    expect(screen.getByText(initialMessage)).toBeInTheDocument();
     expect(screen.queryByText(completeMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.click(screen.queryByRole('button', { name: 'send' }));
-    await waitFor(() => expect(mockHandleSendEmailVerification.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleSendEmailVerification.mock.calls.length).toEqual(1));
 
     expect(screen.queryByRole('button', { name: 'send' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'reload' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'sign-out' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'reload' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sign-out' })).toBeInTheDocument();
     expect(screen.queryByText(initialMessage)).toBeNull();
-    expect(screen.queryByText(completeMessage)).toBeInTheDocument();
+    expect(screen.getByText(completeMessage)).toBeInTheDocument();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.click(screen.queryByRole('button', { name: 'reload' }));
-    await waitFor(() => expect(mockHandleReloadAuthUser.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleReloadAuthUser.mock.calls.length).toEqual(1));
 
     userEvent.click(screen.queryByRole('button', { name: 'sign-out' }));
-    await waitFor(() => expect(mockHandleSignOut.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleSignOut.mock.calls.length).toEqual(1));
   });
 
   it('shows button send and button sign-out on initial state, '
   + 'and shows error messeege after click button send is failed.', async () => {
     mockContext.me = { id: 'id01' };
     mockContext.authUser = { emailVerified: false };
-    mockHandleSendEmailVerification
+    handleSendEmailVerification
       .mockImplementationOnce(() => { throw Error(); });
     render(
       <AppContext.Provider value={mockContext}>
@@ -79,24 +78,24 @@ describe('EmailVerificationPage', () => {
         </MemoryRouter>
       </AppContext.Provider>,
     );
-    expect(screen.queryByRole('button', { name: 'send' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'send' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'reload' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'sign-out' })).toBeInTheDocument();
-    expect(screen.queryByText(initialMessage)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sign-out' })).toBeInTheDocument();
+    expect(screen.getByText(initialMessage)).toBeInTheDocument();
     expect(screen.queryByText(completeMessage)).toBeNull();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.click(screen.queryByRole('button', { name: 'send' }));
-    await waitFor(() => expect(mockHandleSendEmailVerification.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleSendEmailVerification.mock.calls.length).toEqual(1));
 
-    expect(screen.queryByRole('button', { name: 'send' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'send' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'reload' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'sign-out' })).toBeInTheDocument();
-    expect(screen.queryByText(initialMessage)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sign-out' })).toBeInTheDocument();
+    expect(screen.getByText(initialMessage)).toBeInTheDocument();
     expect(screen.queryByText(completeMessage)).toBeNull();
-    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
 
     userEvent.click(screen.queryByRole('button', { name: 'sign-out' }));
-    await waitFor(() => expect(mockHandleSignOut.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleSignOut.mock.calls.length).toEqual(1));
   });
 });

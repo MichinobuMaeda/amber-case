@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-import { AppContext, handleSignOut } from '../api';
+import AppContext from '../api/AppContext';
+import { handleSignOut } from '../api/authentication';
 
 const SignOutPanel = () => {
   const { t } = useTranslation();

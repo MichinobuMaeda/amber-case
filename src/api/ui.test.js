@@ -1,6 +1,15 @@
-import { selectThemeMode } from '.';
+import {
+  initialieMock,
+  mockWindow, mockNavigator,
+} from '../setupTests';
+import {
+  selectThemeMode,
+  updateApp,
+} from './ui';
 
-import '../testConfig';
+beforeEach(() => {
+  initialieMock();
+});
 
 describe('selectThemeMode(context)', () => {
   it('return the dark theme options '
@@ -49,5 +58,13 @@ describe('selectThemeMode(context)', () => {
       themeMode: 'system',
       preferColorScheme: 'light',
     }).palette.mode).toEqual('light');
+  });
+});
+
+describe('updateApp(navigator, window)', () => {
+  it('unregister the service worker and reload web app.', async () => {
+    await updateApp(mockNavigator, mockWindow);
+    expect(mockNavigator.serviceWorker.ready.unregister.mock.calls).toEqual([[]]);
+    expect(mockWindow.location.reload.mock.calls).toEqual([[]]);
   });
 });

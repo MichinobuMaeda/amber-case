@@ -8,8 +8,9 @@ import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateReuired, validatePassword } from '../conf';
-import { AppContext, setMyPassword } from '../api';
-import ShowPasswordButton from './ShowPasswordButton';
+import AppContext from '../api/AppContext';
+import { setMyPassword } from '../api/authentication';
+import ShowPasswordButton from '../components/ShowPasswordButton';
 
 const MyPasswordPanel = () => {
   const { t } = useTranslation();
@@ -23,7 +24,7 @@ const MyPasswordPanel = () => {
   };
 
   const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState(null);
+  const [validationError, setValidationError] = useState(getValidationError(''));
   const [confirmation, setConfirmation] = useState('');
   const [confirmationError, setConfirmationError] = useState('');
   const [successStatus, setSuccessStatus] = useState(false);

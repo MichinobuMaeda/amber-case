@@ -2,12 +2,15 @@ const { logger } = require('firebase-functions');
 const { createHash } = require('crypto');
 const { nanoid } = require('nanoid');
 
-const createUser = async (firebase, name, admin, tester, group, email, password) => {
+const createAuthUser = async (
+  firebase,
+  {
+    name, admin, tester, group, email, password,
+  },
+) => {
   logger.info({
     name, admin, tester, group, email, password: !!password,
   });
-  const db = firebase.firestore();
-  const auth = firebase.auth();
 
   if (name.trim().length === 0) {
     throw new Error('Param name is missing.');
@@ -21,6 +24,8 @@ const createUser = async (firebase, name, admin, tester, group, email, password)
     throw new Error('Param password is empty.');
   }
 
+  const db = firebase.firestore();
+  const auth = firebase.auth();
   const ts = new Date();
 
   const account = await db.collection('accounts').add({
@@ -28,6 +33,7 @@ const createUser = async (firebase, name, admin, tester, group, email, password)
     valid: true,
     admin,
     tester,
+    group: group || null,
     themeMode: null, // added: dataVersion: 1
     invitation: null,
     invitedBy: null,
@@ -60,12 +66,12 @@ const createUser = async (firebase, name, admin, tester, group, email, password)
 };
 
 const setUserName = async (firebase, uid, name) => {
-  const db = firebase.firestore();
-  const auth = firebase.auth();
-
   if (name.length === 0) {
     throw new Error('Param name is missing.');
   }
+
+  const db = firebase.firestore();
+  const auth = firebase.auth();
 
   await auth.updateUser(uid, { displayName: name });
   await db.collection('accounts').doc(uid).update({
@@ -75,22 +81,22 @@ const setUserName = async (firebase, uid, name) => {
 };
 
 const setUserEmail = async (firebase, uid, email) => {
-  const auth = firebase.auth();
-
   if (email.length === 0) {
     throw new Error('Param email is empty.');
   }
+
+  const auth = firebase.auth();
 
   logger.info(`setUserEmail: ${uid}, ${email}`);
   await auth.updateUser(uid, { email });
 };
 
 const setUserPassword = async (firebase, uid, password) => {
-  const auth = firebase.auth();
-
   if (password.length === 0) {
     throw new Error('Param password is empty.');
   }
+
+  const auth = firebase.auth();
 
   logger.info(`setUserPassword: ${uid}`);
   await auth.updateUser(uid, { password });
@@ -137,11 +143,13 @@ const getToken = async (firebase, code) => {
     throw new Error('No record');
   }
   const account = accounts.docs[0];
+  const accountRef = db.collection('accounts').doc(account.id);
   if (!account.get('invitedAt') || !account.get('invitedBy')) {
-    await account.ref.update({
+    await accountRef.update({
       invitation: null,
       invitedBy: null,
       invitedAt: null,
+      updatedAt: new Date(),
     });
     throw new Error(
       `Invitation for account: ${account.id} has invalid status.`,
@@ -149,10 +157,11 @@ const getToken = async (firebase, code) => {
   }
   const expired = new Date().getTime() - conf.get('invitationExpirationTime');
   if (account.get('invitedAt').toDate().getTime() < expired) {
-    await account.ref.update({
+    await accountRef.update({
       invitation: null,
       invitedBy: null,
       invitedAt: null,
+      updatedAt: new Date(),
     });
     throw new Error(`Invitation for account: ${account.id} is expired.`);
   }
@@ -182,7 +191,7 @@ const onAccountUpdate = async (firebase, change) => {
 };
 
 module.exports = {
-  createUser,
+  createAuthUser,
   setUserName,
   setUserEmail,
   setUserPassword,

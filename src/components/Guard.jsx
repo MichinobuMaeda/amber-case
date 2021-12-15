@@ -2,52 +2,50 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation, Navigate } from 'react-router-dom';
 
-import { AppContext, currentPriv, isAllowed } from '../api';
+import { AppContext, hasPriv } from '../api';
 
 const Guard = ({
-  require, children, redirect, substitutes,
+  require, children, substitutes, redirect,
 }) => {
   const context = useContext(AppContext);
   const location = useLocation();
-  const from = location.state?.from;
 
-  if (isAllowed(context, require)) return children;
+  if (hasPriv(context, require)) {
+    return children;
+  }
 
-  const priv = currentPriv(context);
+  if (!redirect) {
+    return substitutes;
+  }
 
-  if (require === 'admin' && priv === 'user') {
+  if ((require === 'noroute')
+    || (require === 'admin' && hasPriv(context, 'user'))
+  ) {
     return <Navigate to="/" replace />;
   }
 
-  if (substitutes) return substitutes;
+  const from = ['any', 'loaded', 'user', 'admin'].includes(require)
+    ? location
+    : location.state?.from;
 
-  if (redirect) {
-    switch (priv) {
-      case 'admin':
-        return <Navigate to={from?.pathname || '/'} replace />;
-      case 'user':
-        return <Navigate to={from?.pathname || '/'} replace />;
-      case 'pending':
-        return ['any', 'loaded', 'user', 'admin'].includes(require)
-          ? <Navigate to="/emailVerify" state={{ from: location }} />
-          : <Navigate to="/emailVerify" state={from ? { from } : {}} />;
-      case 'guest':
-        return ['any', 'loaded', 'user', 'admin'].includes(require)
-          ? <Navigate to="/signin" state={{ from: location }} />
-          : <Navigate to="/signin" state={from ? { from } : {}} />;
-      default:
-        return ['any', 'loaded', 'user', 'admin'].includes(require)
-          ? <Navigate to="/loading" state={{ from: location }} />
-          : <Navigate to="/loading" state={from ? { from } : {}} />;
-    }
+  if (hasPriv(context, 'user')) {
+    return <Navigate to={location.state?.from?.pathname || '/'} replace />;
   }
 
-  return null;
+  if (hasPriv(context, 'pending')) {
+    return <Navigate to="/emailVerify" state={from ? { from } : {}} />;
+  }
+
+  if (hasPriv(context, 'guest')) {
+    return <Navigate to="/signin" state={from ? { from } : {}} />;
+  }
+
+  return <Navigate to="/loading" state={from ? { from } : {}} />;
 };
 
 Guard.propTypes = {
   require: PropTypes.oneOf([
-    'any', 'loading', 'loaded', 'guest', 'pending', 'user', 'admin',
+    'any', 'loading', 'loaded', 'guest', 'pending', 'user', 'admin', 'noroute',
   ]).isRequired,
   children: PropTypes.node.isRequired,
   redirect: PropTypes.bool,

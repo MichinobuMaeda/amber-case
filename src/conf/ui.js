@@ -1,4 +1,5 @@
 export const menuWidth = 320;
+export const shrinkMenuBreakPoint = 'md';
 
 // https://mui.com/customization/default-theme/
 const components = {

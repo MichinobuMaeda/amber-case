@@ -1,258 +1,224 @@
-import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import HomeIcon from '@mui/icons-material/Home';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import InfoIcon from '@mui/icons-material/Info';
 
+import { initialieMock, mockContext } from './setupTests';
 import { i18n, firebaseConfig } from './conf';
-import { resetMockService, mockContext } from './testConfig';
+import AppContext from './api/AppContext';
+import { updateApp } from './api';
+import { MenuItem } from './api/authorization';
+import Layout from './Layout';
 
-let mockNavigationType;
-const mockUseNavigate = jest.fn();
-
+const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigationType: jest.fn(() => mockNavigationType),
-  useNavigate: () => mockUseNavigate,
+  useNavigate: () => mockNavigate,
 }));
 
-const mockUpdateApp = jest.fn();
-jest.mock('../api', () => ({
-  ...jest.requireActual('../api'),
-  updateApp: mockUpdateApp,
-}));
+jest.mock('@mui/material/useMediaQuery');
 
-// work around for mocking problem.
-const { AppContext } = require('./api');
-const { Layout } = require('.');
+jest.mock('./api', () => ({
+  ...jest.requireActual('./api'),
+  updateApp: jest.fn(),
+}));
 
 beforeEach(() => {
-  resetMockService();
+  initialieMock();
 });
 
 describe('Layout', () => {
-  it('hides the back button and hides the settings button, '
-    + 'on "/" and if the conf is not loaded.', () => {
+  const pages = [
+    new MenuItem({
+      path: '',
+      require: 'user',
+      title: i18n.t('Home'),
+      icon: <HomeIcon />,
+      element: <div>Home page</div>,
+      top: true,
+    }),
+    new MenuItem({
+      path: 'prefs',
+      require: 'loaded',
+      title: 'Preferences',
+      icon: <AccountCircleIcon />,
+      element: <div>Preferences page</div>,
+    }),
+    new MenuItem({
+      path: 'info',
+      require: 'loaded',
+      title: 'Infomation',
+      icon: <InfoIcon />,
+      element: <div>Infomation page</div>,
+    }),
+  ];
+
+  it('shows back button if the current page is not a top page.', () => {
     render(
-      <AppContext.Provider value={{ conf: {} }}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/prefs' }]}>
+          <Layout pages={pages}><div>Test</div></Layout>
         </MemoryRouter>
       </AppContext.Provider>,
     );
-    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'back' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'settings' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'back' })).toBeInTheDocument();
+    userEvent.click(screen.getByRole('button', { name: 'back' }));
+    expect(mockNavigate.mock.calls).toEqual([[-1]]);
   });
 
-  it('hides the back button and shows the settings button, '
-    + 'on "/" and if the conf is loaded.', () => {
-    render(
-      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'back' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'settings' })).toBeInTheDocument();
-  });
-
-  it('shows back button and hides settings button, '
-    + 'on "/settings/x" and if the conf is not loaded.', () => {
-    render(
-      <AppContext.Provider value={{ conf: {} }}>
-        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'settings' })).toBeNull();
-  });
-
-  it('shows back button and disables settings button, '
-    + 'on "/settings/x" and if the conf is loaded.', () => {
-    render(
-      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/settings/x' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'settings' })).toHaveAttribute('disabled');
-  });
-
-  it('shows back button and shows settings button, '
-    + 'on "/Info" and if the conf is not loaded.', () => {
-    render(
-      <AppContext.Provider value={{ conf: {} }}>
-        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'settings' })).toBeNull();
-  });
-
-  it('shows back button and shows settings button, '
-    + 'on "/Info" and if the conf is loaded.', () => {
-    render(
-      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    expect(screen.queryByText(i18n.t('App name'))).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'back' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'settings' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'settings' })).not.toHaveAttribute('disabled');
-  });
-
-  it('calls navigation("/", { replace: true }) on the back button, '
-  + 'if history has no entry.', () => {
-    mockNavigationType = 'POP';
-    render(
-      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    userEvent.click(screen.queryByRole('button', { name: 'back' }));
-    expect(mockUseNavigate.mock.calls.length).toEqual(1);
-    expect(mockUseNavigate.mock.calls[0].length).toEqual(2);
-    expect(mockUseNavigate.mock.calls[0][0]).toEqual('/');
-    expect(mockUseNavigate.mock.calls[0][1]).toEqual({ replace: true });
-  });
-
-  it('calls navigation(-1) on the back button, '
-  + 'if history has entries.', () => {
-    mockNavigationType = 'PUSH';
-    render(
-      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/Info' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    userEvent.click(screen.queryByRole('button', { name: 'back' }));
-    expect(mockUseNavigate.mock.calls.length).toEqual(1);
-    expect(mockUseNavigate.mock.calls[0].length).toEqual(1);
-    expect(mockUseNavigate.mock.calls[0][0]).toEqual(-1);
-  });
-
-  it('calls navigation("/settings/themeMode") on the settings button.', () => {
-    mockNavigationType = 'PUSH';
-    render(
-      <AppContext.Provider value={{ conf: { id: 'conf' } }}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    userEvent.click(screen.queryByRole('button', { name: 'settings' }));
-    expect(mockUseNavigate.mock.calls.length).toEqual(1);
-    expect(mockUseNavigate.mock.calls[0].length).toEqual(1);
-    expect(mockUseNavigate.mock.calls[0][0]).toEqual('/settings/themeMode');
-  });
-
-  it('do not shows button appUpdate if this app is latest version.', () => {
-    mockContext.conf = {
-      id: 'conf',
-      version: mockContext.version,
-    };
+  it('hides back button if the current page is a top page.', () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
+          <Layout pages={pages}><div>Test</div></Layout>
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+    expect(screen.queryByRole('button', { name: 'back' })).toBeNull();
+  });
+
+  it('shows menu button if the widow witdh is less than md.', async () => {
+    mockContext.conf = { id: 'conf' };
+    useMediaQuery.mockImplementation(() => true);
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Layout pages={pages}><div>Test</div></Layout>
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+    expect(screen.getByRole('button', { name: 'menu' })).toBeInTheDocument();
+    expect(screen.getByTestId('MenuIcon')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('MenuIcon'));
+    expect(await screen.findByTestId('ChevronRightIcon')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('ChevronRightIcon'));
+    expect(await screen.findByTestId('MenuIcon')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('MenuIcon'));
+    expect(await screen.findByTestId('ChevronRightIcon')).toBeInTheDocument();
+    expect(await screen.findAllByTestId('HomeIcon')).toHaveLength(2);
+    expect(await screen.findByTestId('AccountCircleIcon')).toBeInTheDocument();
+    expect(await screen.findByTestId('InfoIcon')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('AccountCircleIcon'));
+    expect(mockNavigate.mock.calls).toEqual([['/prefs']]);
+    expect(await screen.findByTestId('MenuIcon')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('MenuIcon'));
+    expect(await screen.findByTestId('ChevronRightIcon')).toBeInTheDocument();
+
+    // https://stackoverflow.com/questions/55030879/how-to-trigger-onclose-for-react-ui-menu-with-react-testing-libray
+    // fire onClose()
+    // eslint-disable-next-line testing-library/no-node-access
+    userEvent.click(screen.getByRole('presentation').firstChild);
+    expect(await screen.findByTestId('MenuIcon')).toBeInTheDocument();
+  });
+
+  it('hides menu button if the widow witdh is more than md.', () => {
+    mockContext.conf = { id: 'conf' };
+    useMediaQuery.mockImplementation(() => false);
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/prefs' }]}>
+          <Layout pages={pages}><div>Test</div></Layout>
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'menu' })).toBeNull();
+  });
+
+  it('shows updateApp button if the UI verion and conf.verson do not match.', () => {
+    mockContext.version = '1.0.0';
+    mockContext.conf = { id: 'conf', version: '1.0.1' };
+    useMediaQuery.mockImplementation(() => false);
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/prefs' }]}>
+          <Layout pages={pages}><div>Test</div></Layout>
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'updateApp' })).toBeInTheDocument();
+
+    userEvent.click(screen.getByRole('button', { name: 'updateApp' }));
+    expect(updateApp.mock.calls).toHaveLength(1);
+  });
+
+  it('hides updateApp button if the UI verion and conf.verson match.', () => {
+    mockContext.version = '1.0.0';
+    mockContext.conf = { id: 'conf', version: '1.0.0' };
+    useMediaQuery.mockImplementation(() => false);
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/prefs' }]}>
+          <Layout pages={pages}><div>Test</div></Layout>
         </MemoryRouter>
       </AppContext.Provider>,
     );
     expect(screen.queryByRole('button', { name: 'updateApp' })).toBeNull();
   });
 
-  it('shows button appUpdate if this app is out of date.', () => {
-    mockContext.conf = {
-      id: 'conf',
-      version: 'x.x.x',
-    };
-    render(
-      <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-    expect(screen.queryByRole('button', { name: 'updateApp' })).toBeInTheDocument();
-
-    userEvent.click(screen.queryByRole('button', { name: 'updateApp' }));
-    expect(mockUpdateApp.mock.calls.length).toEqual(1);
-  });
-
-  it('shows debug dialog on click button debug.', async () => {
+  it('shows debug button if the env is "test" and the status is "loaded".', () => {
+    firebaseConfig.apiKey = 'FIREBASE_API_KEY';
     mockContext.conf = { id: 'conf' };
-    mockContext.me = { id: 'id01', valid: true, tester: true };
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
+          <Layout pages={pages}><div>Test</div></Layout>
         </MemoryRouter>
       </AppContext.Provider>,
     );
-
-    userEvent.click(screen.queryByRole('button', { name: 'debug' }));
-    expect(screen.getByRole('button', { label: 'close' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'debug' })).toBeInTheDocument();
   });
 
-  it('hides button debug before loading.', async () => {
-    mockContext.conf = {};
-    mockContext.me = { id: 'id01', valid: true, tester: true };
+  it('hides debug button if the env is not "test" and the status is "loaded".', () => {
+    firebaseConfig.apiKey = 'production key';
+    mockContext.conf = { id: 'conf' };
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
+          <Layout pages={[]}><div>Test</div></Layout>
         </MemoryRouter>
       </AppContext.Provider>,
     );
-
     expect(screen.queryByRole('button', { name: 'debug' })).toBeNull();
   });
 
-  it('hides button debug on production without tester priv.', async () => {
+  it('shows debug button if the user is a tester.', () => {
+    firebaseConfig.apiKey = 'production key';
     mockContext.conf = { id: 'conf' };
+    mockContext.authUser = { uid: 'id01' };
+    mockContext.me = { id: 'id01', valid: true, tester: true };
+    render(
+      <AppContext.Provider value={mockContext}>
+        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+          <Layout pages={[]}><div>Test</div></Layout>
+        </MemoryRouter>
+      </AppContext.Provider>,
+    );
+    expect(screen.getByRole('button', { name: 'debug' })).toBeInTheDocument();
+  });
+
+  it('hides debug button if the user is not a tester.', () => {
+    firebaseConfig.apiKey = 'production key';
+    mockContext.conf = { id: 'conf' };
+    mockContext.authUser = { uid: 'id01' };
     mockContext.me = { id: 'id01', valid: true, tester: false };
-    firebaseConfig.apiKey = 'production key';
     render(
       <AppContext.Provider value={mockContext}>
         <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
+          <Layout pages={[]}><div>Test</div></Layout>
         </MemoryRouter>
       </AppContext.Provider>,
     );
-
     expect(screen.queryByRole('button', { name: 'debug' })).toBeNull();
-  });
-
-  it('shows button debug on production with tester priv.', async () => {
-    mockContext.conf = { id: 'conf' };
-    mockContext.me = { id: 'id01', valid: true, tester: true };
-    firebaseConfig.apiKey = 'production key';
-    render(
-      <AppContext.Provider value={mockContext}>
-        <MemoryRouter initialEntries={[{ pathname: '/' }]}>
-          <Layout />
-        </MemoryRouter>
-      </AppContext.Provider>,
-    );
-
-    expect(screen.queryByRole('button', { name: 'debug' })).toBeInTheDocument();
   });
 });

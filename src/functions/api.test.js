@@ -1,111 +1,105 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-const supertest = require('supertest');
-const express = require('express');
 const axios = require('axios');
 const {
+  confSnapshot,
   mockFirebase,
-  mockDocAdd,
-  mockDocSet,
-  mockDocUpdate,
-  mockConfExists,
-  mockConfData,
-} = require('./testConfig');
+} = require('./setupTests');
 const {
-  init,
+  getConf,
+  updateVersion,
+  updateData,
+  install,
+} = require('./setup');
+const {
+  setup,
 } = require('./api');
-
-const config = {
-  initial: {
-    email: 'primary@example.com',
-    password: "primary's password",
-    url: 'https://example.com',
-  },
-};
 
 jest.mock('axios');
 
-afterEach(async () => {
-  jest.clearAllMocks();
-});
+jest.mock('./setup', () => ({
+  getConf: jest.fn(),
+  updateVersion: jest.fn(),
+  updateData: jest.fn(),
+  install: jest.fn(),
+}));
 
-describe('get: /setup', () => {
-  it("send text 'OK' and create document 'conf' if document 'conf' is not exists.", async () => {
-    const uid = 'id01';
-    mockDocAdd.mockImplementationOnce(() => ({ id: uid }));
-    mockConfExists.mockImplementationOnce(() => false);
+describe('setup()', () => {
+  const config = {
+    initial: {
+      email: 'info@example.com',
+      password: 'testpass',
+      url: 'https://example.com',
+    },
+  };
+  const req = {};
+  const res = {
+    send: jest.fn(),
+  };
 
-    axios.get.mockResolvedValue({
-      data: {
-        version: '1.0.0',
-      },
-    });
+  it('calls only updateVersion() '
+  + 'if conf.version is latest value.', async () => {
+    getConf
+      .mockImplementationOnce(() => new Promise((resolve) => { resolve(confSnapshot); }));
+    updateVersion
+      .mockImplementationOnce(() => new Promise((resolve) => { resolve(false); }));
+    const sendOk = { body: 'OK' };
+    res.send
+      .mockImplementationOnce(() => sendOk);
+    const firebase = mockFirebase();
 
-    const app = express();
-    app.use(express.urlencoded({ extended: true }));
-    const request = supertest(init(mockFirebase, config, app, axios));
-    const response = await request.get('/setup');
+    const ret = await setup(firebase, axios, config)(req, res);
 
-    expect(response.status).toBe(200);
-    expect(response.text).toMatch('OK');
-
-    expect(mockDocSet.mock.calls.length).toEqual(3);
-    expect(mockDocSet.mock.calls[0][0]).toEqual('service');
-    expect(mockDocSet.mock.calls[0][1]).toEqual('conf');
-    expect(mockDocSet.mock.calls[0][2].version).toEqual('1.0.0');
-
-    expect(mockDocAdd.mock.calls.length).toEqual(1);
-    expect(mockDocUpdate.mock.calls.length).toBeGreaterThan(0);
+    expect(getConf.mock.calls).toEqual([[firebase]]);
+    expect(updateVersion.mock.calls).toEqual([[firebase, confSnapshot, axios]]);
+    expect(updateData.mock.calls).toEqual([]);
+    expect(install.mock.calls).toEqual([]);
+    expect(res.send.mock.calls).toEqual([['OK']]);
+    expect(ret).toEqual(sendOk);
   });
 
-  it("send text 'OK' if document 'conf' is exists.", async () => {
-    axios.get.mockResolvedValue({
-      data: {
-        version: '1.0.0',
-      },
-    });
+  it('calls updateVersion() and updateData() '
+  + 'if conf.version is not value.', async () => {
+    getConf
+      .mockImplementationOnce(() => new Promise((resolve) => { resolve(confSnapshot); }));
+    updateVersion
+      .mockImplementationOnce(() => new Promise((resolve) => { resolve(true); }));
+    const sendOk = { body: 'OK' };
+    res.send
+      .mockImplementationOnce(() => sendOk);
+    const firebase = mockFirebase();
 
-    const app = express();
-    app.use(express.urlencoded({ extended: true }));
-    const request = supertest(init(mockFirebase, config, app, axios));
-    const response = await request.get('/setup');
+    const ret = await setup(firebase, axios, config)(req, res);
 
-    expect(response.status).toBe(200);
-    expect(response.text).toEqual('OK');
-
-    expect(mockDocAdd.mock.calls.length).toEqual(0);
-    expect(mockDocSet.mock.calls.length).toEqual(0);
-    expect(mockDocUpdate.mock.calls.length).toEqual(0);
+    expect(getConf.mock.calls).toEqual([[firebase]]);
+    expect(updateVersion.mock.calls).toEqual([[firebase, confSnapshot, axios]]);
+    expect(updateData.mock.calls).toEqual([[firebase, confSnapshot]]);
+    expect(install.mock.calls).toEqual([]);
+    expect(res.send.mock.calls).toEqual([['OK']]);
+    expect(ret).toEqual(sendOk);
   });
 
-  it("send text 'OK' and set new ver to document 'conf' if document 'conf' is exists.", async () => {
-    axios.get.mockResolvedValue({
-      data: {
-        version: '1.0.1',
-      },
-    });
+  it('calls install() and updateData() '
+  + 'if conf is not exists.', async () => {
+    getConf
+      .mockImplementationOnce(() => new Promise((resolve) => { resolve(null); }));
+    install
+      .mockImplementationOnce(() => new Promise((resolve) => { resolve(confSnapshot); }));
+    const sendOk = { body: 'OK' };
+    res.send
+      .mockImplementationOnce(() => sendOk);
+    const firebase = mockFirebase();
 
-    mockConfData.mockImplementationOnce(() => ({
-      invitationExpirationTime: 3 * 24 * 3600 * 1000,
-      seed: 'seed value',
-      version: '1.0.0',
-      dataVersion: 1,
-    }));
+    const ret = await setup(firebase, axios, config)(req, res);
 
-    const app = express();
-    app.use(express.urlencoded({ extended: true }));
-    const request = supertest(init(mockFirebase, config, app, axios));
-    const response = await request.get('/setup');
-
-    expect(response.status).toBe(200);
-    expect(response.text).toEqual('OK');
-
-    expect(mockDocAdd.mock.calls.length).toEqual(0);
-    expect(mockDocSet.mock.calls.length).toEqual(0);
-
-    expect(mockDocUpdate.mock.calls.length).toEqual(1);
-    expect(mockDocUpdate.mock.calls[0][0]).toEqual('service');
-    expect(mockDocUpdate.mock.calls[0][1]).toEqual('conf');
-    expect(mockDocUpdate.mock.calls[0][2].version).toEqual('1.0.1');
-    expect(mockDocUpdate.mock.calls[0][2].updatedAt).toBeDefined();
+    expect(getConf.mock.calls).toEqual([[firebase]]);
+    expect(updateVersion.mock.calls).toEqual([]);
+    expect(updateData.mock.calls).toEqual([[firebase, confSnapshot]]);
+    expect(install.mock.calls).toEqual([[
+      firebase,
+      config.initial.email,
+      config.initial.password,
+      config.initial.url,
+    ]]);
+    expect(res.send.mock.calls).toEqual([['OK']]);
+    expect(ret).toEqual(sendOk);
   });
 });

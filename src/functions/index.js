@@ -4,8 +4,8 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const guard = require('./guard');
-const httpApi = require('./api');
 const users = require('./users');
+const { setup } = require('./api');
 
 const REGION = 'asia-northeast1';
 
@@ -15,14 +15,14 @@ const config = functions.config();
 const httpApp = express();
 httpApp.use(cors({ origin: true }));
 httpApp.use(express.urlencoded({ extended: true }));
+httpApp.get('/setup', setup(firebase, axios, config));
 
-exports.api = functions.region(REGION)
-  .https.onRequest(httpApi.init(firebase, config, httpApp, axios));
+exports.api = functions.region(REGION).https.onRequest(httpApp);
 
-exports.createUser = functions.region(REGION)
+exports.createAuthUser = functions.region(REGION)
   .https.onCall(async (data, context) => {
     await guard.admin(firebase, context.auth?.uid);
-    await users.createUser(
+    await users.createAuthUser(
       firebase,
       data.name || '',
       data.admin || false,

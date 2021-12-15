@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import { validateEmail } from '../conf';
-import Guard from '../components/Guard';
+import RadioButtons, { RadioButtonsItem } from '../components/RadioButtons';
 import Section from '../components/Section';
-import RadioButtons from '../components/RadioButtons';
-import SignInWithEmailLinkPanel from '../components/SignInWithEmailLinkPanel';
-import SignInWithPasswordPanel from '../components/SignInWithPasswordPanel';
+import SignInWithEmailLinkPanel from '../panels/SignInWithEmailLinkPanel';
+import SignInWithPasswordPanel from '../panels/SignInWithPasswordPanel';
 
 const SignInPage = () => {
   const { t } = useTranslation();
+
   const withEmailLink = 'emailLink';
   const withPassword = 'password';
   const [signInMethod, setSignInMethod] = useState(withEmailLink);
@@ -23,13 +23,19 @@ const SignInPage = () => {
   };
 
   return (
-    <Guard require="guest" redirect>
+    <>
       <RadioButtons
         legend={t('select login method')}
         onChange={setSignInMethod}
         items={[
-          { value: withEmailLink, label: t('sign in with email link') },
-          { value: withPassword, label: t('email address and password') },
+          new RadioButtonsItem({
+            label: t('sign in with email link'),
+            value: withEmailLink,
+          }),
+          new RadioButtonsItem({
+            label: t('email address and password'),
+            value: withPassword,
+          }),
         ]}
         value={signInMethod}
       />
@@ -52,7 +58,7 @@ const SignInPage = () => {
       </Section>
       )}
       {t('no login method worked or call admin')}
-    </Guard>
+    </>
   );
 };
 

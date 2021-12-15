@@ -6,10 +6,27 @@ export const currentPriv = (context) => {
   return 'admin';
 };
 
-export const isAllowed = (context, require) => {
+export const hasPriv = (context, require) => {
   const priv = currentPriv(context);
   return require === 'any'
     || require === priv
     || (require === 'loaded' && context.conf.id)
     || (require === 'user' && priv === 'admin');
 };
+
+export const currentPage = (location, pages) => pages.find(
+  (item) => location.pathname === `/${item.path}` || item.path === '*',
+);
+
+export class MenuItem {
+  constructor({
+    path, require, title, icon, element, top = false,
+  }) {
+    this.path = path;
+    this.require = require;
+    this.title = title;
+    this.icon = icon;
+    this.element = element;
+    this.top = top;
+  }
+}

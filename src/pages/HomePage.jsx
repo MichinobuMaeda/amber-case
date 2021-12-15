@@ -3,8 +3,7 @@ import Grid from '@mui/material/Grid';
 // import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-// import { AppContext } from '../api';
-import Guard from '../components/Guard';
+// import { AppContext, guard } from '../api';
 
 // eslint-disable-next-line arrow-body-style
 const HomePage = () => {
@@ -12,13 +11,11 @@ const HomePage = () => {
   // const context = useContext(AppContext);
 
   return (
-    <Guard require="user" redirect>
-      <Grid container spacing={2} data-testid="home-page">
-        <Grid item xs={12}>
-          Home
-        </Grid>
+    <Grid container spacing={2} data-testid="home-page">
+      <Grid item xs={12}>
+        Home
       </Grid>
-    </Guard>
+    </Grid>
   );
 };
 

@@ -4,7 +4,7 @@ const valid = async (firebase, uid) => {
   }
   const db = firebase.firestore();
   const account = await db.collection('accounts').doc(uid).get();
-  if (!account || !account.exists) {
+  if (!account?.exists) {
     throw new Error(`User: ${uid} is not exists.`);
   }
   if (!account.get('valid')) {

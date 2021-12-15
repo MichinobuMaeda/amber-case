@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  useLocation, useNavigate, useNavigationType, // useResolvedPath,
-} from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Drawer from '@mui/material/Drawer';
@@ -14,48 +14,31 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
-import ArrowBackIosNew from '@mui/icons-material/ArrowBackIosNew';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import MenuIcon from '@mui/icons-material/Menu';
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdateAlt';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useTranslation } from 'react-i18next';
 
 import './conf/i18n';
-import { firebaseConfig, menuWidth } from './conf';
-import { AppContext, updateApp } from './api';
+import { firebaseConfig, menuWidth, shrinkMenuBreakPoint } from './conf';
+import {
+  AppContext, updateApp, hasPriv, currentPage, MenuItem,
+} from './api';
 import Debug from './components/Debug';
+import Guard from './components/Guard';
 
-const Layout = ({ 'menu-items': menuItems, children }) => {
+const Layout = ({ pages, children }) => {
   const { t } = useTranslation();
   const context = useContext(AppContext);
   const navigate = useNavigate();
-  const navigationType = useNavigationType();
   const location = useLocation();
-  const loaded = !!context.conf.id;
+
+  const shrinkMenu = useMediaQuery(useTheme().breakpoints.down(shrinkMenuBreakPoint));
+  const currPage = currentPage(location, pages);
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const matchedMenuItem = menuItems.find((item) => item.path === location.pathname) || {};
 
-  const MenuItem = () => (
-    <>
-      <Toolbar variant="dense" />
-      <List>
-        {menuItems.map((item) => (
-          <ListItemButton
-            key={item.path}
-            selected={item.path === location.pathname}
-            onClick={() => { navigate(item.path); setMenuOpen(false); }}
-          >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText>{item.title}</ListItemText>
-          </ListItemButton>
-        ))}
-      </List>
-    </>
-  );
-
-  const handleMenuToggle = () => {
-    setMenuOpen(!menuOpen);
-  };
   return (
     <>
       <AppBar
@@ -63,69 +46,70 @@ const Layout = ({ 'menu-items': menuItems, children }) => {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar variant="dense">
-          {!matchedMenuItem.top && (
+          {!currPage?.top && (
             <IconButton
               edge="start"
               color="inherit"
               aria-label="back"
-              onClick={() => {
-                if (navigationType === 'POP') {
-                  navigate('/', { replace: true });
-                } else {
-                  navigate(-1);
-                }
-              }}
+              onClick={() => { navigate(-1); }}
             >
-              <ArrowBackIosNew />
+              <ArrowBackIosNewIcon />
             </IconButton>
           )}
           <Typography variant="h1" component="div" sx={{ flexGrow: 1 }}>
             {t('App name')}
           </Typography>
-          {loaded && (firebaseConfig.apiKey === 'FIREBASE_API_KEY' || context.me.tester) && <Debug />}
-          {loaded && (
-            <IconButton
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMenuToggle}
-              sx={{ display: { xs: 'inline-flex', md: 'none' } }}
-            >
-              {menuOpen ? <ChevronRightIcon /> : <MenuIcon />}
-            </IconButton>
-          )}
+          <Guard require="loaded">
+            {(firebaseConfig.apiKey === 'FIREBASE_API_KEY' || context.me.tester) && <Debug />}
+            {shrinkMenu && (
+              <IconButton
+                color="inherit"
+                aria-label="menu"
+                onClick={() => setMenuOpen(!menuOpen)}
+              >
+                {menuOpen ? <ChevronRightIcon /> : <MenuIcon />}
+              </IconButton>
+            )}
+          </Guard>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="temporary"
-        open={menuOpen}
-        onClose={handleMenuToggle}
-        ModalProps={{ keepMounted: true }}
-        anchor="right"
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: menuWidth, maxWidth: '100%' },
-        }}
-      >
-        <MenuItem />
-      </Drawer>
-      <Drawer
-        variant="permanent"
-        anchor="right"
-        sx={{
-          flexShrink: 0,
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: menuWidth },
-        }}
-        open
-      >
-        <MenuItem />
-      </Drawer>
+      <Guard require="loaded">
+        <Drawer
+          variant={shrinkMenu ? 'temporary' : 'permanent'}
+          open={!shrinkMenu || menuOpen}
+          onClose={shrinkMenu ? () => setMenuOpen(false) : null}
+          ModalProps={shrinkMenu ? { keepMounted: true } : {}}
+          anchor="right"
+          sx={shrinkMenu ? {
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: menuWidth, maxWidth: '100%' },
+          } : {
+            flexShrink: 0,
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: menuWidth },
+          }}
+        >
+          <Toolbar variant="dense" />
+          <List>
+            {pages.map((item) => (
+              <ListItemButton
+                key={`/${item.path}`}
+                selected={`/${item.path}` === location.pathname}
+                onClick={() => { navigate(`/${item.path}`); setMenuOpen(false); }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText>{item.title}</ListItemText>
+              </ListItemButton>
+            ))}
+          </List>
+        </Drawer>
+      </Guard>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           py: { xs: 2, sm: 3 },
-          width: { md: `calc(100% - ${menuWidth}px)` },
+          width: (hasPriv(context, 'loaded') && !shrinkMenu) ? `calc(100% - ${menuWidth}px)` : null,
         }}
       >
         <Toolbar variant="dense" />
@@ -141,10 +125,10 @@ const Layout = ({ 'menu-items': menuItems, children }) => {
             {t('Update app')}
           </Button>
         )}
-        {(matchedMenuItem.title || matchedMenuItem.icon) && (
+        {(currPage?.title || currPage?.icon) && (
         <Typography variant="h2" component="div" sx={{ mb: 3 }}>
-          <span style={{ marginRight: '0.25em' }}>{matchedMenuItem.icon}</span>
-          {matchedMenuItem.title}
+          <span style={{ marginRight: '0.25em' }}>{currPage?.icon}</span>
+          {currPage?.title}
         </Typography>
         )}
         {children}
@@ -155,8 +139,7 @@ const Layout = ({ 'menu-items': menuItems, children }) => {
 
 Layout.propTypes = {
   children: PropTypes.node.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  'menu-items': PropTypes.array.isRequired,
+  pages: PropTypes.arrayOf(PropTypes.instanceOf(MenuItem)).isRequired,
 };
 
 export default Layout;

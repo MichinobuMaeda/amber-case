@@ -17,6 +17,8 @@ const resources = {
       'Dark mode': 'ダークモード',
       'Accept system settings': 'システムの設定に従う',
       'E-mail': 'メールアドレス',
+      'Current E-mail': '現在のメールアドレス',
+      'New E-mail': '新しいメールアドレス',
       'Password': 'パスワード',
       'Sign-in': 'ログイン',
       'Sign-out': 'ログアウト',

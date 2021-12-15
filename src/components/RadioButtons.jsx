@@ -6,6 +6,13 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 
+export class RadioButtonsItem {
+  constructor({ label, value }) {
+    this.label = label;
+    this.value = value;
+  }
+}
+
 const RadioButtons = ({
   'aria-label': ariaLabel, legend, items, value, onChange,
 }) => (
@@ -31,10 +38,8 @@ const RadioButtons = ({
 RadioButtons.propTypes = {
   'aria-label': PropTypes.string,
   legend: PropTypes.string,
-  // eslint-disable-next-line react/forbid-prop-types
-  items: PropTypes.array.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  value: PropTypes.any.isRequired,
+  items: PropTypes.arrayOf(PropTypes.instanceOf(RadioButtonsItem)).isRequired,
+  value: PropTypes.string.isRequired,
   onChange: PropTypes.func,
 };
 

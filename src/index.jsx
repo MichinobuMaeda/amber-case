@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import ThemeProvider from '@mui/material/styles/ThemeProvider';
-import createTheme from '@mui/material/styles/createTheme';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import { HashRouter } from 'react-router-dom';

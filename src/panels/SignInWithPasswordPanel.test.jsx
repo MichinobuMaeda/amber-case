@@ -1,20 +1,16 @@
-import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { i18n } from '../conf';
-import '../testConfig';
+import { handleSignInWithPassword } from '../api/authentication';
+import SignInWithPasswordPanel from './SignInWithPasswordPanel';
 
-const mockHandleSignInWithPassword = jest.fn();
-jest.mock('../api', () => ({
-  ...jest.requireActual('../api'),
-  handleSignInWithPassword: mockHandleSignInWithPassword,
+jest.mock('../api/authentication', () => ({
+  ...jest.requireActual('../api/authentication'),
+  handleSignInWithPassword: jest.fn(),
 }));
-
-// work around for mocking problem.
-const { SignInWithPasswordPanel } = require('.');
 
 const mockOnEmailChange = jest.fn();
 
@@ -40,7 +36,7 @@ describe('SignInWithPasswordPanel', () => {
     await waitFor(() => expect(screen.queryByRole('button', { name: 'sign-in' })).not.toBeDisabled());
 
     userEvent.click(screen.queryByRole('button', { name: 'sign-in' }));
-    await waitFor(() => expect(mockHandleSignInWithPassword.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleSignInWithPassword.mock.calls.length).toEqual(1));
 
     expect(screen.queryByText(errorMessage)).toBeNull();
 
@@ -50,12 +46,12 @@ describe('SignInWithPasswordPanel', () => {
 
     userEvent.click(screen.queryByTestId('VisibilityOffIcon'));
     expect(screen.queryByTestId('VisibilityOffIcon')).toBeNull();
-    expect(screen.queryByTestId('VisibilityIcon')).toBeInTheDocument();
+    expect(screen.getByTestId('VisibilityIcon')).toBeInTheDocument();
   });
 
   it('shows message for error.', async () => {
     const email = 'test01@example.com';
-    mockHandleSignInWithPassword.mockImplementationOnce(() => { throw new Error(); });
+    handleSignInWithPassword.mockImplementationOnce(() => { throw new Error(); });
 
     render(
       <MemoryRouter initialEntries={[{ pathname: '/' }]}>
@@ -66,12 +62,12 @@ describe('SignInWithPasswordPanel', () => {
       </MemoryRouter>,
     );
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 't');
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'sign-in' })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: 'sign-in' })).toBeInTheDocument();
 
     userEvent.click(screen.queryByRole('button', { name: 'sign-in' }));
-    await waitFor(() => expect(mockHandleSignInWithPassword.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(handleSignInWithPassword.mock.calls.length).toEqual(1));
 
-    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
   it('disables button send for invalid email.', async () => {

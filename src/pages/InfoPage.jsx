@@ -4,8 +4,9 @@ import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
-import { AppContext, setConfProperties, currentPriv } from '../api';
-import Guard from '../components/Guard';
+import AppContext from '../api/AppContext';
+import { hasPriv } from '../api/authorization';
+import { setConfProperties } from '../api/service';
 import AccordionSection from '../components/AccordionSection';
 import MarkDownEdit from '../components/MarkDownEdit';
 
@@ -14,9 +15,9 @@ const InfoPage = () => {
   const context = useContext(AppContext);
 
   return (
-    <Guard require="loaded" redirect data-testid="info-page">
+    <>
       <AccordionSection
-        data-testid="copyright"
+        data-testid="copyright-section"
         title={t('Copyright')}
       >
         <Stack spacing={2} sx={{ mb: 2 }}>
@@ -31,12 +32,12 @@ const InfoPage = () => {
           data-testid="copyright"
           label={t('Copyright')}
           value={context.conf.copyright}
-          editable={currentPriv(context) === 'admin'}
+          editable={hasPriv(context, 'admin')}
           onSave={(v) => setConfProperties(context, { copyright: v })}
         />
       </AccordionSection>
       <AccordionSection
-        data-testid="policy"
+        data-testid="policy-section"
         title={t('Policy')}
         defaultExpanded
       >
@@ -44,11 +45,11 @@ const InfoPage = () => {
           data-testid="policy"
           label={t('Policy')}
           value={context.conf.policy}
-          editable={currentPriv(context) === 'admin'}
+          editable={hasPriv(context, 'admin')}
           onSave={(v) => setConfProperties(context, { policy: v })}
         />
       </AccordionSection>
-    </Guard>
+    </>
   );
 };
 

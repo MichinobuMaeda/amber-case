@@ -1,36 +1,18 @@
-import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { resetMockService } from '../testConfig';
-
-let mockNavigationType;
-const mockUseNavigate = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigationType: jest.fn(() => mockNavigationType),
-  useNavigate: () => mockUseNavigate,
-}));
-
-const mockUpdateApp = jest.fn();
-jest.mock('../api', () => ({
-  ...jest.requireActual('../api'),
-  updateApp: mockUpdateApp,
-}));
-
-// work around for mocking problem.
-const { AppContext } = require('../api');
-const { Debug } = require('./indexTest');
+import { initialieMock } from '../setupTests';
+import AppContext from '../api/AppContext';
+import Debug from './Debug';
 
 beforeEach(() => {
-  resetMockService();
+  initialieMock();
 });
 
 describe('Debug', () => {
   it('show all context properties up to level 4.', async () => {
-    const context = {
+    const context = () => ({
       typeUndefined: undefined,
       typeNull: null,
       typeEmptyArray: [],
@@ -48,37 +30,35 @@ describe('Debug', () => {
           },
         },
       },
-    };
+    });
     render(
-      <AppContext.Provider value={context}>
-        <div>
-          <Debug />
-        </div>
+      <AppContext.Provider value={context()}>
+        <Debug />
       </AppContext.Provider>,
     );
 
     expect(screen.queryByText('context: {...}')).toBeNull();
 
     userEvent.click(screen.getByRole('button', { label: 'debug' }));
-    await waitFor(() => expect(screen.getByRole('button', { label: 'close' })).toBeInTheDocument());
-    expect(screen.queryByText('context: {...}')).toBeInTheDocument();
-    expect(screen.queryByText('typeUndefined: undefined')).toBeInTheDocument();
-    expect(screen.queryByText('typeNull: null')).toBeInTheDocument();
-    expect(screen.queryByText('typeEmptyArray: []')).toBeInTheDocument();
-    expect(screen.queryByText('typeBoolean: [...]')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { label: 'close' })).toBeInTheDocument();
+    expect(screen.getByText('context: {...}')).toBeInTheDocument();
+    expect(screen.getByText('typeUndefined: undefined')).toBeInTheDocument();
+    expect(screen.getByText('typeNull: null')).toBeInTheDocument();
+    expect(screen.getByText('typeEmptyArray: []')).toBeInTheDocument();
+    expect(screen.getByText('typeBoolean: [...]')).toBeInTheDocument();
     expect(screen.queryByText('0: (boolean) false')).toBeNull();
     expect(screen.queryByText('1: (boolean) true')).toBeNull();
-    expect(screen.queryByText('typeNumber: (number) 1')).toBeInTheDocument();
-    expect(screen.queryByText('typeString: (string) text')).toBeInTheDocument();
-    expect(screen.queryByText('typeMultiLineString: (string) line 1 line 2')).toBeInTheDocument();
-    expect(screen.queryByText('typeFunction: () => {}')).toBeInTheDocument();
-    expect(screen.queryByText('typeDate: (Date) 2020-01-01T12:34:56.789Z')).toBeInTheDocument();
-    expect(screen.queryByText('typeEmptyObject: {}')).toBeInTheDocument();
-    expect(screen.queryByText('typeObject: {...}')).toBeInTheDocument();
+    expect(screen.getByText('typeNumber: (number) 1')).toBeInTheDocument();
+    expect(screen.getByText('typeString: (string) text')).toBeInTheDocument();
+    expect(screen.getByText('typeMultiLineString: (string) line 1 line 2')).toBeInTheDocument();
+    expect(screen.getByText('typeFunction: () => {}')).toBeInTheDocument();
+    expect(screen.getByText('typeDate: (Date) 2020-01-01T12:34:56.789Z')).toBeInTheDocument();
+    expect(screen.getByText('typeEmptyObject: {}')).toBeInTheDocument();
+    expect(screen.getByText('typeObject: {...}')).toBeInTheDocument();
 
     userEvent.click(screen.queryByText('typeBoolean: [...]'));
-    expect(screen.queryByText('0: (boolean) false')).toBeInTheDocument();
-    expect(screen.queryByText('1: (boolean) true')).toBeInTheDocument();
+    expect(screen.getByText('0: (boolean) false')).toBeInTheDocument();
+    expect(screen.getByText('1: (boolean) true')).toBeInTheDocument();
 
     userEvent.click(screen.getByRole('button', { label: 'close' }));
     await waitFor(() => expect(screen.queryByText('context: {...}')).toBeNull());

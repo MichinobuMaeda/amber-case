@@ -1,13 +1,18 @@
+import React from 'react';
+import HomeIcon from '@mui/icons-material/Home';
+
 import {
-  resetMockService, mockContext,
-} from '../testConfig';
+  initialieMock, mockContext,
+} from '../setupTests';
 import {
   currentPriv,
-  isAllowed,
+  hasPriv,
+  currentPage,
+  MenuItem,
 } from './authorization';
 
 beforeEach(() => {
-  resetMockService();
+  initialieMock();
 });
 
 describe('currentPriv(context)', () => {
@@ -76,21 +81,21 @@ describe('currentPriv(context)', () => {
   });
 });
 
-describe('isAllowed(context, require)', () => {
+describe('hasPriv(context, require)', () => {
   it('authorized pages require "any", "loading" '
   + 'for "loading" priv.', async () => {
     mockContext.conf = { uninitialized: true };
     mockContext.authUser = { uid: 'id01' };
     expect(currentPriv(mockContext)).toEqual('loading');
 
-    expect(isAllowed(mockContext, 'any')).toBeTruthy();
-    expect(isAllowed(mockContext, 'loading')).toBeTruthy();
+    expect(hasPriv(mockContext, 'any')).toBeTruthy();
+    expect(hasPriv(mockContext, 'loading')).toBeTruthy();
 
-    expect(isAllowed(mockContext, 'loaded')).toBeFalsy();
-    expect(isAllowed(mockContext, 'guest')).toBeFalsy();
-    expect(isAllowed(mockContext, 'pending')).toBeFalsy();
-    expect(isAllowed(mockContext, 'user')).toBeFalsy();
-    expect(isAllowed(mockContext, 'admin')).toBeFalsy();
+    expect(hasPriv(mockContext, 'loaded')).toBeFalsy();
+    expect(hasPriv(mockContext, 'guest')).toBeFalsy();
+    expect(hasPriv(mockContext, 'pending')).toBeFalsy();
+    expect(hasPriv(mockContext, 'user')).toBeFalsy();
+    expect(hasPriv(mockContext, 'admin')).toBeFalsy();
   });
 
   it('authorized pages require "any", "loaded", "guest" '
@@ -100,14 +105,14 @@ describe('isAllowed(context, require)', () => {
     mockContext.me = {};
     expect(currentPriv(mockContext)).toEqual('guest');
 
-    expect(isAllowed(mockContext, 'any')).toBeTruthy();
-    expect(isAllowed(mockContext, 'loaded')).toBeTruthy();
-    expect(isAllowed(mockContext, 'guest')).toBeTruthy();
+    expect(hasPriv(mockContext, 'any')).toBeTruthy();
+    expect(hasPriv(mockContext, 'loaded')).toBeTruthy();
+    expect(hasPriv(mockContext, 'guest')).toBeTruthy();
 
-    expect(isAllowed(mockContext, 'loading')).toBeFalsy();
-    expect(isAllowed(mockContext, 'pending')).toBeFalsy();
-    expect(isAllowed(mockContext, 'user')).toBeFalsy();
-    expect(isAllowed(mockContext, 'admin')).toBeFalsy();
+    expect(hasPriv(mockContext, 'loading')).toBeFalsy();
+    expect(hasPriv(mockContext, 'pending')).toBeFalsy();
+    expect(hasPriv(mockContext, 'user')).toBeFalsy();
+    expect(hasPriv(mockContext, 'admin')).toBeFalsy();
   });
 
   it('authorized pages require "any", "loaded", "pending" '
@@ -117,14 +122,14 @@ describe('isAllowed(context, require)', () => {
     mockContext.me = { id: 'id01', valid: true };
     expect(currentPriv(mockContext)).toEqual('pending');
 
-    expect(isAllowed(mockContext, 'any')).toBeTruthy();
-    expect(isAllowed(mockContext, 'loaded')).toBeTruthy();
-    expect(isAllowed(mockContext, 'pending')).toBeTruthy();
+    expect(hasPriv(mockContext, 'any')).toBeTruthy();
+    expect(hasPriv(mockContext, 'loaded')).toBeTruthy();
+    expect(hasPriv(mockContext, 'pending')).toBeTruthy();
 
-    expect(isAllowed(mockContext, 'loading')).toBeFalsy();
-    expect(isAllowed(mockContext, 'guest')).toBeFalsy();
-    expect(isAllowed(mockContext, 'user')).toBeFalsy();
-    expect(isAllowed(mockContext, 'admin')).toBeFalsy();
+    expect(hasPriv(mockContext, 'loading')).toBeFalsy();
+    expect(hasPriv(mockContext, 'guest')).toBeFalsy();
+    expect(hasPriv(mockContext, 'user')).toBeFalsy();
+    expect(hasPriv(mockContext, 'admin')).toBeFalsy();
   });
 
   it('authorized pages require "any", "loaded", "user" '
@@ -134,14 +139,14 @@ describe('isAllowed(context, require)', () => {
     mockContext.me = { id: 'id01', valid: true };
     expect(currentPriv(mockContext)).toEqual('user');
 
-    expect(isAllowed(mockContext, 'any')).toBeTruthy();
-    expect(isAllowed(mockContext, 'loaded')).toBeTruthy();
-    expect(isAllowed(mockContext, 'user')).toBeTruthy();
+    expect(hasPriv(mockContext, 'any')).toBeTruthy();
+    expect(hasPriv(mockContext, 'loaded')).toBeTruthy();
+    expect(hasPriv(mockContext, 'user')).toBeTruthy();
 
-    expect(isAllowed(mockContext, 'loading')).toBeFalsy();
-    expect(isAllowed(mockContext, 'guest')).toBeFalsy();
-    expect(isAllowed(mockContext, 'pending')).toBeFalsy();
-    expect(isAllowed(mockContext, 'admin')).toBeFalsy();
+    expect(hasPriv(mockContext, 'loading')).toBeFalsy();
+    expect(hasPriv(mockContext, 'guest')).toBeFalsy();
+    expect(hasPriv(mockContext, 'pending')).toBeFalsy();
+    expect(hasPriv(mockContext, 'admin')).toBeFalsy();
   });
 
   it('authorized pages require "any", "loaded", "user", "admin" '
@@ -151,13 +156,56 @@ describe('isAllowed(context, require)', () => {
     mockContext.me = { id: 'id01', valid: true, admin: true };
     expect(currentPriv(mockContext)).toEqual('admin');
 
-    expect(isAllowed(mockContext, 'any')).toBeTruthy();
-    expect(isAllowed(mockContext, 'loaded')).toBeTruthy();
-    expect(isAllowed(mockContext, 'user')).toBeTruthy();
-    expect(isAllowed(mockContext, 'admin')).toBeTruthy();
+    expect(hasPriv(mockContext, 'any')).toBeTruthy();
+    expect(hasPriv(mockContext, 'loaded')).toBeTruthy();
+    expect(hasPriv(mockContext, 'user')).toBeTruthy();
+    expect(hasPriv(mockContext, 'admin')).toBeTruthy();
 
-    expect(isAllowed(mockContext, 'loading')).toBeFalsy();
-    expect(isAllowed(mockContext, 'guest')).toBeFalsy();
-    expect(isAllowed(mockContext, 'pending')).toBeFalsy();
+    expect(hasPriv(mockContext, 'loading')).toBeFalsy();
+    expect(hasPriv(mockContext, 'guest')).toBeFalsy();
+    expect(hasPriv(mockContext, 'pending')).toBeFalsy();
+  });
+});
+
+describe('currentPage(location, pages)', () => {
+  const pages = [
+    { path: '' },
+    { path: 'test1' },
+    { path: 'test2' },
+    { path: 'test3' },
+    { path: '*' },
+  ];
+
+  it('returns then item of pages with path matches given location', () => {
+    expect(
+      currentPage({ pathname: '/' }, pages),
+    ).toEqual({ path: '' });
+    expect(
+      currentPage({ pathname: '/test2' }, pages),
+    ).toEqual({ path: 'test2' });
+  });
+
+  it('returns then item with path: * if no route', () => {
+    expect(
+      currentPage({ pathname: '/test0' }, pages),
+    ).toEqual({ path: '*' });
+  });
+});
+
+describe('MenuItem', () => {
+  it('holds the given properties.', () => {
+    const obj = new MenuItem({
+      path: '/test',
+      require: 'admin',
+      title: 'Title 01',
+      icon: <HomeIcon />,
+      element: <div>Test</div>,
+    });
+    expect(obj.path).toEqual('/test');
+    expect(obj.require).toEqual('admin');
+    expect(obj.title).toEqual('Title 01');
+    expect(obj.icon).toEqual(<HomeIcon />);
+    expect(obj.element).toEqual(<div>Test</div>);
+    expect(obj.top).toBeFalsy();
   });
 });

@@ -30,7 +30,7 @@ https://console.firebase.google.com/
     - Create database: Start in production mode
 
 ```
-$ npx create-react-app amber-case --template cra-template-pwa
+$ yarn create react-app my-app --template cra-template-pwa
 $ gh repo create amber-case
 ? Visibility Public
 ? Would you like to add a .gitignore? No

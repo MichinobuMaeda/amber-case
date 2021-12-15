@@ -1,75 +1,157 @@
 const {
+  accountNotExist,
+  invalidSnapshot,
+  deletedSnapshot,
+  user01Snapshot,
+  adminSnapshot,
+  mockGet,
   mockFirebase,
-} = require('./testConfig');
+} = require('./setupTests');
 const {
   valid,
   admin,
 } = require('./guard');
 
-afterEach(async () => {
-  jest.clearAllMocks();
-});
-
 describe('valid()', () => {
   it('rejects undefined uid.', async () => {
-    await expect(valid(mockFirebase))
+    await expect(valid(mockFirebase()))
       .rejects.toThrow('Param uid is missing.');
+
+    expect(mockGet.mock.calls.length).toEqual(0);
   });
 
   it('rejects uid without doc.', async () => {
-    await expect(valid(mockFirebase, 'dummy'))
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(accountNotExist); }),
+    );
+
+    await expect(valid(mockFirebase(), 'dummy'))
       .rejects.toThrow('User: dummy is not exists.');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'dummy',
+    }]);
   });
 
   it('rejects invalid account.', async () => {
-    await expect(valid(mockFirebase, 'invalid'))
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(invalidSnapshot); }),
+    );
+
+    await expect(valid(mockFirebase(), 'invalid'))
       .rejects.toThrow('User: invalid is not valid.');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'invalid',
+    }]);
   });
 
   it('rejects deleted account.', async () => {
-    await expect(valid(mockFirebase, 'deleted'))
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(deletedSnapshot); }),
+    );
+
+    await expect(valid(mockFirebase(), 'deleted'))
       .rejects.toThrow('User: deleted has deleted.');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'deleted',
+    }]);
   });
 
   it('returns valid account.', async () => {
-    const ret = await valid(mockFirebase, 'account01');
-    expect(ret.id).toEqual('account01');
-  });
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(user01Snapshot); }),
+    );
 
-  it('returns valid admin account.', async () => {
-    const ret = await valid(mockFirebase, 'admin');
-    expect(ret.id).toEqual('admin');
+    const ret = await valid(mockFirebase(), 'user01');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'user01',
+    }]);
+    expect(ret).toEqual(user01Snapshot);
   });
 });
 
 describe('admin()', () => {
   it('rejects undefined uid.', async () => {
-    await expect(admin(mockFirebase))
+    await expect(admin(mockFirebase()))
       .rejects.toThrow('Param uid is missing.');
+
+    expect(mockGet.mock.calls.length).toEqual(0);
   });
 
   it('rejects uid without doc.', async () => {
-    await expect(admin(mockFirebase, 'dummy'))
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(accountNotExist); }),
+    );
+
+    await expect(admin(mockFirebase(), 'dummy'))
       .rejects.toThrow('User: dummy is not exists.');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'dummy',
+    }]);
   });
 
   it('rejects invalid account.', async () => {
-    await expect(admin(mockFirebase, 'invalid'))
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(invalidSnapshot); }),
+    );
+
+    await expect(admin(mockFirebase(), 'invalid'))
       .rejects.toThrow('User: invalid is not valid.');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'invalid',
+    }]);
   });
 
   it('rejects deleted account.', async () => {
-    await expect(admin(mockFirebase, 'deleted'))
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(deletedSnapshot); }),
+    );
+
+    await expect(admin(mockFirebase(), 'deleted'))
       .rejects.toThrow('User: deleted has deleted.');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'deleted',
+    }]);
   });
 
-  it('rejects account without admin priv.', async () => {
-    await expect(admin(mockFirebase, 'account01'))
-      .rejects.toThrow('User: account01 is not admin.');
+  it('rejects valid account without admin priv.', async () => {
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(user01Snapshot); }),
+    );
+
+    await expect(admin(mockFirebase(), 'user01'))
+      .rejects.toThrow('User: user01 is not admin.');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'user01',
+    }]);
   });
 
   it('returns valid account with admin priv.', async () => {
-    const ret = await admin(mockFirebase, 'admin');
-    expect(ret.id).toEqual('admin');
+    mockGet.mockImplementationOnce(
+      () => new Promise((resolve) => { resolve(adminSnapshot); }),
+    );
+
+    const ret = await admin(mockFirebase(), 'admin');
+
+    expect(mockGet.mock.calls[0]).toEqual([{
+      collection: 'accounts',
+      id: 'admin',
+    }]);
+    expect(ret).toEqual(adminSnapshot);
   });
 });

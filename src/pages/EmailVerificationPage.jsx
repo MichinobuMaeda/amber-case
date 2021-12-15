@@ -9,16 +9,18 @@ import Logout from '@mui/icons-material/Logout';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
+import AppContext from '../api/AppContext';
 import {
-  AppContext, handleSendEmailVerification,
-  handleReloadAuthUser, handleSignOut,
-} from '../api';
-import Guard from '../components/Guard';
+  handleSendEmailVerification,
+  handleReloadAuthUser,
+  handleSignOut,
+} from '../api/authentication';
 
 const EmailVerificationPage = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const context = useContext(AppContext);
+  const navigate = useNavigate();
+
   const [completion, setCompletion] = useState(false);
   const [errorStatus, setErrorStatus] = useState(false);
 
@@ -37,78 +39,76 @@ const EmailVerificationPage = () => {
   };
 
   return (
-    <Guard require="pending" redirect>
-      <Grid container spacing={2} data-testid="emailVerification-page">
-        {!completion && (
-        <Grid item xs={12}>
-          <Alert severity="info">
-            {t('email verification is required')}
-          </Alert>
-        </Grid>
-        )}
-        {!completion && (
-        <Grid item xs={12}>
-          <Button
-            onClick={onSubmit}
-            aria-label="send"
-            startIcon={<Send />}
-            // variant={buttonVariant}
-          >
-            {t('Send')}
-          </Button>
-        </Grid>
-        )}
-        {completion && (
-        <Grid item xs={12}>
-          <Alert severity="success">
-            {t('send email verification')}
-          </Alert>
-        </Grid>
-        )}
-        {completion && (
-        <Grid item xs={12}>
-          <Alert severity="info">
-            {t('reload app to complete email verification')}
-          </Alert>
-        </Grid>
-        )}
-        {completion && (
-        <Grid item xs={12}>
-          <Button
-            onClick={() => handleReloadAuthUser(context)}
-            aria-label="reload"
-            startIcon={<Cached />}
-            // variant={buttonVariant}
-          >
-            {t('Update')}
-          </Button>
-        </Grid>
-        )}
-        {errorStatus && (
-        <Grid item xs={12}>
-          <Alert severity="error">
-            {t('failed to send email') + t('retry failed or call admin')}
-          </Alert>
-        </Grid>
-        )}
-        <Grid item xs={12}>
-          <Alert severity="info">
-            {t('sign out fo retry')}
-          </Alert>
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            onClick={onClickSignOut}
-            aria-label="sign-out"
-            startIcon={<Logout />}
-            color="secondary"
-            // variant={buttonVariant}
-          >
-            {t('Sign-out')}
-          </Button>
-        </Grid>
+    <Grid container spacing={2} data-testid="emailVerification-page">
+      {!completion && (
+      <Grid item xs={12}>
+        <Alert severity="info">
+          {t('email verification is required')}
+        </Alert>
       </Grid>
-    </Guard>
+      )}
+      {!completion && (
+      <Grid item xs={12}>
+        <Button
+          onClick={onSubmit}
+          aria-label="send"
+          startIcon={<Send />}
+          // variant={buttonVariant}
+        >
+          {t('Send')}
+        </Button>
+      </Grid>
+      )}
+      {completion && (
+      <Grid item xs={12}>
+        <Alert severity="success">
+          {t('send email verification')}
+        </Alert>
+      </Grid>
+      )}
+      {completion && (
+      <Grid item xs={12}>
+        <Alert severity="info">
+          {t('reload app to complete email verification')}
+        </Alert>
+      </Grid>
+      )}
+      {completion && (
+      <Grid item xs={12}>
+        <Button
+          onClick={() => handleReloadAuthUser(context)}
+          aria-label="reload"
+          startIcon={<Cached />}
+          // variant={buttonVariant}
+        >
+          {t('Update')}
+        </Button>
+      </Grid>
+      )}
+      {errorStatus && (
+      <Grid item xs={12}>
+        <Alert severity="error">
+          {t('failed to send email') + t('retry failed or call admin')}
+        </Alert>
+      </Grid>
+      )}
+      <Grid item xs={12}>
+        <Alert severity="info">
+          {t('sign out fo retry')}
+        </Alert>
+      </Grid>
+      <Grid item xs={12}>
+        <Button
+          onClick={onClickSignOut}
+          aria-label="sign-out"
+          startIcon={<Logout />}
+          color="secondary"
+          // variant={buttonVariant}
+        >
+          {t('Sign-out')}
+        </Button>
+      </Grid>
+    </Grid>
   );
 };
 

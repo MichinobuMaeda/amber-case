@@ -18,8 +18,9 @@ const AccordionSection = ({
     >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
-        aria-controls="policy-content"
-        id="policy-header"
+        aria-label={`${dataTestid}-summary`}
+        aria-controls={`${dataTestid}-content`}
+        id={`${dataTestid}-header`}
       >
         <Typography variant="h3" component="div" color="primary">{title}</Typography>
       </AccordionSummary>

@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react';
-import PropTypes from 'prop-types';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import TextField from '@mui/material/TextField';
@@ -9,14 +8,14 @@ import Check from '@mui/icons-material/Check';
 import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
+import AppContext from '../api/AppContext';
 import {
-  AppContext,
   handelReauthenticateLinkToEmail,
   handleReauthenticateWithPassword,
-} from '../api';
-import ShowPasswordButton from './ShowPasswordButton';
+} from '../api/authentication';
+import ShowPasswordButton from '../components/ShowPasswordButton';
 
-const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
+const ReauthenticationPanel = () => {
   const { t } = useTranslation();
   const context = useContext(AppContext);
   const [sendEmailCompletion, setSendEmailCompletion] = useState(false);
@@ -43,7 +42,7 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
   };
 
   return (
-    <Grid container spacing={2} data-testid={dataTestid}>
+    <Grid container spacing={2} data-testid="reauthentication-panel">
       <Grid item xs={12}>
         <Alert severity="info">
           {t('reauthentication required')}
@@ -77,7 +76,7 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
       )}
       <Grid item xs={12} sm={9} md={8} lg={6}>
         <TextField
-          id={`${dataTestid}-password`}
+          id="reauthentication-panel-password"
           type={showPassword ? 'text' : 'password'}
           label={t('Password')}
           onChange={(e) => setPassword(e.target.value)}
@@ -106,14 +105,6 @@ const ReauthenticationPanel = ({ 'data-testid': dataTestid }) => {
       )}
     </Grid>
   );
-};
-
-ReauthenticationPanel.propTypes = {
-  'data-testid': PropTypes.string,
-};
-
-ReauthenticationPanel.defaultProps = {
-  'data-testid': null,
 };
 
 export default ReauthenticationPanel;

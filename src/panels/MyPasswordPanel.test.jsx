@@ -1,33 +1,31 @@
-import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { i18n } from '../conf';
-import { resetMockService, mockContext } from '../testConfig';
+import { initialieMock, mockContext } from '../setupTests';
+import AppContext from '../api/AppContext';
+import { setMyPassword } from '../api/authentication';
+import MyPasswordPanel from './MyPasswordPanel';
 
-const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => jest.fn(),
 }));
 
-const mockSetMyPassword = jest.fn();
-jest.mock('../api', () => ({
-  ...jest.requireActual('../api'),
-  setMyPassword: mockSetMyPassword,
+jest.mock('../api/authentication', () => ({
+  ...jest.requireActual('../api/authentication'),
+  setMyPassword: jest.fn(),
 }));
-
-// work around for mocking problem.
-const { AppContext } = require('../api');
-const { MyPasswordPanel } = require('.');
 
 beforeEach(() => {
-  resetMockService();
+  initialieMock();
 });
 
 describe('MyPasswordPanel', () => {
   const successMessage = i18n.t('completed saving data');
+  const requiredMessage = i18n.t('input is required');
+  const comfermationMassage = i18n.t('do not match the confirmation input');
   const errorMessage = i18n.t('failed to save data') + i18n.t('retry failed or call admin');
 
   it('enables button if data is valid and is modified.', async () => {
@@ -38,8 +36,14 @@ describe('MyPasswordPanel', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
+    expect(screen.getByText(requiredMessage)).toBeInTheDocument();
+    expect(screen.queryByText(comfermationMassage)).toBeNull();
+    expect(screen.queryByText(successMessage)).toBeNull();
+    expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'T');
+    await waitFor(() => expect(screen.queryByText(requiredMessage)).toBeNull());
+    expect(screen.getByText(comfermationMassage)).toBeInTheDocument();
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'e');
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 's');
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 't');
@@ -58,12 +62,13 @@ describe('MyPasswordPanel', () => {
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Confirmation')), '4');
+    await waitFor(() => expect(screen.queryByText(requiredMessage)).toBeNull());
+    expect(screen.queryByText(comfermationMassage)).toBeNull();
     expect(screen.queryByRole('button', { name: 'save' })).not.toBeDisabled();
-
     userEvent.click(screen.queryByRole('button', { name: 'save' }));
-    await waitFor(() => expect(mockSetMyPassword.mock.calls.length).toEqual(1));
-    expect(mockSetMyPassword.mock.calls[0][1]).toEqual('Test1234');
-    expect(screen.queryByText(successMessage)).toBeInTheDocument();
+    await waitFor(() => expect(setMyPassword.mock.calls.length).toEqual(1));
+    expect(setMyPassword.mock.calls[0][1]).toEqual('Test1234');
+    expect(screen.getByText(successMessage)).toBeInTheDocument();
     expect(screen.queryByText(errorMessage)).toBeNull();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), '5');
@@ -119,7 +124,7 @@ describe('MyPasswordPanel', () => {
   });
 
   it('shows error message on click button "save" with exception.', async () => {
-    mockSetMyPassword.mockImplementationOnce(() => { throw Error(''); });
+    setMyPassword.mockImplementationOnce(() => { throw Error(''); });
     render(
       <AppContext.Provider value={mockContext}>
         <MyPasswordPanel />
@@ -145,12 +150,12 @@ describe('MyPasswordPanel', () => {
     userEvent.type(screen.queryByLabelText(i18n.t('Confirmation')), '4');
 
     userEvent.click(screen.queryByRole('button', { name: 'save' }));
-    await waitFor(() => expect(mockSetMyPassword.mock.calls.length).toEqual(1));
+    await waitFor(() => expect(setMyPassword.mock.calls.length).toEqual(1));
     expect(screen.queryByText(successMessage)).toBeNull();
-    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('require data.', async () => {
+  it('requires data.', async () => {
     render(
       <AppContext.Provider value={mockContext}>
         <MyPasswordPanel />
@@ -158,15 +163,15 @@ describe('MyPasswordPanel', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'save' })).toBeDisabled();
-    expect(screen.queryByText(i18n.t('input is required'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('input is required'))).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('do not match the confirmation input'))).toBeNull();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), 'a');
-    expect(screen.queryByText(i18n.t('correct your password'))).toBeInTheDocument();
-    expect(screen.queryByText(i18n.t('do not match the confirmation input'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('correct your password'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('do not match the confirmation input'))).toBeInTheDocument();
 
     userEvent.type(screen.queryByLabelText(i18n.t('Password')), '{backspace}');
-    expect(screen.queryByText(i18n.t('input is required'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('input is required'))).toBeInTheDocument();
     expect(screen.queryByText(i18n.t('do not match the confirmation input'))).toBeNull();
   });
 });

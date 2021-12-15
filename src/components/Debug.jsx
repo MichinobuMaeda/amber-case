@@ -10,7 +10,7 @@ import Close from '@mui/icons-material/Close';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 
-import { AppContext } from '../api';
+import AppContext from '../api/AppContext';
 
 const makeTree = (base, name, src) => {
   const level = (base.match(/:/g) || []).length;

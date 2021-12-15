@@ -22,7 +22,7 @@ const MarkDownEdit = ({
   const [saveError, setSaveError] = useState(false);
 
   const onEdit = () => {
-    setChanged(value || '');
+    setChanged(value);
     setSaveError(null);
     setEdit(true);
   };
@@ -45,7 +45,7 @@ const MarkDownEdit = ({
   };
 
   const onCancel = () => {
-    setChanged(value || '');
+    setChanged(value);
     setSaveError(null);
     setEdit(false);
   };
@@ -63,6 +63,9 @@ const MarkDownEdit = ({
             multiline
             rows={10}
             variant="outlined"
+            inputProps={{
+              'aria-label': `${dataTestid}-input`,
+            }}
           />
         </Grid>
         <Grid item xs={12} container spacing={2} justifyContent="flex-end">
@@ -119,7 +122,7 @@ MarkDownEdit.propTypes = {
 
 MarkDownEdit.defaultProps = {
   'data-testid': null,
-  value: null,
+  value: '',
   editable: false,
   saveErrorMessage: null,
 };

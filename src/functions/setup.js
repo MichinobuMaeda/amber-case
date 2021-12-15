@@ -1,7 +1,7 @@
 const { logger } = require('firebase-functions');
 const { createHash } = require('crypto');
 const { nanoid } = require('nanoid');
-const { createUser } = require('./users');
+const { createAuthUser } = require('./users');
 
 const getConf = async (firebase) => {
   const db = firebase.firestore();
@@ -9,7 +9,10 @@ const getConf = async (firebase) => {
   return conf && conf.exists ? conf : null;
 };
 
-const updateVersion = async (conf, axios) => {
+const updateVersion = async (firebase, conf, axios) => {
+  const db = firebase.firestore();
+  const confRef = db.collection('service').doc('conf');
+
   const res = await axios.get(
     `${conf.get('url')}version.json?check=${new Date().getTime()}`,
   );
@@ -18,7 +21,7 @@ const updateVersion = async (conf, axios) => {
   if (version !== conf.get('version')) {
     logger.info(version);
 
-    await conf.ref.update({
+    await confRef.update({
       version,
       updatedAt: new Date(),
     });
@@ -32,6 +35,7 @@ const updateVersion = async (conf, axios) => {
 const updateData = async (firebase, conf) => {
   const db = firebase.firestore();
   const dataVersion = conf.get('dataVersion') || 0;
+  const confRef = db.collection('service').doc('conf');
 
   if (dataVersion === 1) {
     return false;
@@ -40,8 +44,9 @@ const updateData = async (firebase, conf) => {
   // for data version 0
   const accounts = await db.collection('accounts').get();
   await Promise.all(accounts.docs.map(async (doc) => {
-    await doc.ref.update({
+    await db.collection('accounts').doc(doc.id).update({
       themeMode: doc.get('themeMode') || null,
+      updatedAt: new Date(),
     });
   }));
 
@@ -50,7 +55,7 @@ const updateData = async (firebase, conf) => {
   //  ... ...
   // for data version n
 
-  await conf.ref.update({
+  await confRef.update({
     dataVersion: 1,
     updatedAt: new Date(),
   });
@@ -79,7 +84,7 @@ const install = async (firebase, email, password, url) => {
     invitationExpirationTime: 3 * 24 * 3600 * 1000,
     copyright: `Copyright &copy; 2021 Michinobu Maeda.
 
-The program of this app is distributed under the MIT license.
+The source code for this app is distributed under the MIT license.
 
 <https://github.com/MichinobuMaeda/amber-case>
 `,
@@ -93,7 +98,7 @@ The quick brown fox jumps over the lazy dog.
 The quick brown fox jumps over the lazy dog.
 The quick brown fox jumps over the lazy dog.
 
-<https://reactjs.org//>
+<https://reactjs.org/>
 
 [React](https://reactjs.org/)
 
@@ -124,14 +129,16 @@ The quick brown fox jumps over the lazy dog.
   });
 
   const testers = 'testers';
-  const uid = await createUser(
+  const uid = await createAuthUser(
     firebase,
-    name,
-    true,
-    true,
-    testers,
-    email,
-    password,
+    {
+      name,
+      admin: true,
+      tester: true,
+      group: testers,
+      email,
+      password,
+    },
   );
 
   await db.collection('groups').doc(testers).set({

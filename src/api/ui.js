@@ -1,6 +1,5 @@
 import { themeOptions } from '../conf';
 
-// eslint-disable-next-line import/prefer-default-export
 export const selectThemeMode = ({ themeMode, preferColorScheme }) => themeOptions
   .find(
     (item) => item.palette.mode === (
@@ -13,3 +12,9 @@ export const selectThemeMode = ({ themeMode, preferColorScheme }) => themeOption
         : 'light'
     ),
   );
+
+export const updateApp = async (navigator, window) => {
+  const registration = await navigator.serviceWorker.ready;
+  await registration.unregister();
+  window.location.reload();
+};
