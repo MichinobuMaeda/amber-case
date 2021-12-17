@@ -32,8 +32,8 @@ jobs:
       - run: npm -g i yarn
       - run: yarn install --frozen-lockfile && yarn --cwd src/functions install --frozen-lockfile
       - run: yarn lint && yarn test
-      - name: Set src/conf/version.js
-        run: grep '"version"' package.json | sed -e "s/.*:\s*\"/export default '/" -e "s/\"\s*,*\s*$/';/" > src/conf/version.js
+      - name: Set src/conf/version.ts
+        run: grep '"version"' package.json | sed -e "s/.*:\s*\"/export default '/" -e "s/\"\s*,*\s*$/';/" > src/conf/version.ts
       - run: |
           yarn functions:config:set \
             initial.email="${{ secrets.INITIAL_EMAIL }}" \

@@ -173,7 +173,7 @@ const getToken = async (firebase, code) => {
 const onCreateAuthUser = async (firebase, user) => {
   const db = firebase.firestore();
   const account = await db.collection('accounts').doc(user.uid).get();
-  if (account && account.exists) {
+  if (account.exists) {
     return true;
   }
 

@@ -6,7 +6,7 @@ const { createAuthUser } = require('./users');
 const getConf = async (firebase) => {
   const db = firebase.firestore();
   const conf = await db.collection('service').doc('conf').get();
-  return conf && conf.exists ? conf : null;
+  return conf.exists ? conf : null;
 };
 
 const updateVersion = async (firebase, conf, axios) => {

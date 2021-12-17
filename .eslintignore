@@ -1,0 +1,3 @@
+src/conf/version.ts
+**/*.test.ts
+**/*.test.tsx
