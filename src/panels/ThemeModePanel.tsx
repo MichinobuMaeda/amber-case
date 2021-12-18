@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import AppContext from '../api/AppContext';
-import { hasPriv } from '../api/authorization';
+import { Priv, hasPriv } from '../api/authorization';
 import { setAccountProperties } from '../api/accounts';
 import RadioButtons from '../components/RadioButtons';
 
@@ -14,7 +14,7 @@ const ThemeModePanel = () => {
 
   const handleChange = async (mode: string) => {
     context.setThemeMode(mode);
-    if (hasPriv(context, 'user')) {
+    if (hasPriv(context, Priv.USER)) {
       await setAccountProperties(context, context.me!.id!, { themeMode: mode });
     }
   };

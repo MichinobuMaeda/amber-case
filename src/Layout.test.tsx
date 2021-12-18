@@ -13,7 +13,7 @@ import { i18n, firebaseConfig } from './conf';
 import AppContext from './api/AppContext';
 import { Conf, Account } from './api/models';
 import { updateApp } from './api/ui';
-import { MenuItem } from './api/authorization';
+import { Priv, MenuItem } from './api/authorization';
 import Layout from './Layout';
 
 const mockNavigate = jest.fn();
@@ -37,7 +37,7 @@ describe('Layout', () => {
   const pages = [
     {
       path: '',
-      require: 'user',
+      require: Priv.USER,
       title: i18n.t('Home'),
       icon: <HomeIcon />,
       element: <div>Home page</div>,
@@ -45,14 +45,14 @@ describe('Layout', () => {
     } as MenuItem,
     {
       path: 'prefs',
-      require: 'loaded',
+      require: Priv.LOADED,
       title: 'Preferences',
       icon: <AccountCircleIcon />,
       element: <div>Preferences page</div>,
     } as MenuItem,
     {
       path: 'info',
-      require: 'loaded',
+      require: Priv.LOADED,
       title: 'Infomation',
       icon: <InfoIcon />,
       element: <div>Infomation page</div>,

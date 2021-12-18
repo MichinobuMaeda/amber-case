@@ -11,7 +11,9 @@ import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 
 import { i18n } from './conf';
 import AppContext, { Context } from './api/AppContext';
-import { currentPage, MenuItem, hasPriv } from './api/authorization';
+import {
+  currentPage, MenuItem, hasPriv, Priv,
+} from './api/authorization';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import HomePage from './pages/HomePage';
 import LoadingPage from './pages/LoadingPage';
@@ -24,7 +26,7 @@ import Layout from './Layout';
 const pages = (context: Context): MenuItem[] => [
   {
     path: '',
-    require: 'user',
+    require: Priv.USER,
     title: i18n.t('Home'),
     icon: <HomeIcon />,
     element: <HomePage />,
@@ -32,13 +34,13 @@ const pages = (context: Context): MenuItem[] => [
   },
   {
     path: 'loading',
-    require: 'loading',
+    require: Priv.LOADING,
     element: <LoadingPage />,
     top: true,
   },
   {
     path: 'signin',
-    require: 'guest',
+    require: Priv.GUEST,
     title: i18n.t('Sign-in'),
     icon: <LoginIcon />,
     element: <SignInPage />,
@@ -46,7 +48,7 @@ const pages = (context: Context): MenuItem[] => [
   },
   {
     path: 'emailVerify',
-    require: 'pending',
+    require: Priv.PENDING,
     title: i18n.t('E-mail verification'),
     icon: <MarkEmailReadIcon />,
     element: <EmailVerificationPage />,
@@ -54,7 +56,7 @@ const pages = (context: Context): MenuItem[] => [
   },
   {
     path: 'prefs',
-    require: 'loaded',
+    require: Priv.LOADED,
     title: context.me?.name
       ? i18n.t('One\'s preferences', { name: context.me!.name })
       : i18n.t('Preferences'),
@@ -63,14 +65,14 @@ const pages = (context: Context): MenuItem[] => [
   },
   {
     path: 'info',
-    require: 'loaded',
+    require: Priv.LOADED,
     title: i18n.t('About this app'),
     icon: <InfoIcon />,
     element: <InfoPage />,
   },
   {
     path: '*',
-    require: 'noroute',
+    require: Priv.NOROUTE,
     title: '',
     element: <Navigate to="/" replace />,
   },

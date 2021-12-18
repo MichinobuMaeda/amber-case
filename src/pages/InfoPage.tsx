@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import AppContext from '../api/AppContext';
-import { hasPriv } from '../api/authorization';
+import { Priv, hasPriv } from '../api/authorization';
 import { setConfProperties } from '../api/service';
 import AccordionSection from '../components/AccordionSection';
 import MarkDownEdit from '../components/MarkDownEdit';
@@ -32,7 +32,7 @@ const InfoPage = () => {
           data-testid="copyright"
           label={t('Copyright')}
           value={context.conf?.copyright ?? ''}
-          editable={hasPriv(context, 'admin')}
+          editable={hasPriv(context, Priv.ADMIN)}
           onSave={(v) => setConfProperties(context, { copyright: v })}
         />
       </AccordionSection>
@@ -45,7 +45,7 @@ const InfoPage = () => {
           data-testid="policy"
           label={t('Policy')}
           value={context.conf?.policy ?? ''}
-          editable={hasPriv(context, 'admin')}
+          editable={hasPriv(context, Priv.ADMIN)}
           onSave={(v) => setConfProperties(context, { policy: v })}
         />
       </AccordionSection>

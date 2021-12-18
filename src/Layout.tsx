@@ -25,7 +25,7 @@ import { firebaseConfig, menuWidth, shrinkMenuBreakPoint } from './conf';
 import {
   AppContext, updateApp, hasPriv, currentPage,
 } from './api';
-import { MenuItem } from './api/authorization';
+import { Priv, MenuItem } from './api/authorization';
 import Debug from './components/Debug';
 import Guard from './components/Guard';
 
@@ -67,7 +67,7 @@ const Layout = ({
           <Typography variant="h1" component="div" sx={{ flexGrow: 1 }}>
             {t('App name')}
           </Typography>
-          <Guard require="loaded">
+          <Guard require={Priv.LOADED}>
             {(firebaseConfig.apiKey === 'FIREBASE_API_KEY' || context.me?.tester) && <Debug />}
             {shrinkMenu && (
               <IconButton
@@ -81,7 +81,7 @@ const Layout = ({
           </Guard>
         </Toolbar>
       </AppBar>
-      <Guard require="loaded">
+      <Guard require={Priv.LOADED}>
         <Drawer
           variant={shrinkMenu ? 'temporary' : 'permanent'}
           open={!shrinkMenu || menuOpen}
@@ -117,7 +117,7 @@ const Layout = ({
         sx={{
           flexGrow: 1,
           py: { xs: 2, sm: 3 },
-          width: (hasPriv(context, 'loaded') && !shrinkMenu) ? `calc(100% - ${menuWidth}px)` : null,
+          width: (hasPriv(context, Priv.LOADED) && !shrinkMenu) ? `calc(100% - ${menuWidth}px)` : null,
         }}
       >
         <Toolbar variant="dense" />

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import '../conf/i18n';
 import { validateReuired } from '../conf';
 import AppContext from '../api/AppContext';
+import { Priv } from '../api/authorization';
 import { setAccountProperties } from '../api/accounts';
 import Guard from '../components/Guard';
 import Section from '../components/Section';
@@ -23,7 +24,7 @@ const PreferencesPage = () => {
       <Section data-testid="preferences-page">
         <ThemeModePanel />
       </Section>
-      <Guard require="user">
+      <Guard require={Priv.USER}>
         <Section>
           <TextEdit
             data-testid="myDisplayName"
