@@ -2,17 +2,18 @@ import { ThemeOptions } from '@mui/material/styles';
 
 import { themeOptions } from '../conf';
 import { Context } from './AppContext';
+import { ThemeMode } from './models'
 
 export const selectThemeMode = (context: Context): ThemeOptions => themeOptions
   .find(
     (item: ThemeOptions) => item.palette?.mode === (
       (
-        context.themeMode === 'system'
+        context.themeMode === ThemeMode.SYSTEM
           ? context.preferColorScheme
           : context.themeMode
-      ) === 'dark'
-        ? 'dark'
-        : 'light'
+      ) === ThemeMode.DARK
+        ? ThemeMode.DARK
+        : ThemeMode.LIGHT
     ),
   )!;
 

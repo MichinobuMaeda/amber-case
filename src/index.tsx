@@ -9,7 +9,9 @@ import { User } from 'firebase/auth';
 
 import { firebaseConfig, reauthentication } from './conf';
 import AppContext from './api/AppContext';
-import { Conf, Account, Group } from './api/models';
+import {
+  Conf, Account, Group, ThemeMode, themeModeList, defaultThemeMode,
+} from './api/models';
 import { listenFirebase } from './api/authentication';
 import { initializeFirebase } from './api/firebase';
 import { selectThemeMode } from './api/ui';
@@ -27,10 +29,10 @@ const App = () => {
   context.storage = storage;
   context.functions = functions;
 
-  const [themeMode, setThemeMode] = useState('light');
+  const [themeMode, setThemeMode] = useState(themeModeList[defaultThemeMode]);
   context.themeMode = themeMode;
   context.setThemeMode = setThemeMode;
-  context.preferColorScheme = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+  context.preferColorScheme = useMediaQuery('(prefers-color-scheme: dark)') ? ThemeMode.DARK : ThemeMode.LIGHT;
 
   const [conf, setConf] = useState(null);
   context.conf = conf;

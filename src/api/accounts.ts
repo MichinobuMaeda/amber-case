@@ -2,7 +2,9 @@ import {
   onSnapshot, doc, collection, getDoc,
 } from 'firebase/firestore';
 
-import { CastedDoc, Account } from './models';
+import {
+  CastedDoc, Account, themeModeList, defaultThemeMode,
+} from './models';
 import {
   castDoc, setDocProperties, mergeUpdatedDocs,
   HandleListenError,
@@ -27,7 +29,7 @@ export const updateMe = (
     throw Error();
   }
   setMe(me);
-  setThemeMode(me.themeMode || 'light');
+  setThemeMode(themeModeList[me.themeMode || defaultThemeMode]);
   listenGroups(context, handleListenError);
   return true;
 };

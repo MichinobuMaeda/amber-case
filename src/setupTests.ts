@@ -3,7 +3,9 @@ import '@testing-library/jest-dom';
 import { User } from 'firebase/auth';
 import { Unsubscribe } from 'firebase/firestore';
 
-import { Conf, Account, Group } from './api/models';
+import {
+  Conf, Account, Group, ThemeMode,
+} from './api/models';
 import { Context } from './api/AppContext';
 
 global.console.log = jest.fn();
@@ -63,8 +65,8 @@ export const initializeMock = () => {
   mockContext.db = { name: 'mockDb' };
   mockContext.storage = { name: 'mockStorage' };
   mockContext.functions = { name: 'mockFunctions' };
-  mockContext.themeMode = 'light';
-  mockContext.preferColorScheme = 'light';
+  mockContext.themeMode = ThemeMode.LIGHT;
+  mockContext.preferColorScheme = ThemeMode.LIGHT;
   mockContext.conf = {} as Conf;
   mockContext.authUser = {} as User;
   mockContext.me = {} as Account;

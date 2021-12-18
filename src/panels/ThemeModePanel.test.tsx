@@ -6,7 +6,9 @@ import { User } from 'firebase/auth';
 import { i18n } from '../conf';
 import { initializeMock, mockContext } from '../setupTests';
 import AppContext from '../api/AppContext';
-import { Conf, Account } from '../api/models';
+import {
+  Conf, Account, ThemeMode, themeModeList,
+} from '../api/models';
 import { setAccountProperties } from '../api/accounts';
 import ThemeModePanel from './ThemeModePanel';
 
@@ -33,10 +35,10 @@ describe('ThemeModePanel', () => {
 
     userEvent.click(screen.getByText(`${i18n.t('Accept system settings')}`));
     expect(mockContext.setThemeMode.mock.calls.length).toEqual(1);
-    expect(mockContext.setThemeMode.mock.calls[0][0]).toEqual('system');
+    expect(mockContext.setThemeMode.mock.calls[0][0]).toEqual(ThemeMode.SYSTEM);
     await waitFor(() => expect(setAccountProperties.mock.calls.length).toEqual(1));
     expect(setAccountProperties.mock.calls[0][1]).toEqual('id01');
-    expect(setAccountProperties.mock.calls[0][2]).toEqual({ themeMode: 'system' });
+    expect(setAccountProperties.mock.calls[0][2]).toEqual({ themeMode: themeModeList.indexOf(ThemeMode.SYSTEM) });
   });
 
   it('set the selected theme mode to app context and user data '
@@ -51,7 +53,7 @@ describe('ThemeModePanel', () => {
 
     userEvent.click(screen.getByText(`${i18n.t('Accept system settings')}`));
     expect(mockContext.setThemeMode.mock.calls.length).toEqual(1);
-    expect(mockContext.setThemeMode.mock.calls[0][0]).toEqual('system');
+    expect(mockContext.setThemeMode.mock.calls[0][0]).toEqual(ThemeMode.SYSTEM);
     await waitFor(() => expect(setAccountProperties.mock.calls.length).toEqual(0));
   });
 });

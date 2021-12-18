@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import '../conf/i18n';
 import AppContext from '../api/AppContext';
+import { ThemeMode, themeModeList } from '../api/models';
 import { Priv, hasPriv } from '../api/authorization';
 import { setAccountProperties } from '../api/accounts';
 import RadioButtons from '../components/RadioButtons';
@@ -15,7 +16,11 @@ const ThemeModePanel = () => {
   const handleChange = async (mode: string) => {
     context.setThemeMode(mode);
     if (hasPriv(context, Priv.USER)) {
-      await setAccountProperties(context, context.me!.id!, { themeMode: mode });
+      await setAccountProperties(
+        context,
+        context.me!.id!,
+        { themeMode: themeModeList.indexOf(mode) },
+      );
     }
   };
 
@@ -28,15 +33,15 @@ const ThemeModePanel = () => {
           items={[
             {
               label: t('Light mode'),
-              value: 'light',
+              value: ThemeMode.LIGHT,
             },
             {
               label: t('Dark mode'),
-              value: 'dark',
+              value: ThemeMode.DARK,
             },
             {
               label: t('Accept system settings'),
-              value: 'system',
+              value: ThemeMode.SYSTEM,
             },
           ]}
           value={context.themeMode!}

@@ -1,3 +1,20 @@
+/* eslint-disable @typescript-eslint/lines-between-class-members */
+export class ThemeMode {
+  public static NOTSET: string = 'notset';
+  public static LIGHT: string = 'light';
+  public static DARK: string = 'dark';
+  public static SYSTEM: string = 'system';
+}
+
+export const themeModeList = [
+  ThemeMode.NOTSET,
+  ThemeMode.LIGHT,
+  ThemeMode.DARK,
+  ThemeMode.SYSTEM,
+];
+
+export const defaultThemeMode = themeModeList.indexOf(ThemeMode.LIGHT);
+
 export interface CastedDoc {
   id?: string;
   createdAt?: Date;
@@ -21,7 +38,7 @@ export interface Account extends CastedDoc {
   admin?: boolean;
   tester?: boolean;
   group?: string;
-  themeMode?: string;
+  themeMode?: number;
   invitation?: string,
   invitedBy?: string,
   invitedAt?: Date,

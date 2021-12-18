@@ -6,6 +6,7 @@ import {
   selectThemeMode,
   updateApp,
 } from './ui';
+import { ThemeMode } from '../api/models'
 
 beforeEach(() => {
   initializeMock();
@@ -14,44 +15,44 @@ beforeEach(() => {
 describe('selectThemeMode(context)', () => {
   it('return the dark theme options '
   + 'for themeMode: "dark", preferColorScheme: "dark".', async () => {
-    mockContext.themeMode = 'dark';
-    mockContext.preferColorScheme = 'dark';
-    expect(selectThemeMode(mockContext).palette?.mode).toEqual('dark');
+    mockContext.themeMode = ThemeMode.DARK;
+    mockContext.preferColorScheme = ThemeMode.DARK;
+    expect(selectThemeMode(mockContext).palette?.mode).toEqual(ThemeMode.DARK);
   });
 
   it('return the dark theme options '
   + 'for themeMode: "dark", preferColorScheme: "light".', async () => {
-    mockContext.themeMode = 'dark';
-    mockContext.preferColorScheme = 'light';
-    expect(selectThemeMode(mockContext).palette?.mode).toEqual('dark');
+    mockContext.themeMode = ThemeMode.DARK;
+    mockContext.preferColorScheme = ThemeMode.LIGHT;
+    expect(selectThemeMode(mockContext).palette?.mode).toEqual(ThemeMode.DARK);
   });
 
   it('return the dark theme options '
   + 'for themeMode: "system", preferColorScheme: "dark".', async () => {
-    mockContext.themeMode = 'system';
-    mockContext.preferColorScheme = 'dark';
-    expect(selectThemeMode(mockContext).palette?.mode).toEqual('dark');
+    mockContext.themeMode = ThemeMode.SYSTEM;
+    mockContext.preferColorScheme = ThemeMode.DARK;
+    expect(selectThemeMode(mockContext).palette?.mode).toEqual(ThemeMode.DARK);
   });
 
   it('return the light theme options '
   + 'for themeMode: "light", preferColorScheme: "light".', async () => {
-    mockContext.themeMode = 'light';
-    mockContext.preferColorScheme = 'light';
-    expect(selectThemeMode(mockContext).palette?.mode).toEqual('light');
+    mockContext.themeMode = ThemeMode.LIGHT;
+    mockContext.preferColorScheme = ThemeMode.LIGHT;
+    expect(selectThemeMode(mockContext).palette?.mode).toEqual(ThemeMode.LIGHT);
   });
 
   it('return the dark theme options '
   + 'for themeMode: "light", preferColorScheme: "dark".', async () => {
-    mockContext.themeMode = 'light';
-    mockContext.preferColorScheme = 'dark';
-    expect(selectThemeMode(mockContext).palette?.mode).toEqual('light');
+    mockContext.themeMode = ThemeMode.LIGHT;
+    mockContext.preferColorScheme = ThemeMode.DARK;
+    expect(selectThemeMode(mockContext).palette?.mode).toEqual(ThemeMode.LIGHT);
   });
 
   it('return the dark theme options '
   + 'for themeMode: "system", preferColorScheme: "light".', async () => {
-    mockContext.themeMode = 'system';
-    mockContext.preferColorScheme = 'light';
-    expect(selectThemeMode(mockContext).palette?.mode).toEqual('light');
+    mockContext.themeMode = ThemeMode.SYSTEM;
+    mockContext.preferColorScheme = ThemeMode.LIGHT;
+    expect(selectThemeMode(mockContext).palette?.mode).toEqual(ThemeMode.LIGHT);
   });
 });
 

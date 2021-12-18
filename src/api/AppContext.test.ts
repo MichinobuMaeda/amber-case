@@ -1,7 +1,7 @@
 import { User } from 'firebase/auth';
 
 import { initialContext } from './AppContext';
-import { Conf, Account, Group } from './models';
+import { Conf, Account, Group, ThemeMode } from './models';
 
 describe('initialContext', () => {
   it('is initialized with default values.', () => {
@@ -9,7 +9,7 @@ describe('initialContext', () => {
     expect(initialContext.unsub).toBeDefined();
     expect(initialContext.accounts).toHaveLength(0);
     expect(initialContext.groups).toHaveLength(0);
-    expect(initialContext.setThemeMode('light')).not.toBeDefined();
+    expect(initialContext.setThemeMode(ThemeMode.LIGHT)).not.toBeDefined();
     expect(initialContext.setConf({} as Conf)).not.toBeDefined();
     expect(initialContext.setAuthUser({} as User)).not.toBeDefined();
     expect(initialContext.setMe({} as Account)).not.toBeDefined();
