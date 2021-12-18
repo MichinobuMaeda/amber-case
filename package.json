@@ -12,7 +12,8 @@
     "functions:config:set": "firebase functions:config:set",
     "test:functions": "cd functions && jest src --coverage",
     "test:ui": "react-scripts test --coverage --watchAll=false",
-    "test": "yarn test:functions && yarn test:ui && istanbul-merge --out coverage-final.json coverage/coverage-final.json functions/coverage/coverage-final.json",
+    "test": "yarn test:functions && yarn test:ui",
+    "test:rport": "yarn test:functions && yarn test:ui && istanbul-merge --out coverage-final.json coverage/coverage-final.json functions/coverage/coverage-final.json && codecov -f coverage-final.json",
     "emulate": "yarn build:functions && yarn build && firebase emulators:start && yarn dev:setup"
   },
   "dependencies": {
@@ -53,6 +54,7 @@
     "workbox-streams": "^5.1.3"
   },
   "devDependencies": {
+    "codecov": "^3.8.3",
     "eslint": "^8.4.1",
     "eslint-config-airbnb": "^19.0.2",
     "eslint-config-airbnb-typescript": "^16.1.0",

@@ -1,5 +1,5 @@
 import { config, region } from 'firebase-functions';
-import { initializeApp } from 'firebase-admin';
+import * as admin from 'firebase-admin';
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
@@ -11,7 +11,7 @@ import {
 
 const REGION = 'asia-northeast1';
 
-const firebase = initializeApp();
+const firebase = admin.initializeApp();
 
 const httpApp = express();
 httpApp.use(cors({ origin: true }));

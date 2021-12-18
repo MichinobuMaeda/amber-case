@@ -31,7 +31,7 @@ jobs:
           node-version: '14'
       - run: npm -g i yarn
       - run: yarn install --frozen-lockfile && yarn --cwd functions install --frozen-lockfile
-      - run: yarn lint && yarn test && yarn build:functions
+      - run: yarn lint && yarn test:rport && yarn build:functions
       - name: Set src/conf/version.ts
         run: grep '"version"' package.json | sed -e "s/.*:\s*\"/export default '/" -e "s/\"\s*,*\s*$/';/" > src/conf/version.ts
       - run: |
@@ -41,7 +41,7 @@ jobs:
             initial.url="${{ secrets.INITIAL_URL }}" \
             --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
       - run: |
-          yarn deploy --only storage,firestore,functions \
+          yarn deploy --only storage,firestore,functions --force \
             --token "${{ secrets.FIREBASE_TOKEN_AMBER_CASE }}"
       - name: Set src/conf/firebase.js
         run: sed 's/FIREBASE_API_KEY/${{ secrets.FIREBASE_API_KEY_AMBER_CASE }}/' -i src/conf/firebase.js
