@@ -5,6 +5,7 @@
 
 # testing
 /coverage
+merged.info
 
 # production
 /build

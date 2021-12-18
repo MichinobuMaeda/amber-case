@@ -2,7 +2,7 @@ import { ThemeOptions } from '@mui/material/styles';
 
 import { themeOptions } from '../conf';
 import { Context } from './AppContext';
-import { ThemeMode } from './models'
+import { ThemeMode } from './models';
 
 export const selectThemeMode = (context: Context): ThemeOptions => themeOptions
   .find(
