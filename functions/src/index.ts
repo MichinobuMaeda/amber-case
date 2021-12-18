@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase-admin';
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import * as guard from './guard';
+import { adminUser } from './guard';
 import * as users from './users';
 import {
   setup,
@@ -22,7 +22,7 @@ export const api = region(REGION).https.onRequest(httpApp);
 
 export const createAuthUser = region(REGION)
   .https.onCall(async (data: any, context) => {
-    await guard.admin(firebase, context.auth?.uid ?? '');
+    await adminUser(firebase, context.auth?.uid ?? '');
     await users.createAuthUser(
       firebase,
       {
@@ -35,7 +35,7 @@ export const createAuthUser = region(REGION)
 
 export const setUserName = region(REGION)
   .https.onCall(async (data: any, context) => {
-    await guard.admin(firebase, context.auth?.uid ?? '');
+    await adminUser(firebase, context.auth?.uid ?? '');
     await users.setUserName(
       firebase,
       data.uid || '',
@@ -45,7 +45,7 @@ export const setUserName = region(REGION)
 
 export const setUserEmail = region(REGION)
   .https.onCall(async (data: any, context) => {
-    await guard.admin(firebase, context.auth?.uid ?? '');
+    await adminUser(firebase, context.auth?.uid ?? '');
     await users.setUserEmail(
       firebase,
       data.uid || '',
@@ -55,7 +55,7 @@ export const setUserEmail = region(REGION)
 
 export const setUserPassword = region(REGION)
   .https.onCall(async (data: any, context) => {
-    await guard.admin(firebase, context.auth?.uid ?? '');
+    await adminUser(firebase, context.auth?.uid ?? '');
     await users.setUserPassword(
       firebase,
       data.uid || '',

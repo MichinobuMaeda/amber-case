@@ -1,5 +1,5 @@
 import { config } from 'firebase-functions';
-import { app } from 'firebase-admin';
+// import { app } from 'firebase-admin';
 import { Request, Response } from 'express';
 import { AxiosStatic } from 'axios';
 
@@ -12,7 +12,7 @@ import {
 
 /* eslint-disable import/prefer-default-export */
 export const setup = (
-  firebase: app.App,
+  firebase: any,
   axios: AxiosStatic,
   functionsConfig: config.Config,
 ) => async (

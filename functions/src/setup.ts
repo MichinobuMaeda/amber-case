@@ -1,12 +1,12 @@
 import { logger } from 'firebase-functions';
-import { app, firestore } from 'firebase-admin';
+import { firestore } from 'firebase-admin';
 import { createHash } from 'crypto';
 import { AxiosStatic } from 'axios';
 import { nanoid } from 'nanoid';
 import { createAuthUser } from './users';
 
 export const getConf = async (
-  firebase: app.App,
+  firebase: any,
 ) => {
   const db = firebase.firestore();
   const conf = await db.collection('service').doc('conf').get();
@@ -14,7 +14,7 @@ export const getConf = async (
 };
 
 export const updateVersion = async (
-  firebase: app.App,
+  firebase: any,
   conf: firestore.DocumentSnapshot,
   axios: AxiosStatic,
 ) => {
@@ -41,7 +41,7 @@ export const updateVersion = async (
 };
 
 export const updateData = async (
-  firebase: app.App,
+  firebase: any,
   conf: firestore.DocumentSnapshot,
 ) => {
   const db = firebase.firestore();
@@ -54,7 +54,7 @@ export const updateData = async (
 
   // for data version 0
   const accounts = await db.collection('accounts').get();
-  await Promise.all(accounts.docs.map(async (doc) => {
+  await Promise.all(accounts.docs.map(async (doc: firestore.DocumentSnapshot) => {
     await db.collection('accounts').doc(doc.id).update({
       themeMode: doc.get('themeMode') || null,
       updatedAt: new Date(),
@@ -75,7 +75,7 @@ export const updateData = async (
 };
 
 export const install = async (
-  firebase: app.App,
+  firebase: any,
   email: string,
   password: string,
   url: string,

@@ -1,6 +1,11 @@
 import { createHash } from 'crypto';
 import functionTest from 'firebase-functions-test';
 
+global.console.log = jest.fn();
+global.console.info = jest.fn();
+global.console.warn = jest.fn();
+global.console.error = jest.fn();
+
 const test = functionTest();
 
 export const confNotExist = { exists: false, id: 'conf' };
@@ -64,8 +69,8 @@ export const adminSnapshot = test.firestore.makeDocumentSnapshot(
 );
 
 export const testInvitation = (
-  code,
-  seed,
+  code: string,
+  seed: string,
 ) => {
   const hash = createHash('sha256');
   hash.update(code);
@@ -108,14 +113,14 @@ export const mockFirebase = () => {
 
   return {
     firestore: () => ({
-      collection: (collection) => ({
-        add: (data) => mockAdd({ collection, data }),
-        doc: (id) => ({
+      collection: (collection: string) => ({
+        add: (data: any) => mockAdd({ collection, data }),
+        doc: (id: string) => ({
           get: () => mockGet({ collection, id }),
-          set: (data) => mockSet({ collection, id, data }),
-          update: (data) => mockUpdate({ collection, id, data }),
+          set: (data: any) => mockSet({ collection, id, data }),
+          update: (data: any) => mockUpdate({ collection, id, data }),
         }),
-        where: (op1, op2, op3) => ({
+        where: (op1: any, op2: any, op3: any) => ({
           get: () => mockGet({
             collection, op1, op2, op3,
           }),

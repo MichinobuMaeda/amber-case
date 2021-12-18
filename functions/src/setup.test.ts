@@ -11,7 +11,7 @@ import {
   mockUpdate,
   mockFirebase,
 } from './setupTests';
-import { createAuthUser } from './users';
+import * as users from './users';
 import {
   getConf,
   updateVersion,
@@ -22,11 +22,10 @@ import {
 const test = functionTest();
 
 jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-jest.mock('./users', () => ({
-  ...jest.requireActual('./users'),
-  createAuthUser: jest.fn(),
-}));
+jest.mock('./users');
+const mockedUsers = users as jest.Mocked<typeof users>;
 
 describe('getConf()', () => {
   it('returns null if document "conf" is not exists.', async () => {
@@ -46,24 +45,24 @@ describe('getConf()', () => {
 
 describe('updateVersion()', () => {
   it('returns false and not modifies conf has same version.', async () => {
-    axios.get.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         version: confData.version,
       },
     });
 
-    const ret = await updateVersion(mockFirebase(), confSnapshot, axios);
+    const ret = await updateVersion(mockFirebase(), confSnapshot, mockedAxios);
     expect(ret).toBeFalsy();
     expect(mockUpdate.mock.calls).toEqual([]);
   });
 
   it('returns true and update conf has old version.', async () => {
-    axios.get.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         version: '1.0.1',
       },
     });
-    const ret = await updateVersion(mockFirebase(), confSnapshot, axios);
+    const ret = await updateVersion(mockFirebase(), confSnapshot, mockedAxios);
     expect(ret).toBeTruthy();
     expect(mockUpdate.mock.calls).toEqual([[{
       collection: 'service',
@@ -143,7 +142,7 @@ describe('install()', () => {
     const email = 'primary@example.com';
     const password = "primary's password";
     const url = 'https://example.com';
-    createAuthUser
+    mockedUsers.createAuthUser
       .mockImplementationOnce(() => new Promise((resolve) => { resolve('id01'); }));
     const testConfData = {
       version: '1.0.0',
@@ -165,7 +164,7 @@ describe('install()', () => {
     const ret = await install(mockFirebase(), email, password, url);
 
     expect(ret.id).toEqual('conf');
-    expect(createAuthUser.mock.calls[0][1]).toEqual({
+    expect(mockedUsers.createAuthUser.mock.calls[0][1]).toEqual({
       name: 'Primary user',
       admin: true,
       tester: true,

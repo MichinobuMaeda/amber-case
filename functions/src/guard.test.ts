@@ -8,13 +8,13 @@ import {
   mockFirebase,
 } from './setupTests';
 import {
-  valid,
-  admin,
+  validUser,
+  adminUser,
 } from './guard';
 
-describe('valid()', () => {
+describe('validUser()', () => {
   it('rejects undefined uid.', async () => {
-    await expect(valid(mockFirebase()))
+    await expect(validUser(mockFirebase(), ''))
       .rejects.toThrow('Param uid is missing.');
 
     expect(mockGet.mock.calls.length).toEqual(0);
@@ -25,7 +25,7 @@ describe('valid()', () => {
       () => new Promise((resolve) => { resolve(accountNotExist); }),
     );
 
-    await expect(valid(mockFirebase(), 'dummy'))
+    await expect(validUser(mockFirebase(), 'dummy'))
       .rejects.toThrow('User: dummy is not exists.');
 
     expect(mockGet.mock.calls[0]).toEqual([{
@@ -34,12 +34,12 @@ describe('valid()', () => {
     }]);
   });
 
-  it('rejects invalid account.', async () => {
+  it('rejects invalidUser account.', async () => {
     mockGet.mockImplementationOnce(
       () => new Promise((resolve) => { resolve(invalidSnapshot); }),
     );
 
-    await expect(valid(mockFirebase(), 'invalid'))
+    await expect(validUser(mockFirebase(), 'invalid'))
       .rejects.toThrow('User: invalid is not valid.');
 
     expect(mockGet.mock.calls[0]).toEqual([{
@@ -53,7 +53,7 @@ describe('valid()', () => {
       () => new Promise((resolve) => { resolve(deletedSnapshot); }),
     );
 
-    await expect(valid(mockFirebase(), 'deleted'))
+    await expect(validUser(mockFirebase(), 'deleted'))
       .rejects.toThrow('User: deleted has deleted.');
 
     expect(mockGet.mock.calls[0]).toEqual([{
@@ -67,7 +67,7 @@ describe('valid()', () => {
       () => new Promise((resolve) => { resolve(user01Snapshot); }),
     );
 
-    const ret = await valid(mockFirebase(), 'user01');
+    const ret = await validUser(mockFirebase(), 'user01');
 
     expect(mockGet.mock.calls[0]).toEqual([{
       collection: 'accounts',
@@ -77,9 +77,9 @@ describe('valid()', () => {
   });
 });
 
-describe('admin()', () => {
+describe('adminUser()', () => {
   it('rejects undefined uid.', async () => {
-    await expect(admin(mockFirebase()))
+    await expect(adminUser(mockFirebase(), ''))
       .rejects.toThrow('Param uid is missing.');
 
     expect(mockGet.mock.calls.length).toEqual(0);
@@ -90,7 +90,7 @@ describe('admin()', () => {
       () => new Promise((resolve) => { resolve(accountNotExist); }),
     );
 
-    await expect(admin(mockFirebase(), 'dummy'))
+    await expect(adminUser(mockFirebase(), 'dummy'))
       .rejects.toThrow('User: dummy is not exists.');
 
     expect(mockGet.mock.calls[0]).toEqual([{
@@ -104,7 +104,7 @@ describe('admin()', () => {
       () => new Promise((resolve) => { resolve(invalidSnapshot); }),
     );
 
-    await expect(admin(mockFirebase(), 'invalid'))
+    await expect(adminUser(mockFirebase(), 'invalid'))
       .rejects.toThrow('User: invalid is not valid.');
 
     expect(mockGet.mock.calls[0]).toEqual([{
@@ -118,7 +118,7 @@ describe('admin()', () => {
       () => new Promise((resolve) => { resolve(deletedSnapshot); }),
     );
 
-    await expect(admin(mockFirebase(), 'deleted'))
+    await expect(adminUser(mockFirebase(), 'deleted'))
       .rejects.toThrow('User: deleted has deleted.');
 
     expect(mockGet.mock.calls[0]).toEqual([{
@@ -127,12 +127,12 @@ describe('admin()', () => {
     }]);
   });
 
-  it('rejects valid account without admin priv.', async () => {
+  it('rejects valid account without adminUser priv.', async () => {
     mockGet.mockImplementationOnce(
       () => new Promise((resolve) => { resolve(user01Snapshot); }),
     );
 
-    await expect(admin(mockFirebase(), 'user01'))
+    await expect(adminUser(mockFirebase(), 'user01'))
       .rejects.toThrow('User: user01 is not admin.');
 
     expect(mockGet.mock.calls[0]).toEqual([{
@@ -146,7 +146,7 @@ describe('admin()', () => {
       () => new Promise((resolve) => { resolve(adminSnapshot); }),
     );
 
-    const ret = await admin(mockFirebase(), 'admin');
+    const ret = await adminUser(mockFirebase(), 'admin');
 
     expect(mockGet.mock.calls[0]).toEqual([{
       collection: 'accounts',

@@ -1,5 +1,5 @@
 import { logger, Change } from 'firebase-functions';
-import { app, auth, firestore } from 'firebase-admin';
+import { auth, firestore } from 'firebase-admin';
 import { createHash } from 'crypto';
 import { nanoid } from 'nanoid';
 
@@ -20,7 +20,7 @@ export interface UserProfile {
 }
 
 export const createAuthUser = async (
-  firebase: app.App,
+  firebase: any,
   {
     name, admin, tester, group, email, password,
   }: UserData,
@@ -82,7 +82,7 @@ export const createAuthUser = async (
 };
 
 export const setUserName = async (
-  firebase: app.App,
+  firebase: any,
   uid: string,
   name: string,
 ) => {
@@ -100,7 +100,7 @@ export const setUserName = async (
 };
 
 export const setUserEmail = async (
-  firebase: app.App,
+  firebase: any,
   uid: string,
   email: string,
 ) => {
@@ -113,7 +113,7 @@ export const setUserEmail = async (
 };
 
 export const setUserPassword = async (
-  firebase: app.App,
+  firebase: any,
   uid: string,
   password: string,
 ) => {
@@ -136,7 +136,7 @@ export const calcInvitation = (
 };
 
 export const invite = async (
-  firebase: app.App,
+  firebase: any,
   uid: string,
   invitee: string,
 ) => {
@@ -158,7 +158,7 @@ export const invite = async (
 };
 
 export const getToken = async (
-  firebase: app.App,
+  firebase: any,
   code: string,
 ) => {
   const db = firebase.firestore();
@@ -200,7 +200,7 @@ export const getToken = async (
 };
 
 export const onCreateAuthUser = async (
-  firebase: app.App,
+  firebase: any,
   user: auth.UserRecord,
 ) => {
   const db = firebase.firestore();
@@ -215,10 +215,10 @@ export const onCreateAuthUser = async (
 };
 
 export const onAccountUpdate = async (
-  firebase: app.App,
+  firebase: any,
   change: Change<firestore.DocumentSnapshot>,
 ) => {
-  if (change.before.data()?.name !== change.after.data()?.name) {
-    await firebase.auth().updateUser(change.after.id, { displayName: change.after.data()?.name });
+  if (change.before.data()!.name !== change.after.data()!.name) {
+    await firebase.auth().updateUser(change.after.id, { displayName: change.after.data()!.name });
   }
 };

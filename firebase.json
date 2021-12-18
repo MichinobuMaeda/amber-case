@@ -8,7 +8,7 @@
   },
   "functions": {
     "predeploy": [],
-    "source": "src/functions"
+    "source": "functions"
   },
   "hosting": {
     "public": "build",

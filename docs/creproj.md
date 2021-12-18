@@ -61,9 +61,7 @@ $ firebase init functions
 ? Do you want to use ESLint to catch probable bugs and enforce style? No
 ? Do you want to install dependencies with npm now? No
 
-$ mv functions src/
-
-$ yarn --cwd src/functions install
+$ yarn --cwd functions install
 
 $ firebase init hosting
 ? What do you want to use as your public directory? build

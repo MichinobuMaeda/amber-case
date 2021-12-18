@@ -1,3 +1,4 @@
+import {auth} from "firebase-admin";
 import functionTest from 'firebase-functions-test';
 import {
   confData,
@@ -442,7 +443,7 @@ describe('onCreateAuthUser()', () => {
     mockGet
       .mockImplementationOnce(() => new Promise((resolve) => { resolve(accountNotExist); }));
 
-    await onCreateAuthUser(mockFirebase(), { uid: accountNotExist.id });
+    await onCreateAuthUser(mockFirebase(), { uid: accountNotExist.id } as auth.UserRecord);
 
     expect(deleteUser.mock.calls).toEqual([[accountNotExist.id]]);
   });
@@ -451,7 +452,7 @@ describe('onCreateAuthUser()', () => {
     mockGet
       .mockImplementationOnce(() => new Promise((resolve) => { resolve(user01Snapshot); }));
 
-    await onCreateAuthUser(mockFirebase(), { uid: 'user01' });
+    await onCreateAuthUser(mockFirebase(), { uid: 'user01' } as auth.UserRecord);
 
     expect(deleteUser.mock.calls).toEqual([]);
   });

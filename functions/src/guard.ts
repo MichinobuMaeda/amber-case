@@ -1,7 +1,7 @@
-import { app } from 'firebase-admin';
+// import { app } from 'firebase-admin';
 
-export const valid = async (
-  firebase: app.App,
+export const validUser = async (
+  firebase: any,
   uid: string,
 ) => {
   if (!uid) {
@@ -21,11 +21,11 @@ export const valid = async (
   return account;
 };
 
-export const admin = async (
-  firebase: app.App,
+export const adminUser = async (
+  firebase: any,
   uid: string,
 ) => {
-  const account = await valid(firebase, uid);
+  const account = await validUser(firebase, uid);
   if (!account.get('admin')) {
     throw new Error(`User: ${uid} is not admin.`);
   }
