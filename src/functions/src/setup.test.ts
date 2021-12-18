@@ -1,7 +1,6 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-const test = require('firebase-functions-test')();
-const axios = require('axios');
-const {
+import functionTest from 'firebase-functions-test';
+import axios from 'axios';
+import {
   confNotExist,
   confData,
   confSnapshot,
@@ -11,14 +10,16 @@ const {
   mockSet,
   mockUpdate,
   mockFirebase,
-} = require('./setupTests');
-const { createAuthUser } = require('./users');
-const {
+} from './setupTests';
+import { createAuthUser } from './users';
+import {
   getConf,
   updateVersion,
   updateData,
   install,
-} = require('./setup');
+} from './setup';
+
+const test = functionTest();
 
 jest.mock('axios');
 

@@ -1,4 +1,4 @@
-const {
+import {
   accountNotExist,
   invalidSnapshot,
   deletedSnapshot,
@@ -6,11 +6,11 @@ const {
   adminSnapshot,
   mockGet,
   mockFirebase,
-} = require('./setupTests');
-const {
+} from './setupTests';
+import {
   valid,
   admin,
-} = require('./guard');
+} from './guard';
 
 describe('valid()', () => {
   it('rejects undefined uid.', async () => {

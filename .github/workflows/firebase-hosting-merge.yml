@@ -31,7 +31,7 @@ jobs:
           node-version: '14'
       - run: npm -g i yarn
       - run: yarn install --frozen-lockfile && yarn --cwd src/functions install --frozen-lockfile
-      - run: yarn lint && yarn test
+      - run: yarn lint && yarn test && yarn build:functions
       - name: Set src/conf/version.ts
         run: grep '"version"' package.json | sed -e "s/.*:\s*\"/export default '/" -e "s/\"\s*,*\s*$/';/" > src/conf/version.ts
       - run: |

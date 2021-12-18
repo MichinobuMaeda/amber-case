@@ -1,6 +1,5 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-const test = require('firebase-functions-test')();
-const {
+import functionTest from 'firebase-functions-test';
+import {
   confData,
   confSnapshot,
   accountNotExist,
@@ -15,8 +14,8 @@ const {
   createUser,
   updateUser,
   deleteUser,
-} = require('./setupTests');
-const {
+} from './setupTests';
+import {
   createAuthUser,
   setUserName,
   setUserEmail,
@@ -25,7 +24,9 @@ const {
   getToken,
   onCreateAuthUser,
   onAccountUpdate,
-} = require('./users');
+} from './users';
+
+const test = functionTest();
 
 describe('createAuthUser()', () => {
   const name = 'User 01';
@@ -289,15 +290,13 @@ describe('setUserPassword()', () => {
 });
 
 describe('invite()', () => {
-  const caller = { id: 'admin' };
-
   it('creates invitation code and'
   + ' save hashed code, host account id and timestamp,'
   + ' and return invitation code.', async () => {
     mockGet
       .mockImplementationOnce(() => new Promise((resolve) => { resolve(confSnapshot); }));
 
-    const code = await invite(mockFirebase(), caller, 'id01');
+    const code = await invite(mockFirebase(), 'admin', 'id01');
 
     expect(code.length).toBeGreaterThan(0);
     expect(mockUpdate.mock.calls).toEqual([[{
@@ -305,7 +304,7 @@ describe('invite()', () => {
       id: 'id01',
       data: {
         invitation: testInvitation(code, 'test seed'),
-        invitedBy: caller.id,
+        invitedBy: 'admin',
         invitedAt: expect.any(Date),
         updatedAt: expect.any(Date),
       },

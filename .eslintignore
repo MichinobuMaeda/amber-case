@@ -1,3 +1,4 @@
 src/conf/version.ts
+src/functions/lib
 **/*.test.ts
 **/*.test.tsx

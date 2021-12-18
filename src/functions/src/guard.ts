@@ -1,4 +1,9 @@
-const valid = async (firebase, uid) => {
+import { app } from 'firebase-admin';
+
+export const valid = async (
+  firebase: app.App,
+  uid: string,
+) => {
   if (!uid) {
     throw new Error('Param uid is missing.');
   }
@@ -16,15 +21,13 @@ const valid = async (firebase, uid) => {
   return account;
 };
 
-const admin = async (firebase, uid) => {
+export const admin = async (
+  firebase: app.App,
+  uid: string,
+) => {
   const account = await valid(firebase, uid);
   if (!account.get('admin')) {
     throw new Error(`User: ${uid} is not admin.`);
   }
   return account;
-};
-
-module.exports = {
-  valid,
-  admin,
 };

@@ -1,12 +1,29 @@
-const { logger } = require('firebase-functions');
-const { createHash } = require('crypto');
-const { nanoid } = require('nanoid');
+import { logger, Change } from 'firebase-functions';
+import { app, auth, firestore } from 'firebase-admin';
+import { createHash } from 'crypto';
+import { nanoid } from 'nanoid';
 
-const createAuthUser = async (
-  firebase,
+export interface UserData {
+  name: string,
+  admin?: boolean,
+  tester?: boolean,
+  group?: string,
+  email?: string,
+  password?: string,
+}
+
+export interface UserProfile {
+  uid: string,
+  displayName: string,
+  email: string,
+  password: string,
+}
+
+export const createAuthUser = async (
+  firebase: app.App,
   {
     name, admin, tester, group, email, password,
-  },
+  }: UserData,
 ) => {
   logger.info({
     name, admin, tester, group, email, password: !!password,
@@ -25,7 +42,6 @@ const createAuthUser = async (
   }
 
   const db = firebase.firestore();
-  const auth = firebase.auth();
   const ts = new Date();
 
   const account = await db.collection('accounts').add({
@@ -46,14 +62,14 @@ const createAuthUser = async (
   const uid = account.id;
   const displayName = name;
 
-  const profile = { uid, displayName };
+  const profile = { uid, displayName } as UserProfile;
   if (email) {
     profile.email = email;
     if (password) {
       profile.password = password;
     }
   }
-  await auth.createUser(profile);
+  await firebase.auth().createUser(profile);
 
   await db.collection('people').doc(uid).set({
     groups: group ? [group] : [],
@@ -65,46 +81,53 @@ const createAuthUser = async (
   return uid;
 };
 
-const setUserName = async (firebase, uid, name) => {
+export const setUserName = async (
+  firebase: app.App,
+  uid: string,
+  name: string,
+) => {
   if (name.length === 0) {
     throw new Error('Param name is missing.');
   }
 
   const db = firebase.firestore();
-  const auth = firebase.auth();
 
-  await auth.updateUser(uid, { displayName: name });
+  await firebase.auth().updateUser(uid, { displayName: name });
   await db.collection('accounts').doc(uid).update({
     name,
     updatedAt: new Date(),
   });
 };
 
-const setUserEmail = async (firebase, uid, email) => {
+export const setUserEmail = async (
+  firebase: app.App,
+  uid: string,
+  email: string,
+) => {
   if (email.length === 0) {
     throw new Error('Param email is empty.');
   }
 
-  const auth = firebase.auth();
-
   logger.info(`setUserEmail: ${uid}, ${email}`);
-  await auth.updateUser(uid, { email });
+  await firebase.auth().updateUser(uid, { email });
 };
 
-const setUserPassword = async (firebase, uid, password) => {
+export const setUserPassword = async (
+  firebase: app.App,
+  uid: string,
+  password: string,
+) => {
   if (password.length === 0) {
     throw new Error('Param password is empty.');
   }
 
-  const auth = firebase.auth();
-
   logger.info(`setUserPassword: ${uid}`);
-  await auth.updateUser(uid, { password });
+  await firebase.auth().updateUser(uid, { password });
 };
 
-const calcInvitation = (
-  code,
-  seed,
+export const calcInvitation = (
+  code: string,
+  seed: string,
 ) => {
   const hash = createHash('sha256');
   hash.update(code);
@@ -112,16 +135,20 @@ const calcInvitation = (
   return hash.digest('hex');
 };
 
-const invite = async (firebase, caller, uid) => {
+export const invite = async (
+  firebase: app.App,
+  uid: string,
+  invitee: string,
+) => {
   const db = firebase.firestore();
-  const invitedBy = caller.id;
+  const invitedBy = uid;
 
-  logger.info(`setUserEmail ${JSON.stringify({ invitedBy, uid })}`);
+  logger.info(`setUserEmail ${JSON.stringify({ invitedBy, invitee })}`);
   const conf = await db.collection('service').doc('conf').get();
   const code = nanoid();
   const ts = new Date();
   const invitation = calcInvitation(code, conf.get('seed'));
-  await db.collection('accounts').doc(uid).update({
+  await db.collection('accounts').doc(invitee).update({
     invitation,
     invitedBy,
     invitedAt: ts,
@@ -130,9 +157,11 @@ const invite = async (firebase, caller, uid) => {
   return code;
 };
 
-const getToken = async (firebase, code) => {
+export const getToken = async (
+  firebase: app.App,
+  code: string,
+) => {
   const db = firebase.firestore();
-  const auth = firebase.auth();
 
   logger.info(`getToken: ${code}`);
   const conf = await db.collection('service').doc('conf').get();
@@ -165,38 +194,31 @@ const getToken = async (firebase, code) => {
     });
     throw new Error(`Invitation for account: ${account.id} is expired.`);
   }
-  const token = await auth.createCustomToken(account.id);
+  const token = await firebase.auth().createCustomToken(account.id);
   logger.info(`Invited account: ${account.id} get token: ${token}`);
   return token;
 };
 
-const onCreateAuthUser = async (firebase, user) => {
+export const onCreateAuthUser = async (
+  firebase: app.App,
+  user: auth.UserRecord,
+) => {
   const db = firebase.firestore();
   const account = await db.collection('accounts').doc(user.uid).get();
   if (account.exists) {
     return true;
   }
 
-  const auth = firebase.auth();
-  await auth.deleteUser(user.uid);
+  await firebase.auth().deleteUser(user.uid);
   logger.warn(`deleted: ${user.uid}`);
   return false;
 };
 
-const onAccountUpdate = async (firebase, change) => {
-  const auth = firebase.auth();
-  if (change.before.data().name !== change.after.data().name) {
-    await auth.updateUser(change.after.id, { displayName: change.after.data().name });
+export const onAccountUpdate = async (
+  firebase: app.App,
+  change: Change<firestore.DocumentSnapshot>,
+) => {
+  if (change.before.data()?.name !== change.after.data()?.name) {
+    await firebase.auth().updateUser(change.after.id, { displayName: change.after.data()?.name });
   }
-};
-
-module.exports = {
-  createAuthUser,
-  setUserName,
-  setUserEmail,
-  setUserPassword,
-  invite,
-  getToken,
-  onCreateAuthUser,
-  onAccountUpdate,
 };

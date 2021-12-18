@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev:setup": "curl http://localhost:5001/amber-case/asia-northeast1/api/setup",
-    "start": "firebase emulators:exec --only auth,functions,firestore,storage --ui 'yarn dev:setup && react-scripts start'",
+    "start": "yarn build:functions && firebase emulators:exec --only auth,functions,firestore,storage --ui 'yarn dev:setup && react-scripts start'",
     "build": "react-scripts build",
+    "build:functions": "cd src/functions && tsc --types node && cd ../..",
     "deploy": "firebase deploy",
     "lint": "eslint src",
     "functions:config:set": "firebase functions:config:set",
     "test": "react-scripts test -w 1 --coverage --watchAll=false",
-    "emulate": "yarn build && firebase emulators:start && yarn dev:setup"
+    "emulate": "yarn build:functions && yarn build && firebase emulators:start && yarn dev:setup"
   },
   "dependencies": {
     "@emotion/react": "^11.7.1",
@@ -73,13 +74,18 @@
     },
     "overrides": [
       {
-        "files": ["*.ts", "*.tsx"],
+        "files": [
+          "*.ts",
+          "*.tsx"
+        ],
         "extends": [
           "react-app",
           "react-app/jest",
           "airbnb-typescript"
         ],
-        "plugins": ["@typescript-eslint"],
+        "plugins": [
+          "@typescript-eslint"
+        ],
         "parserOptions": {
           "project": "tsconfig.json"
         },
@@ -94,7 +100,7 @@
     "coveragePathIgnorePatterns": [
       "index.[jt]s",
       "index.[jt]sx",
-      "setupTests.js",
+      "setupTests.[jt]s",
       "reportWebVitals.[jt]s",
       "service-worker.js",
       "serviceWorkerRegistration.js"

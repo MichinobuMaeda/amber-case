@@ -1,33 +1,34 @@
-const { createHash } = require('crypto');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const test = require('firebase-functions-test')();
+import { createHash } from 'crypto';
+import functionTest from 'firebase-functions-test';
 
-const confNotExist = { exists: false, id: 'conf' };
-const confData = {
+const test = functionTest();
+
+export const confNotExist = { exists: false, id: 'conf' };
+export const confData = {
   version: '1.0.0',
   seed: 'test seed',
   invitationExpirationTime: 3 * 24 * 3600 * 1000,
   createdAt: new Date('2020-01-01T01:23:45.678Z'),
   updatedAt: new Date('2021-01-01T00:11:22.333Z'),
 };
-const confSnapshot = test.firestore.makeDocumentSnapshot(
+export const confSnapshot = test.firestore.makeDocumentSnapshot(
   confData,
   'document/service/conf',
 );
 
-const accountNotExist = { exists: false, id: 'dummy' };
-const invalidData = {
+export const accountNotExist = { exists: false, id: 'dummy' };
+export const invalidData = {
   valid: false,
   name: 'Invalid User',
   admin: false,
   createdAt: new Date('2020-01-01T01:23:45.678Z'),
   updatedAt: new Date('2021-01-01T00:11:22.333Z'),
 };
-const invalidSnapshot = test.firestore.makeDocumentSnapshot(
+export const invalidSnapshot = test.firestore.makeDocumentSnapshot(
   invalidData,
   'document/accounts/invalid',
 );
-const deletedData = {
+export const deletedData = {
   valid: true,
   name: 'Deleted User',
   admin: false,
@@ -35,34 +36,34 @@ const deletedData = {
   updatedAt: new Date('2021-01-01T00:11:22.333Z'),
   deletedAt: new Date('2022-01-01T00:11:22.333Z'),
 };
-const deletedSnapshot = test.firestore.makeDocumentSnapshot(
+export const deletedSnapshot = test.firestore.makeDocumentSnapshot(
   deletedData,
   'document/accounts/deleted',
 );
-const user01Data = {
+export const user01Data = {
   valid: true,
   name: 'User 01',
   admin: false,
   createdAt: new Date('2020-01-01T01:23:45.678Z'),
   updatedAt: new Date('2021-01-01T00:11:22.333Z'),
 };
-const user01Snapshot = test.firestore.makeDocumentSnapshot(
+export const user01Snapshot = test.firestore.makeDocumentSnapshot(
   user01Data,
   'document/accounts/user01',
 );
-const adminData = {
+export const adminData = {
   valid: true,
   name: 'User 01',
   admin: true,
   createdAt: new Date('2020-01-01T01:23:45.678Z'),
   updatedAt: new Date('2021-01-01T00:11:22.333Z'),
 };
-const adminSnapshot = test.firestore.makeDocumentSnapshot(
+export const adminSnapshot = test.firestore.makeDocumentSnapshot(
   adminData,
   'document/accounts/admin',
 );
 
-const testInvitation = (
+export const testInvitation = (
   code,
   seed,
 ) => {
@@ -72,17 +73,17 @@ const testInvitation = (
   return hash.digest('hex');
 };
 
-const mockGet = jest.fn();
-const mockAdd = jest.fn();
-const mockSet = jest.fn();
-const mockUpdate = jest.fn();
+export const mockGet = jest.fn();
+export const mockAdd = jest.fn();
+export const mockSet = jest.fn();
+export const mockUpdate = jest.fn();
 
-const createUser = jest.fn();
-const updateUser = jest.fn();
-const deleteUser = jest.fn();
-const createCustomToken = jest.fn();
+export const createUser = jest.fn();
+export const updateUser = jest.fn();
+export const deleteUser = jest.fn();
+export const createCustomToken = jest.fn();
 
-const mockFirebase = () => {
+export const mockFirebase = () => {
   mockAdd.mockImplementation(() => new Promise((resolve) => {
     resolve({ id: 'created' });
   }));
@@ -129,29 +130,4 @@ const mockFirebase = () => {
       createCustomToken,
     }),
   };
-};
-
-module.exports = {
-  confNotExist,
-  confData,
-  confSnapshot,
-  accountNotExist,
-  invalidData,
-  invalidSnapshot,
-  deletedData,
-  deletedSnapshot,
-  user01Data,
-  user01Snapshot,
-  adminData,
-  adminSnapshot,
-  testInvitation,
-  mockFirebase,
-  mockGet,
-  mockAdd,
-  mockSet,
-  mockUpdate,
-  createUser,
-  updateUser,
-  deleteUser,
-  createCustomToken,
 };

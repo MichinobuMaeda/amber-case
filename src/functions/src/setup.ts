@@ -1,15 +1,23 @@
-const { logger } = require('firebase-functions');
-const { createHash } = require('crypto');
-const { nanoid } = require('nanoid');
-const { createAuthUser } = require('./users');
+import { logger } from 'firebase-functions';
+import { app, firestore } from 'firebase-admin';
+import { createHash } from 'crypto';
+import { AxiosStatic } from 'axios';
+import { nanoid } from 'nanoid';
+import { createAuthUser } from './users';
 
-const getConf = async (firebase) => {
+export const getConf = async (
+  firebase: app.App,
+) => {
   const db = firebase.firestore();
   const conf = await db.collection('service').doc('conf').get();
   return conf.exists ? conf : null;
 };
 
-const updateVersion = async (firebase, conf, axios) => {
+export const updateVersion = async (
+  firebase: app.App,
+  conf: firestore.DocumentSnapshot,
+  axios: AxiosStatic,
+) => {
   const db = firebase.firestore();
   const confRef = db.collection('service').doc('conf');
 
@@ -32,7 +40,10 @@ const updateVersion = async (firebase, conf, axios) => {
   return false;
 };
 
-const updateData = async (firebase, conf) => {
+export const updateData = async (
+  firebase: app.App,
+  conf: firestore.DocumentSnapshot,
+) => {
   const db = firebase.firestore();
   const dataVersion = conf.get('dataVersion') || 0;
   const confRef = db.collection('service').doc('conf');
@@ -63,7 +74,12 @@ const updateData = async (firebase, conf) => {
   return true;
 };
 
-const install = async (firebase, email, password, url) => {
+export const install = async (
+  firebase: app.App,
+  email: string,
+  password: string,
+  url: string,
+) => {
   const db = firebase.firestore();
   const name = 'Primary user';
 
@@ -151,11 +167,4 @@ The quick brown fox jumps over the lazy dog.
   });
 
   return db.collection('service').doc('conf').get();
-};
-
-module.exports = {
-  getConf,
-  updateVersion,
-  updateData,
-  install,
 };

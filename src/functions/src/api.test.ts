@@ -1,17 +1,17 @@
-const axios = require('axios');
-const {
+import axios from 'axios';
+import {
   confSnapshot,
   mockFirebase,
-} = require('./setupTests');
-const {
+} from './setupTests';
+import {
   getConf,
   updateVersion,
   updateData,
   install,
-} = require('./setup');
-const {
+} from './setup';
+import {
   setup,
-} = require('./api');
+} from './api';
 
 jest.mock('axios');
 
@@ -88,7 +88,8 @@ describe('setup()', () => {
       .mockImplementationOnce(() => sendOk);
     const firebase = mockFirebase();
 
-    const ret = await setup(firebase, axios, config)(req, res);
+    const fn = setup(firebase, axios, config);
+    const ret = await fn(req, res);
 
     expect(getConf.mock.calls).toEqual([[firebase]]);
     expect(updateVersion.mock.calls).toEqual([]);
